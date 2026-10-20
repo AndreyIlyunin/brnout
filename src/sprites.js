@@ -691,5 +691,24 @@ function drawPortrait(id,cls){
 }
 function renderClassPreviews(){
   var ids=[['mdl-mgr','mgr'],['mdl-dev','dev'],['mdl-mkt','mkt'],['mdl-dsn','dsn']];
-  for(var i=0;i<ids.length;i++)drawPortrait(ids[i][0],ids[i][1]);
+  for(var i=0;i<ids.length;i++){
+    var el=document.getElementById(ids[i][0]);
+    if(!el)continue;
+    var cls=ids[i][1];
+    var c=el.getContext('2d');
+    var W=el.width,H=el.height;
+    c.setTransform(1,0,0,1,0,0);
+    c.clearRect(0,0,W,H);
+    // модель как в игре, головой вверх, в общий спрайт-буфер
+    SPRC.setTransform(1,0,0,1,0,0);
+    SPRC.clearRect(0,0,160,160);
+    SPRC.save();
+    SPRC.translate(80,80);
+    SPRC.scale(SPR_SCALE*5.2,SPR_SCALE*5.2);
+    drawHumanoidBody(SPRC,{x:0,y:0,cls:cls,look:classLook(cls,0),face:-Math.PI/2,step:0,scale:1,moving:false,haste:0,castT:0,casting:null});
+    SPRC.restore();
+    // блит 1:1 по центру карточки (пиксели остаются чёткими)
+    c.imageSmoothingEnabled=false;
+    c.drawImage(SPRCV,(W-160)/2,(H-160)/2);
+  }
 }
