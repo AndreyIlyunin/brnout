@@ -242,7 +242,7 @@ function prerenderFloor(){
         else if(rm.type==='meeting'){base='#232830';alt='#28303a';}
         else if(rm.type==='lobby'){base='#262a34';alt='#2b303c';}
         else if(rm.type==='wc'){base='#2d3136';alt='#33383e';}
-      }else{base='#1e2228';alt='#22262d';}
+      }else{base='#131c24';alt='#16202a';}
       c.fillStyle=((i+j)%2===0)?base:alt;
       c.fillRect(x,y,TILE,TILE);
       if(!rm){ // corridor seams
@@ -254,8 +254,10 @@ function prerenderFloor(){
   // thin wall strips (drawn after floors so they sit on top of void bg)
   for(var wi=0;wi<WALLS.length;wi++){var w3=WALLS[wi];
     c.fillStyle='#12161e';c.fillRect(w3.x,w3.y,w3.w,w3.h);
-    c.fillStyle='#1e2531';c.fillRect(w3.x+1,w3.y+1,w3.w-2,w3.h-2);
-    c.fillStyle='#39465a';
+    c.fillStyle='#141b28';c.fillRect(w3.x+1,w3.y+1,w3.w-2,w3.h-2);
+    // неоновая кромка: сталь-циан, изредка — вывеска (маджента/циан)
+    var neon=rnd();
+    c.fillStyle=neon<0.06?'#8a2a5a':(neon<0.12?'#15707f':'#2c4258');
     if(w3.dir===0)c.fillRect(w3.x+w3.w-3,w3.y,3,w3.h);
     else if(w3.dir===1)c.fillRect(w3.x,w3.y,3,w3.h);
     else if(w3.dir===2)c.fillRect(w3.x,w3.y+w3.h-3,w3.w,3);
@@ -441,6 +443,48 @@ function unreachableRooms(){
     if(!seen[c[0]+','+c[1]])bad.push(ROOMS[i]);
   }
   return bad;
+}
+
+
+// ---- flow-field: поле расстояний до игрока (BFS по тайлам), мобы идут по градиенту ----
+var FLOW={d:new Int16Array(GW*GH),tx:-1,ty:-1,t:0};
+function computeFlow(px,py){
+  var d=FLOW.d;
+  for(var i=0;i<d.length;i++)d[i]=-1;
+  var sx=clamp((px/TILE)|0,0,GW-1),sy=clamp((py/TILE)|0,0,GH-1);
+  if(!grid[sy][sx]){
+    search: for(var r2=1;r2<5;r2++)
+      for(var dy=-r2;dy<=r2;dy++)for(var dx=-r2;dx<=r2;dx++){
+        var yy=sy+dy,xx=sx+dx;
+        if(yy>=0&&yy<GH&&xx>=0&&xx<GW&&grid[yy][xx]){sy=yy;sx=xx;break search;}
+      }
+  }
+  var q=[sx+sy*GW];d[sx+sy*GW]=0;
+  for(var head=0;head<q.length;head++){
+    var c=q[head],cx=c%GW,cy=(c/GW)|0,dc=d[c]+1;
+    for(var k=0;k<4;k++){
+      var nx=cx+(k===0?1:(k===1?-1:0)),ny=cy+(k===2?1:(k===3?-1:0));
+      if(nx<0||ny<0||nx>=GW||ny>=GH||!grid[ny][nx])continue;
+      var ni=nx+ny*GW;
+      if(d[ni]===-1){d[ni]=dc;q.push(ni);}
+    }
+  }
+}
+function flowDir(x,y){
+  var cx=clamp((x/TILE)|0,0,GW-1),cy=clamp((y/TILE)|0,0,GH-1);
+  var here=FLOW.d[cx+cy*GW];
+  if(here===-1)return null;
+  var best=here,bx=cx,by=cy;
+  for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){
+    if(!dx&&!dy)continue;
+    var nx=cx+dx,ny=cy+dy;
+    if(nx<0||ny<0||nx>=GW||ny>=GH||!grid[ny][nx])continue;
+    if(dx&&dy&&(!grid[cy][nx]||!grid[ny][cx]))continue;
+    var nd=FLOW.d[nx+ny*GW];
+    if(nd!==-1&&nd<best){best=nd;bx=nx;by=ny;}
+  }
+  if(bx===cx&&by===cy)return null;
+  return Math.atan2((by+0.5)*TILE-y,(bx+0.5)*TILE-x);
 }
 
 function blockedAt(x,y,r){

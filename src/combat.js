@@ -13,9 +13,10 @@ function startWave(){
   for(var i=0;i<ni;i++)G.spawnQ.push('intern');
   for(i=0;i<nd;i++)G.spawnQ.push('deadline');
   for(i=G.spawnQ.length-1;i>0;i--){var j=(R()*(i+1))|0;var tmp=G.spawnQ[i];G.spawnQ[i]=G.spawnQ[j];G.spawnQ[j]=tmp;}
-  G.spawnT=0.3;
+  G.spawnT=0.22;
   if(bossWave)msg('СПРИНТ '+w+' · АУДИТ НАЧИНАЕТСЯ',4);
-  else msg('Спринт '+w+' · '+sprintName+': '+ni+' стажёров'+(nd?', '+nd+' дедлайнов':'')+'.');
+  else msg('Спринт '+w+' · '+sprintName+': '+ni+' стажёров'+(nd?', '+nd+' дедлайнов':'')+'. ДЕДЛАЙН УСКОРЯЕТСЯ!');
+  G.rushT=4;
 }
 function spawnMob(type){
   var elite=type==='intern'&&R()<0.12;
@@ -33,7 +34,7 @@ function spawnMob(type){
         var dd=Math.hypot(G.players[pi].x-cand.x,G.players[pi].y-cand.y);
         if(dd<dMin)dMin=dd;
       }
-      if(dMin>380&&dMin<1100)pick=cand;
+      if(dMin>320&&dMin<900)pick=cand;
     }
     if(!pick)pick=SPAWNS[(R()*SPAWNS.length)|0];
     p0={x:pick.x+(R()*70-35),y:pick.y+(R()*70-35)};
@@ -50,7 +51,7 @@ function spawnMob(type){
       stun:0,kx:0,ky:0,cd:R(),wt:0,wx:0,wy:0,face:0,aggro:false,said:false,tint:(R()*4)|0,emb:0,tilt:R()*6,step:0,
       cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0});
   }else{
-    G.mobs.push({id:++G.mobSeq,type:'deadline',x:p0.x,y:p0.y,r:11,hp:9+1.5*w,hpMax:9+1.5*w,spd:135+R()*30,
+    G.mobs.push({id:++G.mobSeq,type:'deadline',x:p0.x,y:p0.y,r:11,hp:9+1.5*w,hpMax:9+1.5*w,spd:150+R()*30,
       stun:0,kx:0,ky:0,cd:0,face:0,tint:(R()*3)|0,emb:0,tilt:R()*6,step:0,elite:0,
       cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0});
     if(R()<0.3)floatText(p0.x,p0.y-20,['ДО РЕЛИЗА 3 ЧАСА','ПРОД ПОЛЁГ','ГОРИТ','DEMO ЧЕРЕЗ 10 МИНУТ'][(R()*4)|0],'#e07050',12);

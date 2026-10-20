@@ -23,6 +23,7 @@ function refreshAim(){
   }
 }
 var cv=document.getElementById('bcv'),ctx=cv.getContext('2d');
+var bhud=document.getElementById('bhud'),hctx=bhud.getContext('2d');
 cv.addEventListener('mousemove',function(e){
   var r=cv.getBoundingClientRect();
   mouse.x=(e.clientX-r.left)*(cv.width/r.width);mouse.y=(e.clientY-r.top)*(cv.height/r.height);

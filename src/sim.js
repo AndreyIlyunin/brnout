@@ -83,7 +83,7 @@ function updateMobs(dt){
     }
     if(m.stun>0){m.stun-=dt;continue;}
     m.x+=m.kx*dt;m.y+=m.ky*dt;m.kx*=Math.exp(-8*dt);m.ky*=Math.exp(-8*dt);
-    var slow=(m.ch>0?0.4:1)*(inWater(m.x,m.y)?0.55:1);
+    var slow=(m.ch>0?0.4:1)*(inWater(m.x,m.y)?0.55:1)*(G.rushT>0?1.3:1);
     if(m.cf>0){ // ребрендинг:/confused wander
       m.cf-=dt;m.aggro=false;
       m.wt-=dt;
@@ -96,7 +96,8 @@ function updateMobs(dt){
     if(!tgt)continue;
     var d=dist(m,tgt);
     if(m.type==='deadline'){
-      var a=angTo(m,tgt);m.face=a;
+      var a=(dist>90&&flowDir(m.x,m.y)!==null)?flowDir(m.x,m.y):angTo(m,tgt);
+      m.face=angTo(m,tgt);
       steerMove(m,Math.cos(a),Math.sin(a),m.spd*slow*dt);
       m.emb-=dt;
       if(m.emb<=0){m.emb=0.07;
@@ -113,10 +114,11 @@ function updateMobs(dt){
         SFX.explode();m.dead=true;
       }
     }else{
-      if(d<430)m.aggro=true;
+      m.aggro=true; // все сразу знают, где вы (динамика!)
       if(m.aggro){
         if(d>m.r+tgt.r+4){
-          var a2=angTo(m,tgt);m.face=a2;
+          var a2=(d>90&&flowDir(m.x,m.y)!==null)?flowDir(m.x,m.y):angTo(m,tgt);
+          m.face=angTo(m,tgt);
           steerMove(m,Math.cos(a2),Math.sin(a2),m.spd*slow*dt);
         }else if(m.cd<=0){
           m.cd=0.95;
@@ -212,6 +214,7 @@ function updateProjs(dt){
 }
 function updateFx(dt){
   updateChaos(dt);
+  if(G.rushT>0)G.rushT-=dt;
   if(R()<0.0006)SFX.whisper(); // редкий мистический шёпот
   if(G.comboT>0){G.comboT-=dt;if(G.comboT<=0)G.combo=0;}
   for(var i=0;i<G.fx.length;i++){var f=G.fx[i];
@@ -255,7 +258,7 @@ function updateWaves(dt){
       G.spawnT-=dt;
       if(G.spawnT<=0){G.spawnT=0.35;spawnMob(G.spawnQ.shift());}
     }else if(G.mobs.length===0&&!G.boss){
-      G.waveState='calm';G.waveT=2.6;
+      G.waveState='calm';G.waveT=1.8;
       for(i=0;i<G.players.length;i++)G.players[i].burnout=Math.max(0,G.players[i].burnout-6);
       msg('Спринт закрыт. Перерыв на кулер.');
     }
@@ -270,7 +273,18 @@ function update(dt){
   G.t+=dt;
   if(NET.mode==='guest'){guestUpdate(dt);return;}
   if(G.state!=='playing')return;
-  for(var i=0;i<G.players.length;i++)updatePlayer(G.players[i],dt);
+  // flow-field к ближайшему живому игроку
+  FLOW.t-=dt;
+  var fp=null;
+  for(var i=0;i<G.players.length;i++)if(!G.players[i].dead&&(fp===null||G.players[i].respT<G.players[fp].respT))fp=G.players[i];
+  if(fp){
+    var ftx=(fp.x/TILE)|0,fty=(fp.y/TILE)|0;
+    if(ftx!==FLOW.tx||fty!==FLOW.ty||FLOW.t<=0){
+      FLOW.tx=ftx;FLOW.ty=fty;FLOW.t=0.4;
+      computeFlow(fp.x,fp.y);
+    }
+  }
+  for(i=0;i<G.players.length;i++)updatePlayer(G.players[i],dt);
   updateMobs(dt);updateBoss(dt);updateProjs(dt);updateFx(dt);updateWaves(dt);
   if(NET.mode==='host'){NET.snapT-=dt;if(NET.snapT<=0){NET.snapT=1/15;sendSnapshot();}}
 }

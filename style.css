@@ -1,6 +1,7 @@
 #burnout{position:relative;width:100%;aspect-ratio:16/9;min-height:420px;background:#05070a;overflow:hidden;border-radius:6px;font-family:'Segoe UI',Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
 @media(max-width:720px){#burnout{aspect-ratio:4/3;min-height:360px;}}
-#burnout #bcv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;}
+#burnout #bcv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;image-rendering:pixelated;image-rendering:crisp-edges;}
+#burnout #bhud{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;}
 #burnout .bgov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,5,9,.8);z-index:5;overflow-y:auto;}
 #burnout .bghidden,#burnout .hidden{display:none;}
 #burnout .bgpanel{background:rgba(13,17,23,.97);border:1px solid #2a3038;border-radius:10px;padding:22px 30px;max-width:620px;width:88%;color:#c9d1d9;box-shadow:0 0 60px rgba(0,0,0,.8);max-height:92%;overflow-y:auto;}

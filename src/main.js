@@ -117,11 +117,15 @@ window.addEventListener('blur',function(){
 });
 
 // ============================== init ==============================
+var PXL=0.5; // пиксельный масштаб мира: GTA2-ватность
 function resize(){
   var r=root.getBoundingClientRect();
   DPR=Math.min(2,window.devicePixelRatio||1);
-  cv.width=Math.max(320,Math.round(r.width*DPR));
-  cv.height=Math.max(240,Math.round(r.height*DPR));
+  cv.width=Math.max(160,Math.round(r.width*PXL));
+  cv.height=Math.max(120,Math.round(r.height*PXL));
+  ctx.imageSmoothingEnabled=false;
+  bhud.width=Math.max(320,Math.round(r.width*DPR));
+  bhud.height=Math.max(240,Math.round(r.height*DPR));
   G.zoom=clamp(r.width/900,0.55,1.15);
   drawPost.vg=null;
 }
