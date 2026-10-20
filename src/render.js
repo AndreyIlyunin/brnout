@@ -555,6 +555,7 @@ function render(){
   hctx.clearRect(0,0,bhud.width/DPR,bhud.height/DPR);
   if(localPlayer()||VIEW.players.length){
     drawWorld();drawGlows();drawLighting();drawPost();
+    drawSouls();
     drawHUD();
   }else{
     renderMenu();

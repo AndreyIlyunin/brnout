@@ -61,18 +61,18 @@ var SFX={
   soulSigh:function(pitch){ // улетающая душа: выдох «аааах»
     if(!AC||muted)return;
     var t0=AC.currentTime,p=(pitch||1);
-    noiz(0.5,0.07,900,0.8);
+    noiz(0.55,0.11,850,0.8);
     var o=AC.createOscillator(),g=AC.createGain();
     o.type='triangle';
     o.frequency.setValueAtTime(p*520,t0+0.05);
     o.frequency.exponentialRampToValueAtTime(Math.max(90,p*150),t0+0.55);
     g.gain.setValueAtTime(0.0001,t0+0.05);
-    g.gain.exponentialRampToValueAtTime(0.09,t0+0.13);
+    g.gain.exponentialRampToValueAtTime(0.15,t0+0.13);
     g.gain.exponentialRampToValueAtTime(0.0001,t0+0.62);
     o.connect(g);g.connect(sfxBus||master);
     o.start(t0+0.05);o.stop(t0+0.66);
-    tone(p*262,0.5,'sine',0.045,-150,0.05);
-    tone(p*392,0.4,'sine',0.03,-190,0.08);
+    tone(p*262,0.55,'sine',0.08,-150,0.05);
+    tone(p*392,0.45,'sine',0.055,-190,0.08);
   },
   whisper:function(){ // мистический шёпот опенспейса
     if(!AC||muted)return;

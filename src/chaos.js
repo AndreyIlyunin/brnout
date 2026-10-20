@@ -208,22 +208,6 @@ function drawDebris(){
       ctx.strokeStyle='#ffcf5c';ctx.lineWidth=1.5;rr(ctx,-wdt/2,-9,wdt,18,3);ctx.stroke();
       ctx.fillStyle='#ffcf5c';ctx.font='bold 9px Arial';ctx.textAlign='center';
       ctx.fillText(d.word,0,3);ctx.textAlign='left';
-    }else if(d.kind==='soul'){
-      var k4=1-d.t/d.life,al4=0.55*k4;
-      ctx.globalCompositeOperation='lighter';
-      if(d.elite){
-        ctx.strokeStyle='rgba(255,207,92,'+(al4*0.55)+')';ctx.lineWidth=2;
-        ctx.beginPath();ctx.arc(d.x,d.y,12+Math.sin(d.t*6)*2,0,TAU);ctx.stroke();
-      }
-      for(var tr=1;tr<=3;tr++){
-        ctx.fillStyle='rgba(150,210,255,'+(al4*0.22*(4-tr)/3).toFixed(3)+')';
-        ctx.beginPath();ctx.ellipse(d.x,d.y+tr*7*(2-k4),(5-tr)*k4+1,(7-tr)*k4+1,0,0,TAU);ctx.fill();
-      }
-      ctx.fillStyle='rgba(190,230,255,'+al4.toFixed(3)+')';
-      ctx.beginPath();ctx.ellipse(d.x,d.y,(d.elite?7:5.5)*k4+1,(d.elite?10:8)*k4+1,0,0,TAU);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,'+(al4*0.85).toFixed(3)+')';
-      ctx.beginPath();ctx.ellipse(d.x-1.5,d.y-3,2*k4+0.5,3*k4+0.5,0,0,TAU);ctx.fill();
-      ctx.globalCompositeOperation='source-over';
     }else if(d.kind==='folder'){
       ctx.rotate(d.rot);
       // канцелярская папка: белый лист + манила-картон + лейбл — никакой позолоты
@@ -253,6 +237,32 @@ function drawDebris(){
       ctx.strokeStyle='rgba(30,33,38,0.8)';ctx.lineWidth=0.8;
       ctx.strokeText(d.word,0,4);
     }
+    ctx.restore();
+  }
+}
+
+// души — поверх освещения и виньетки: духам тьма не помеха
+function drawSouls(){
+  applyWorldT(); // после drawPost трансформация экранная — возвращаем мир
+  for(var i=0;i<DEBRIS.length;i++){var d=DEBRIS[i];
+    if(d.kind!=='soul')continue;
+    if(!tileVis(d.x,d.y))continue;
+    var k4=1-d.t/d.life,al4=0.85*k4;
+    ctx.save();
+    ctx.translate(d.x,d.y);
+    ctx.globalCompositeOperation='lighter';
+    if(d.elite){
+      ctx.strokeStyle='rgba(255,207,92,'+(al4*0.6)+')';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(0,0,12+Math.sin(d.t*6)*2,0,TAU);ctx.stroke();
+    }
+    for(var tr=1;tr<=3;tr++){
+      ctx.fillStyle='rgba(150,210,255,'+(al4*0.3*(4-tr)/3).toFixed(3)+')';
+      ctx.beginPath();ctx.ellipse(0,tr*7*(2-k4),(5-tr)*k4+1,(7-tr)*k4+1,0,0,TAU);ctx.fill();
+    }
+    ctx.fillStyle='rgba(190,230,255,'+al4.toFixed(3)+')';
+    ctx.beginPath();ctx.ellipse(0,0,(d.elite?7:5.5)*k4+1.5,(d.elite?10:8)*k4+1.5,0,0,TAU);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,'+(al4*0.9).toFixed(3)+')';
+    ctx.beginPath();ctx.ellipse(-1.5,-3,2*k4+0.5,3*k4+0.5,0,0,TAU);ctx.fill();
     ctx.restore();
   }
 }
