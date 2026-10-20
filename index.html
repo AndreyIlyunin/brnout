@@ -16,26 +16,22 @@
 <div id="btnPauseM" class="hidden">II</div>
 
 <div class="bgov" id="bmenu">
-  <div class="bgpanel">
+  <div class="bgpanel bgmain">
     <div class="bgtitle">burnout<span>:</span> corporate evil</div>
     <div class="bgtag">18:52. Все ушли домой. Кроме вас. И их.</div>
-    <div class="bgrow">
-      <button class="bgbtn bgwide" id="mSolo">СОЛО-СМЕНУ</button>
-      <button class="bgbtn bgwide" id="mCoop">ОНЛАЙН-КООП (до 4)</button>
-    </div>
-    <div class="bgcards hidden" id="classCards">
-      <div class="bgcard" id="bmgr">
-        <canvas class="bgmodel" id="mdl-mgr" width="150" height="110"></canvas>
+    <div class="bgcards" id="classCards">
+      <div class="bgcard" id="bmgr" data-cls="mgr">
+        <canvas class="bgmodel" id="mdl-mgr" width="150" height="120"></canvas>
         <h2>МЕНЕДЖЕР</h2>
         <p class="bgdesc">Дерётся жирой. JIRA-тикеты в дальний бой.</p>
         <div class="bgfull">
-          <div><b>ЛКМ</b> тикет · <b>ПКМ</b> жир панч</div>
+          <div><b>ЛКМ</b> твит · <b>ПКМ</b> жир панч</div>
           <div><b>ПРОБЕЛ</b> «созвон» — щит от мобов</div>
           <div><b>Q</b> АСАП — ускоряет себя и коллег</div>
         </div>
       </div>
-      <div class="bgcard" id="bdev">
-        <canvas class="bgmodel" id="mdl-dev" width="150" height="110"></canvas>
+      <div class="bgcard" id="bdev" data-cls="dev">
+        <canvas class="bgmodel" id="mdl-dev" width="150" height="120"></canvas>
         <h2>СЕНЬОР-ПРОГЕР</h2>
         <p class="bgdesc">Механическая клава. Ближний бой и контроль.</p>
         <div class="bgfull">
@@ -44,8 +40,8 @@
           <div><b>Q</b> легаси-код — цепь, ментальный урон</div>
         </div>
       </div>
-      <div class="bgcard" id="bmkt">
-        <canvas class="bgmodel" id="mdl-mkt" width="150" height="110"></canvas>
+      <div class="bgcard" id="bmkt" data-cls="mkt">
+        <canvas class="bgmodel" id="mdl-mkt" width="150" height="120"></canvas>
         <h2>МАРКЕТОЛОГ</h2>
         <p class="bgdesc">Твиты и воронки. Дебаффы.</p>
         <div class="bgfull">
@@ -54,8 +50,8 @@
           <div><b>Q</b> таргетинг — метка +50% урона</div>
         </div>
       </div>
-      <div class="bgcard" id="bdsn">
-        <canvas class="bgmodel" id="mdl-dsn" width="150" height="110"></canvas>
+      <div class="bgcard" id="bdsn" data-cls="dsn">
+        <canvas class="bgmodel" id="mdl-dsn" width="150" height="120"></canvas>
         <h2>ДИЗАЙНЕР</h2>
         <p class="bgdesc">Стремительный стилус. Мобильный мили.</p>
         <div class="bgfull">
@@ -65,14 +61,26 @@
         </div>
       </div>
     </div>
+    <div class="bgbottom">
+      <button class="bgcorner" id="mSettings">⚙ НАСТРОЙКИ</button>
+      <button class="bgstart" id="mStart">НАЧАТЬ СМЕНУ</button>
+      <div class="bgmode">
+        <button class="bgmodebtn" id="mSolo">СОЛО</button>
+        <button class="bgmodebtn" id="mCoop">ОНЛАЙН</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bset">
+  <div class="bgpanel bgcenter bgset">
+    <div class="bgtitle bgsmall">НАСТРОЙКИ</div>
     <div class="bgsnd">
       <div class="sndrow"><span class="sndlab">звук</span><input type="range" id="sndMaster" min="0" max="100" value="80"><span class="sndval" id="sndMasterV">80%</span></div>
       <div class="sndrow"><span class="sndlab">музыка</span><input type="range" id="sndMusic" min="0" max="100" value="55"><span class="sndval" id="sndMusicV">55%</span></div>
-      <div class="sndrow"><span class="sndlab">эффекты</span><input type="range" id="sndSfx" min="0" max="100" value="80"><span class="sndval" id="sndSfxV">80%</span></div>
+      <div class="sndrow"><span class="sndlab">эффекты</span><input type="range" id="sndSfx" min="0" max="100" value="100"><span class="sndval" id="sndSfxV">100%</span></div>
     </div>
-    <div class="bghint">WASD — движение · ЛКМ — атака · ПКМ — приём · ПРОБЕЛ — ульта · Q — скил · E — кофе · ESC — пауза</div>
-    <div class="bgcredit">AI-Generated with GLM-5.3</div>
-    <div class="bghint2">вместо хп — выгорание · вместо маны — стаканчик кофе · кофепоинты спасают</div>
+    <button class="bgbtn bgwide" id="bsetBack">Назад</button>
   </div>
 </div>
 
@@ -155,21 +163,21 @@
 </div>
 </div>
 
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="src/utils.js?v=10"></script>
-<script src="src/data.js?v=10"></script>
-<script src="src/audio.js?v=10"></script>
-<script src="src/music.js?v=10"></script>
-<script src="src/map.js?v=10"></script>
-<script src="src/chaos.js?v=10"></script>
-<script src="src/combat.js?v=10"></script>
-<script src="src/abilities.js?v=10"></script>
-<script src="src/sim.js?v=10"></script>
-<script src="src/guest.js?v=10"></script>
-<script src="src/sprites.js?v=10"></script>
-<script src="src/render.js?v=10"></script>
-<script src="src/input.js?v=10"></script>
-<script src="src/ui.js?v=10"></script>
-<script src="src/net.js?v=10"></script>
-<script src="src/main.js?v=10"></script>
+<script src="src/utils.js?v=11"></script>
+<script src="src/data.js?v=11"></script>
+<script src="src/audio.js?v=11"></script>
+<script src="src/music.js?v=11"></script>
+<script src="src/map.js?v=11"></script>
+<script src="src/chaos.js?v=11"></script>
+<script src="src/combat.js?v=11"></script>
+<script src="src/abilities.js?v=11"></script>
+<script src="src/sim.js?v=11"></script>
+<script src="src/guest.js?v=11"></script>
+<script src="src/sprites.js?v=11"></script>
+<script src="src/render.js?v=11"></script>
+<script src="src/input.js?v=11"></script>
+<script src="src/ui.js?v=11"></script>
+<script src="src/net.js?v=11"></script>
+<script src="src/main.js?v=11"></script>

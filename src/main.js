@@ -23,35 +23,37 @@ function loop(ts){
 // ============================== menu wiring ==============================
 function $(id){return document.getElementById(id);}
 var menuMode='solo';
-$('mSolo').addEventListener('click',function(){menuMode='solo';$('classCards').classList.remove('hidden');renderClassPreviews();});
-$('mCoop').addEventListener('click',function(){menuMode='coop';$('classCards').classList.remove('hidden');renderClassPreviews();});
-$('bmgr').addEventListener('click',function(){
-  NET.cls='mgr';
-  $('classCards').classList.add('hidden');
+var selCls='mgr';
+function refreshMenuUI(){
+  var cards=['bmgr','bdev','bmkt','dsn'];
+  for(var i=0;i<cards.length;i++){
+    var el=document.getElementById(cards[i]);
+    if(el)el.classList.toggle('sel',cards[i]==='b'+selCls);
+  }
+  $('mSolo').classList.toggle('on',menuMode==='solo');
+  $('mCoop').classList.toggle('on',menuMode==='coop');
+  $('mStart').textContent=menuMode==='solo'?'НАЧАТЬ СМЕНУ':'В КОМНАТУ →';
+}
+function selectClass(cls){
+  selCls=cls;
+  NET.cls=cls;
+  refreshMenuUI();
+}
+var _cards=[['bmgr','mgr'],['bdev','dev'],['bmkt','mkt'],['bdsn','dsn']];
+for(var _ci=0;_ci<_cards.length;_ci++)(function(cid,cls){
+  document.getElementById(cid).addEventListener('click',function(){selectClass(cls);});
+})(_cards[_ci][0],_cards[_ci][1]);
+$('mSolo').addEventListener('click',function(){menuMode='solo';refreshMenuUI();});
+$('mCoop').addEventListener('click',function(){menuMode='coop';refreshMenuUI();});
+$('mStart').addEventListener('click',function(){
+  audioInit();
   if(menuMode==='solo')startLocal();
   else showOv('bcoop');
 });
-$('bdev').addEventListener('click',function(){
-  NET.cls='dev';
-  $('classCards').classList.add('hidden');
-  if(menuMode==='solo')startLocal();
-  else showOv('bcoop');
-});
-$('bmkt').addEventListener('click',function(){
-  NET.cls='mkt';
-  $('classCards').classList.add('hidden');
-  if(menuMode==='solo')startLocal();
-  else showOv('bcoop');
-});
-$('bdsn').addEventListener('click',function(){
-  NET.cls='dsn';
-  $('classCards').classList.add('hidden');
-  if(menuMode==='solo')startLocal();
-  else showOv('bcoop');
-});
-$('bBack2').addEventListener('click',function(){showOv('bmenu');});
-$('bBack3').addEventListener('click',function(){showOv('bcoop');});
-$('bBack4').addEventListener('click',function(){destroyNet();LOBBY=[];showOv('bmenu');});
+$('mSettings').addEventListener('click',function(){showOv('bset');});
+$('bsetBack').addEventListener('click',function(){showOv('bmenu');});
+refreshMenuUI();
+renderClassPreviews();
 $('cHost').addEventListener('click',function(){
   showOv('bhost');
   $('roomCode').textContent='…';

@@ -71,3 +71,17 @@
 #burnout input[type=range]{flex:1;accent-color:#15707f;height:4px;cursor:pointer;}
 #burnout .sndval{width:40px;font-family:'Pixelify Sans',Arial;font-size:12px;color:#42e0ff;text-align:right;}
 #burnout .bgcredit{margin-top:12px;font-size:10px;color:#4d5560;text-align:center;letter-spacing:1px;}
+
+/* ===== главное меню: класс-фокус, углы ===== */
+#burnout .bgmain{display:flex;flex-direction:column;gap:8px;}
+#burnout .bgbottom{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px;}
+#burnout .bgcorner{background:rgba(10,16,24,0.6);border:1px solid #2c4258;color:#7d8590;border-radius:6px;padding:8px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;min-height:40px;}
+#burnout .bgcorner:hover{border-color:#42e0ff;color:#cfe6f2;}
+#burnout .bgstart{flex:1;background:rgba(21,112,127,0.25);border:1px solid #15707f;color:#eaf6ff;border-radius:8px;padding:10px 18px;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:15px;letter-spacing:2px;cursor:pointer;min-height:44px;transition:all .15s;}
+#burnout .bgstart:hover{background:rgba(66,224,255,0.2);border-color:#42e0ff;box-shadow:0 0 16px rgba(66,224,255,0.35);}
+#burnout .bgmode{display:flex;gap:6px;}
+#burnout .bgmodebtn{background:rgba(10,16,24,0.6);border:1px solid #2c4258;color:#7d8590;border-radius:6px;padding:8px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;min-height:40px;}
+#burnout .bgmodebtn.on{border-color:#42e0ff;color:#42e0ff;background:rgba(21,112,127,0.2);}
+#burnout .bgcard.sel{border-color:#42e0ff;box-shadow:0 0 18px rgba(66,224,255,0.35),inset 0 0 12px rgba(21,112,127,0.12);}
+#burnout .bgcard.sel h2{color:#42e0ff;}
+#burnout .bgset{max-width:420px;}

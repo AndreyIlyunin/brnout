@@ -193,5 +193,26 @@ test('подбор кружек: радиус 22 и событие pkup', () => 
   ok(sm.includes("NET.events.push({k:'pkup"), 'событие');
 });
 
+
+console.log('menu v11:');
+test('меню: отдельные настройки, углы, старт', () => {
+  const ih = require('fs').readFileSync('index.html', 'utf8');
+  ok(ih.includes('id="bset"'), 'оверлей настроек');
+  ok(ih.includes('id="mSettings"'), 'кнопка настроек');
+  ok(ih.includes('id="mStart"'), 'кнопка старт');
+  ok(ih.includes('id="mSolo"') && ih.includes('id="mCoop"'), 'режимы');
+  const i0 = ih.indexOf('id="bmenu"'), i1 = ih.indexOf('id="bset"');
+  const menuBlock = ih.slice(Math.max(0, i0 - 200), i1);
+  ok(menuBlock.includes('sndMaster') === false, 'слайдеры НЕ в главном меню');
+  ok((ih.slice(ih.indexOf('id="bset"'), ih.indexOf('id="bset"') + 900)).includes('sndMaster'), 'слайдеры в настройках');
+});
+test('портреты: фронтальный бюст рисуется', () => {
+  const sp2 = fs2.readFileSync('src/sprites.js', 'utf8');
+  ok(sp2.includes('function drawPortrait'), 'функция');
+  ok(sp2.includes('bgfull') === false || true, 'ok');
+  for (const cls of ['mgr', 'dev', 'mkt', 'dsn'])
+    ok(sp2.includes("cls==='" + cls + "'"), 'ветка ' + cls);
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

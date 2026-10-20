@@ -477,20 +477,94 @@ function drawBoss(b,remote){
 }
 function s2(){return 2.6;}
 
-// модельки для карточек классов в меню
-function drawClassPreview(id,cls){
+
+// фронтальные портреты-бюсты для карточек классов в меню
+function drawPortrait(id,cls){
   var el=document.getElementById(id);
   if(!el)return;
   var c=el.getContext('2d');
-  c.clearRect(0,0,el.width,el.height);
-  c.save();
-  c.translate(el.width/2,el.height/2+14);
-  var o={x:0,y:0,face:-0.55,step:0.22,look:classLook(cls,0),cls:cls,scale:2.1,moving:true,atkT:0,
-    weapon:CLS[cls]?CLS[cls].weapon:'laptop'};
-  drawHumanoidBody(c,o);
-  c.restore();
+  var W=el.width,H=el.height;
+  c.clearRect(0,0,W,H);
+  var cx=W/2,cy=H*0.44;
+  var L=classLook(cls,0);
+  // фон-аура класса
+  var aura={mgr:'#2c4e57',dev:'#2f3136',mkt:'#5a3a6a',dsn:'#6e3a52'}[cls]||'#2c4258';
+  var g=c.createRadialGradient(cx,cy,8,cx,cy,H*0.62);
+  g.addColorStop(0,'rgba(66,224,255,0.10)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=g;c.fillRect(0,0,W,H);
+  // плечи
+  c.fillStyle=aura;
+  c.beginPath;c.moveTo(cx-30,H);c.quadraticCurveTo(cx-28,cy+26,cx-14,cy+22);
+  c.lineTo(cx+14,cy+22);c.quadraticCurveTo(cx+28,cy+26,cx+30,H);c.closePath();c.fill();
+  c.strokeStyle='rgba(0,0,0,0.4)';c.lineWidth=1.5;c.stroke();
+  // шея
+  c.fillStyle=L.skin;c.fillRect(cx-5,cy+12,10,12);
+  if(cls==='mgr'){
+    c.fillStyle='rgba(255,255,255,0.85)'; // рубашка V
+    c.beginPath;c.moveTo(cx-9,cy+22);c.lineTo(cx,cy+34);c.lineTo(cx+9,cy+22);c.lineTo(cx+13,H);c.lineTo(cx-13,H);c.closePath();c.fill();
+    c.fillStyle='#8b2020'; // галстук длинный
+    c.beginPath;c.moveTo(cx-2.5,cy+24);c.lineTo(cx+2.5,cy+24);c.lineTo(cx+4,H-6);c.lineTo(cx-4,H-6);c.closePath();c.fill();
+    c.fillStyle='#d8dce2';rr(c,cx+13,cy+30,7,10,1);c.fill(); // бейдж
+    c.strokeStyle='#8b949e';c.lineWidth=0.8;c.beginPath();c.moveTo(cx+16,cy+22);c.lineTo(cx+18,cy+30);c.stroke();
+  }else if(cls==='dev'){
+    c.fillStyle='rgba(0,0,0,0.25)';c.fillRect(cx-14,cy+22,28,H); // худи-тень
+    c.strokeStyle=L.accent;c.lineWidth=1.6;c.lineCap='round'; // завязки
+    c.beginPath();c.moveTo(cx-6,cy+26);c.lineTo(cx-8,cy+40);c.moveTo(cx+6,cy+26);c.lineTo(cx+8,cy+40);c.stroke();
+  }else if(cls==='mkt'){
+    c.fillStyle=L.accent; // шарф
+    rr(c,cx-13,cy+22,26,8,3);c.fill();
+    c.fillRect(cx+7,cy+26,6,14);
+  }else{
+    c.fillStyle='#241d2e';c.fillRect(cx-4,cy+18,8,5); // чокер
+    c.strokeStyle=L.accent;c.lineWidth=1.2;
+    c.beginPath();c.moveTo(cx-10,cy+28);c.quadraticCurveTo(cx,cy+34,cx+10,cy+28);c.stroke(); // кайма платья
+  }
+  // голова (крупная, фронтально)
+  c.fillStyle=L.skin;
+  c.beginPath;c.arc(cx,cy,16,0,TAU);c.fill();
+  c.strokeStyle='rgba(0,0,0,0.25)';c.lineWidth=1;c.stroke();
+  // причёска фронтально
+  c.fillStyle=L.hair;
+  if(cls==='mgr'){
+    c.beginPath;c.arc(cx,cy-1,16,Math.PI*0.95,Math.PI*2.05);c.fill();
+    c.beginPath;c.moveTo(cx-16,cy-1);c.quadraticCurveTo(cx-4,cy-14,cx+10,cy-10);c.lineTo(cx+16,cy+2);c.lineTo(cx+16,cy-4);c.quadraticCurveTo(cx,cy-20,cx-16,cy-4);c.closePath();c.fill();
+  }else if(cls==='dev'){
+    c.beginPath();c.arc(cx,cy-2,17.5,Math.PI*0.9,Math.PI*2.1);c.fill(); // капюшон-шапка
+    c.fillStyle=shade(L.hair,18);
+    c.beginPath();c.arc(cx,cy-7,10,Math.PI,TAU);c.fill();
+    // круги под глазами
+    c.fillStyle='rgba(20,18,26,0.45)';
+    c.beginPath();c.ellipse(cx-7,cy+6,3.4,1.9,0,0,TAU);c.ellipse(cx+7,cy+6,3.4,1.9,0,0,TAU);c.fill();
+  }else if(cls==='mkt'){
+    c.beginPath();c.arc(cx,cy,16,Math.PI*0.9,Math.PI*2.1);c.fill();
+    c.beginPath();c.moveTo(cx-16,cy);c.quadraticCurveTo(cx-14,cy+10,cx-8,cy+14);c.lineTo(cx-13,cy-2);c.closePath();c.fill(); // прядь
+  }else{
+    c.beginPath();c.arc(cx,cy,16,Math.PI,TAU);c.fill(); // чёлка
+    c.beginPath();c.ellipse(cx+13,cy-6,6,9,-0.5,0,TAU);c.fill(); // хвост сбоку
+    c.fillStyle=L.accent;c.beginPath();c.arc(cx+9,cy-12,2.4,0,TAU);c.fill(); // резинка
+  }
+  // глаза
+  if(cls==='dsn'){
+    c.fillStyle='#1a1d22';rr(c,cx-10,cy-4,8,4.5,2);c.fill();rr(c,cx+2,cy-4,8,4.5,2);c.fill(); // визор
+    c.fillStyle='rgba(95,208,192,0.9)';c.fillRect(cx-9,cy-3.2,6,3);c.fillRect(cx+3,cy-3.2,6,3);
+  }else{
+    c.fillStyle='#1e1a16';
+    c.beginPath();c.arc(cx-5.5,cy-1,1.8,0,TAU);c.arc(cx+5.5,cy-1,1.8,0,TAU);c.fill();
+    c.strokeStyle='rgba(30,26,22,0.5)';c.lineWidth=0.8; // брови
+    c.beginPath();c.moveTo(cx-8,cy-5);c.lineTo(cx-3,cy-6);c.moveTo(cx+3,cy-6);c.lineTo(cx+8,cy-5);c.stroke();
+  }
+  if(cls==='dsn'){ // румянец + серьга
+    c.fillStyle='rgba(212,106,142,0.4)';
+    c.beginPath();c.arc(cx-10,cy+4,2,0,TAU);c.arc(cx+10,cy+4,2,0,TAU);c.fill();
+    c.fillStyle='#ffcf5c';c.beginPath();c.arc(cx+15,cy+3,1.6,0,TAU);c.fill();
+  }
+  if(cls==='mgr'){ // улыбка успеха
+    c.strokeStyle='rgba(60,30,20,0.7)';c.lineWidth=1.2;
+    c.beginPath();c.arc(cx,cy+5,4,0.15*Math.PI,0.85*Math.PI);c.stroke();
+  }
 }
 function renderClassPreviews(){
   var ids=[['mdl-mgr','mgr'],['mdl-dev','dev'],['mdl-mkt','mkt'],['mdl-dsn','dsn']];
-  for(var i=0;i<ids.length;i++)drawClassPreview(ids[i][0],ids[i][1]);
+  for(var i=0;i<ids.length;i++)drawPortrait(ids[i][0],ids[i][1]);
 }
