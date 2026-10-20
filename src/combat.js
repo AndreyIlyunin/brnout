@@ -61,11 +61,11 @@ function spawnMob(type){
   }
   var w=G.wave;
   if(type==='intern'){
-    G.mobs.push({id:++G.mobSeq,type:'intern',x:p0.x,y:p0.y,r:elite?16:13,hp:(16+2*w)*(elite?2.5:1),hpMax:(16+2*w)*(elite?2.5:1),spd:(55+R()*22+w*2)*(elite?0.92:1),elite:elite?1:0,
+    G.mobs.push({id:++G.mobSeq,type:'intern',x:p0.x,y:p0.y,r:elite?19:15,hp:(16+2*w)*(elite?2.5:1),hpMax:(16+2*w)*(elite?2.5:1),spd:(55+R()*22+w*2)*(elite?0.92:1),elite:elite?1:0,
       stun:0,kx:0,ky:0,cd:R(),wt:0,wx:0,wy:0,face:0,aggro:false,said:false,tint:(R()*4)|0,emb:0,tilt:R()*6,step:0,fade:0.5,
       cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0});
   }else{
-    G.mobs.push({id:++G.mobSeq,type:'deadline',x:p0.x,y:p0.y,r:11,hp:9+1.5*w,hpMax:9+1.5*w,spd:150+R()*30,
+    G.mobs.push({id:++G.mobSeq,type:'deadline',x:p0.x,y:p0.y,r:13,hp:9+1.5*w,hpMax:9+1.5*w,spd:150+R()*30,
       stun:0,kx:0,ky:0,cd:0,face:0,tint:(R()*3)|0,emb:0,tilt:R()*6,step:0,elite:0,
       cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0});
     if(R()<0.3)floatText(p0.x,p0.y-20,['ДО РЕЛИЗА 3 ЧАСА','ПРОД ПОЛЁГ','ГОРИТ','DEMO ЧЕРЕЗ 10 МИНУТ'][(R()*4)|0],'#e07050',12);

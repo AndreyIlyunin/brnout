@@ -64,7 +64,7 @@ function classLook(cls,seat){
 }
 function newPlayer(id,cls){
   var lb=lobbySpawn();
-  return{id:id,cls:cls,x:lb.x+lb.w/2+(R()*120-60),y:lb.y+lb.h/2+(R()*120-60),r:16,spd:210,spdMult:1,dmgMult:1,
+  return{id:id,cls:cls,x:lb.x+lb.w/2+(R()*120-60),y:lb.y+lb.h/2+(R()*120-60),r:18,spd:210,spdMult:1,dmgMult:1,
     burnout:0,coffee:60,coffeeMax:100,face:0,coins:0,
     cd1:0,cd2:0,cdQ:0,cdS:0,shield:0,qT:0,qPulse:0,haste:0,castT:0,inv:0,flash:0,heart:0,kx:0,ky:0,step:0,atkT:0,
     dead:false,respT:0,

@@ -192,37 +192,37 @@ function furnishRoom(rm,fid){
     LIGHTS.push({x:i*TILE+TILE*1.5,y:j*TILE+TILE*1.5,dead:dead,dim:dim,ph:rnd()*10,sd:rnd()*100,sput:0});
   }
   if(furnRoom(rm,'openspace')){
-    for(j=rm.y+90;j<rm.y+rm.h-70;j+=150){
-      for(i=rm.x+70;i<rm.x+rm.w-190;i+=260){
+    for(j=rm.y+80;j<rm.y+rm.h-60;j+=130){
+      for(i=rm.x+60;i<rm.x+rm.w-160;i+=210){
         if(rnd()<0.15)continue;
-        fid=placeFurn(rm,fid,'desk',i,j,150,60);
+        fid=placeFurn(rm,fid,'desk',i,j,118,46);
       }
     }
     var np2=1+((rnd()*2)|0);
-    for(i=0;i<np2;i++)fid=placeFurn(rm,fid,'printer',rm.x+20+rnd()*(rm.w-90),rm.y+14+rnd()*(rm.h-70),52,44);
+    for(i=0;i<np2;i++)fid=placeFurn(rm,fid,'printer',rm.x+20+rnd()*(rm.w-80),rm.y+14+rnd()*(rm.h-62),44,38);
   }else if(furnRoom(rm,'office')){
     var n=1+((rnd()*2)|0);
     for(i=0;i<n;i++){
       var dx2=rm.x+60+rnd()*(rm.w-260),dy2=rm.y+60+rnd()*(rm.h-160);
-      fid=placeFurn(rm,fid,'desk',dx2,dy2,150,60);
+      fid=placeFurn(rm,fid,'desk',dx2,dy2,118,46);
     }
-    if(rnd()<0.6)fid=placeFurn(rm,fid,'printer',rm.x+16+rnd()*(rm.w-90),rm.y+16+rnd()*(rm.h-70),52,44);
-    if(rnd()<0.5)fid=placeFurn(rm,fid,'cabinet',rm.x+20,rm.y+rm.h-70,80,36);
+    if(rnd()<0.6)fid=placeFurn(rm,fid,'printer',rm.x+16+rnd()*(rm.w-80),rm.y+16+rnd()*(rm.h-62),44,38);
+    if(rnd()<0.5)fid=placeFurn(rm,fid,'cabinet',rm.x+20,rm.y+rm.h-56,64,28);
   }else if(furnRoom(rm,'meeting')){
-    fid=placeFurn(rm,fid,'rtable',rm.x+rm.w/2-55,rm.y+rm.h/2-35,110,70,16);
+    fid=placeFurn(rm,fid,'rtable',rm.x+rm.w/2-45,rm.y+rm.h/2-28,90,56,14);
   }else if(furnRoom(rm,'pantry')){
-    fid=placeFurn(rm,fid,'cstand',rm.x+rm.w/2-30,rm.y+16,60,44);
-    fid=placeFurn(rm,fid,'cooler',rm.x+rm.w-52,rm.y+rm.h-58,30,30);
+    fid=placeFurn(rm,fid,'cstand',rm.x+rm.w/2-25,rm.y+16,50,38);
+    fid=placeFurn(rm,fid,'cooler',rm.x+rm.w-46,rm.y+rm.h-50,26,26);
   }else if(furnRoom(rm,'lobby')){
-    fid=placeFurn(rm,fid,'rstand',rm.x+rm.w/2-45,rm.y+30,90,40);
+    fid=placeFurn(rm,fid,'rstand',rm.x+rm.w/2-36,rm.y+30,72,32);
   }else if(furnRoom(rm,'wc')){
     // сантехника — фиксированные позиции, рандом-ретраи здесь не нужны
-    FURN.push({id:fid++,t:'sink',x:rm.x+10,y:rm.y+rm.h-30,w:56,h:24});
-    FURN.push({id:fid++,t:'sink',x:rm.x+rm.w-66,y:rm.y+rm.h-30,w:56,h:24});
+    FURN.push({id:fid++,t:'sink',x:rm.x+10,y:rm.y+rm.h-26,w:48,h:20});
+    FURN.push({id:fid++,t:'sink',x:rm.x+rm.w-58,y:rm.y+rm.h-26,w:48,h:20});
     FURN.push({id:fid++,t:'stall',x:rm.x+8,y:rm.y+8,w:(rm.w-28)/2,h:34});
     FURN.push({id:fid++,t:'stall',x:rm.x+rm.w/2+6,y:rm.y+8,w:(rm.w-28)/2,h:34});
   }
-  if(rm.type!=='wc'&&rnd()<0.6)fid=placeFurn(rm,fid,'plant',rm.x+24+rnd()*(rm.w-60),rm.y+24+rnd()*(rm.h-60),26,26,6);
+  if(rm.type!=='wc'&&rnd()<0.6)fid=placeFurn(rm,fid,'plant',rm.x+24+rnd()*(rm.w-54),rm.y+24+rnd()*(rm.h-54),22,22,6);
   return fid;
 }
 function prerenderFloor(){

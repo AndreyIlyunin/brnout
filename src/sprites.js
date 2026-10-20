@@ -2,15 +2,15 @@
 // ============================== sprites (GTA2-style layered humanoids) ==============================
 // пиксельный рендер моделей: рисуем в мелкий оффскрин, блиним крупными чанками.
 // Мир, свет и тексты остаются чёткими — чанки только у персонажей.
-var SPRCV=document.createElement('canvas');SPRCV.width=128;SPRCV.height=128;
+var SPRCV=document.createElement('canvas');SPRCV.width=160;SPRCV.height=160;
 var SPRC=SPRCV.getContext('2d');
 var SPR_SCALE=0.5; // 1 модельный пиксель = 2 мировых
 function pixWrap(o,fn){
   var sc=o.scale||1;
   SPRC.setTransform(1,0,0,1,0,0);
-  SPRC.clearRect(0,0,128,128);
+  SPRC.clearRect(0,0,160,160);
   SPRC.save();
-  SPRC.translate(64,64);
+  SPRC.translate(80,80);
   SPRC.scale(SPR_SCALE*sc,SPR_SCALE*sc);
   var o2={};for(var k in o)o2[k]=o[k];
   o2.x=0;o2.y=0;o2.scale=1;
@@ -18,7 +18,7 @@ function pixWrap(o,fn){
   SPRC.restore();
   ctx.save();
   ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(SPRCV,Math.round(o.x-64),Math.round(o.y-64));
+  ctx.drawImage(SPRCV,Math.round(o.x-80),Math.round(o.y-80));
   ctx.restore();
 }
 function drawHumanoid(c,o){
@@ -335,7 +335,7 @@ function drawWeapon(c,o,s){
 }
 function drawPlayer(p,isMe){
   if(!p||p.dead)return;
-  drawHumanoid(ctx,{x:p.x,y:p.y,face:p.face,step:p.step,look:p.look,cls:p.cls,scale:1,moving:p.moving,atkT:p.atkT,
+  drawHumanoid(ctx,{x:p.x,y:p.y,face:p.face,step:p.step,look:p.look,cls:p.cls,scale:1.35,moving:p.moving,atkT:p.atkT,
     weapon:CLS[p.cls]?CLS[p.cls].weapon:'laptop',casting:(p.cls==='dev'&&p.qT>0)?'type':null,
     castT:p.castT||0,haste:p.haste||0,shieldOn:p.shield>0});
   if(!isMe){
@@ -359,7 +359,7 @@ function drawIntern(m,remote){
   var L=HOODIES[(m.tint||0)%HOODIES.length];
   var wob=Math.sin(G.t*2.4+(m.tilt||0))*0.12;
   var elite=m.elite;
-  drawHumanoid(ctx,{x:m.x,y:m.y,face:(m.face||0)+wob,step:remote?G.t*2.6:(m.step||m.tilt||0),look:L,cls:'intern',scale:elite?1.15:0.85,moving:true,
+  drawHumanoid(ctx,{x:m.x,y:m.y,face:(m.face||0)+wob,step:remote?G.t*2.6:(m.step||m.tilt||0),look:L,cls:'intern',scale:elite?1.55:1.15,moving:true,
     weapon:'laptop',casting:(m.cf>0)?'type':null});
   if(elite){
     ctx.strokeStyle='rgba(200,120,60,'+(0.5+0.3*Math.sin(G.t*6))+')';ctx.lineWidth=2;
@@ -395,7 +395,7 @@ function drawIntern(m,remote){
 function drawDeadline(m,remote){
   var t=G.t+(m.tilt||0);
   var hpF=remote?(m.hpF===undefined?1:m.hpF):(m.hp/m.hpMax);
-  ctx.save();ctx.translate(m.x,m.y);
+  ctx.save();ctx.translate(m.x,m.y);ctx.scale(1.3,1.3);
   ctx.fillStyle='rgba(0,0,0,0.35)';ctx.beginPath();ctx.ellipse(2,5,11,7,0,0,TAU);ctx.fill();
   ctx.rotate(Math.sin(t*9)*0.12);
   for(var k=2;k>=0;k--){
@@ -430,7 +430,7 @@ function drawBoss(b,remote){
   var look={skin:'#c9b8a3',hair:'#b9bcc2',hs:0,shirt:'#232a33',accent:'#8b2020'};
   var hpF=remote?(b.hpF||0):clamp(b.hp/b.hpMax,0,1);
   var wu=b.windup>0?Math.min(1,(b.wuT||0)/1.0):0;
-  drawHumanoid(ctx,{x:b.x,y:b.y,face:b.face,step:b.step||0,look:look,cls:'mgr',scale:2.6,moving:true,atkT:wu>0?0.2:0,
+  drawHumanoid(ctx,{x:b.x,y:b.y,face:b.face,step:b.step||0,look:look,cls:'mgr',scale:2.85,moving:true,atkT:wu>0?0.2:0,
     weapon:wu>0?null:'stamp',bossTie:true});
   // glasses
   var gd=14;
