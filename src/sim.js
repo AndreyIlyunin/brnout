@@ -23,7 +23,7 @@ function updatePlayer(p,dt){
     collideMove(p,p.ix/l*spd*dt,p.iy/l*spd*dt);
     p.step+=dt*spd*0.012;
   }
-  p.x+=p.kx*dt;p.y+=p.ky*dt;p.kx*=Math.exp(-7*dt);p.ky*=Math.exp(-7*dt);
+  collideMove(p,p.kx*dt,p.ky*dt);p.kx*=Math.exp(-7*dt);p.ky*=Math.exp(-7*dt);
   p.x=clamp(p.x,p.r,MAP_W-p.r);p.y=clamp(p.y,p.r,MAP_H-p.r);
   p.face=p.aim;
   p.cd1-=dt;p.cd2-=dt;p.cdQ-=dt;p.cdS-=dt;p.inv-=dt;p.atkT=Math.max(0,p.atkT-dt);p.flash=Math.max(0,p.flash-dt*3);
@@ -82,7 +82,7 @@ function updateMobs(dt){
         if(m.hp<=0&&!m.dead){m.dead=true;killMob(m);continue;}}
     }
     if(m.stun>0){m.stun-=dt;continue;}
-    m.x+=m.kx*dt;m.y+=m.ky*dt;m.kx*=Math.exp(-8*dt);m.ky*=Math.exp(-8*dt);
+    collideMove(m,m.kx*dt,m.ky*dt);m.kx*=Math.exp(-8*dt);m.ky*=Math.exp(-8*dt);
     var slow=(m.ch>0?0.4:1)*(inWater(m.x,m.y)?0.55:1)*(G.rushT>0?1.3:1);
     if(m.cf>0){ // ребрендинг:/confused wander
       m.cf-=dt;m.aggro=false;

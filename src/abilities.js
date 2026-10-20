@@ -161,10 +161,12 @@ function trySkill2(p){ // Q-скил
   }else{ // dsn пиксель-перфект: dash
     if(!spendCoffee(p,C.sk.cost))return;
     p.cdS=C.sk.cd;p.inv=Math.max(p.inv,0.4);
-    var a=p.aim,stepLen=24,total=170;
+    var a=p.aim,stepLen=5,total=170;
     for(var st=0;st<total;st+=stepLen){
+      var nx=p.x+Math.cos(a)*stepLen,ny=p.y+Math.sin(a)*stepLen;
+      if(blockedAt(nx,ny,p.r))break; // рывок не проходит сквозь стены
       G.fx.push({type:'ghost',x:p.x,y:p.y,face:p.face,cls:p.cls,t:0,life:0.3+st*0.001});
-      collideMove(p,Math.cos(a)*stepLen,Math.sin(a)*stepLen);
+      p.x=nx;p.y=ny;
     }
     NET.events.push({k:'ring',x:Math.round(p.x),y:Math.round(p.y),rm:40,green:1});
     SFX.whoosh();
