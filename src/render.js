@@ -28,6 +28,21 @@ function worldPool(sel){
 }
 function applyWorldT(){ctx.setTransform(DPR*G.zoom,0,0,DPR*G.zoom,-G.camX*DPR*G.zoom,-G.camY*DPR*G.zoom);}
 function applyScreenT(){ctx.setTransform(DPR,0,0,DPR,0,0);}
+var fogCv=document.createElement('canvas');fogCv.width=GW;fogCv.height=GH;
+var fogCtx=fogCv.getContext('2d');
+function drawFog(){
+  var img=fogCtx.createImageData(GW,GH);
+  var d=img.data;
+  for(var i=0;i<GW*GH;i++){
+    var o=i*4;
+    if(!FOG.explored[i]){d[o]=4;d[o+1]=6;d[o+2]=11;d[o+3]=255;}
+    else if(!FOG.vis[i]){d[o]=4;d[o+1]=7;d[o+2]=13;d[o+3]=172;}
+    else d[o+3]=0;
+  }
+  fogCtx.putImageData(img,0,0);
+  ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(fogCv,-TILE*0.5,-TILE*0.5,MAP_W+TILE,MAP_H+TILE);
+}
 function drawWorld(){
   var mobs=worldPool('mobs'),players=worldPool('players'),projs=worldPool('projs'),
       pickups=(NET.mode==='guest')?VIEW.pickups:G.pickups,zones=(NET.mode==='guest')?VIEW.zones:G.zones,
@@ -48,7 +63,7 @@ function drawWorld(){
   }
   var cf=(NET.mode==='guest')?VIEW.coffee:null;
   for(i=0;i<COFFEES.length;i++)drawCoffeePoint(COFFEES[i],cf?cf[i]:COFFEES[i].charges);
-  for(i=0;i<pickups.length;i++)drawPickup(pickups[i]);
+  for(i=0;i<pickups.length;i++){if(tileVis(pickups[i].x,pickups[i].y))drawPickup(pickups[i]);}
   if(boss&&boss.windup>0){
     var rad=150+20*(boss.phase||1);
     ctx.fillStyle='rgba(200,60,50,'+(0.15+0.1*Math.sin(G.t*12))+')';
@@ -66,7 +81,8 @@ function drawWorld(){
     }
   }
   for(i=0;i<mobs.length;i++){
-    ctx.globalAlpha=1-Math.max(0,mobs[i].fade||0); // проявление после спавна
+    if(!tileVis(mobs[i].x,mobs[i].y))continue; // в тумане мобов не видно
+    ctx.globalAlpha=1-Math.max(0,mobs[i].fade||0);
     if(mobs[i].type==='deadline')drawDeadline(mobs[i],NET.mode==='guest');
     else drawIntern(mobs[i],NET.mode==='guest');
     ctx.globalAlpha=1;
@@ -105,7 +121,7 @@ function drawWorld(){
       }
     }
   }
-  if(boss)drawBoss(boss,NET.mode==='guest');
+  if(boss&&tileVis(boss.x,boss.y))drawBoss(boss,NET.mode==='guest');
   for(i=0;i<players.length;i++)drawPlayer(players[i],players[i].id===NET.myId);
   for(i=0;i<projs.length;i++){var pj=projs[i];
     ctx.save();ctx.translate(pj.x,pj.y);ctx.rotate(pj.rot||0);
@@ -133,13 +149,14 @@ function drawWorld(){
   }
   for(i=0;i<G.fx.length;i++)drawFx(G.fx[i]);
   drawDebris();
-  drawHoverTag();
   for(i=0;i<G.texts.length;i++){var t=G.texts[i];
     ctx.globalAlpha=1-t.t/t.life;
     ctx.font='bold '+t.size+'px Arial';ctx.fillStyle=t.color;
     ctx.textAlign='center';ctx.fillText(t.text,t.x,t.y);ctx.textAlign='left';
     ctx.globalAlpha=1;
   }
+  drawFog();
+  drawHoverTag();
 }
 function drawCoffeePoint(cp,charges){
   var bob=Math.sin(G.t*2+cp.x)*2;
@@ -486,6 +503,12 @@ function drawMinimap(){
   hctx.drawImage(mmCv,mx,my,mw,mh);
   hctx.globalAlpha=1;
   var sc=mw/MAP_W;
+  // туман на миникарте: инкогнито глухо, исследованное-без-обзора притушено
+  var ts=mw/GW;
+  for(var fj=0;fj<GH;fj++)for(var fi=0;fi<GW;fi++){
+    if(!FOG.explored[fi+fj*GW]){hctx.fillStyle='rgba(6,8,13,0.94)';hctx.fillRect(mx+fi*ts,my+fj*ts,ts+0.6,ts+0.6);}
+    else if(!FOG.vis[fi+fj*GW]){hctx.fillStyle='rgba(6,9,15,0.45)';hctx.fillRect(mx+fi*ts,my+fj*ts,ts+0.6,ts+0.6);}
+  }
   var cf=(NET.mode==='guest')?VIEW.coffee:null;
   for(var i=0;i<COFFEES.length;i++){
     var ch=cf?(cf[i]!==undefined?cf[i]:0):COFFEES[i].charges;
@@ -494,7 +517,7 @@ function drawMinimap(){
   }
   var mobs=worldPool('mobs');
   hctx.fillStyle='#c23b32';
-  for(i=0;i<mobs.length;i++)hctx.fillRect(mx+mobs[i].x*sc-1,my+mobs[i].y*sc-1,2.5,2.5);
+  for(i=0;i<mobs.length;i++)if(tileVis(mobs[i].x,mobs[i].y))hctx.fillRect(mx+mobs[i].x*sc-1,my+mobs[i].y*sc-1,2.5,2.5);
   var boss=(NET.mode==='guest')?VIEW.boss:G.boss;
   if(boss){hctx.fillStyle='#e5534b';hctx.beginPath();hctx.arc(mx+boss.x*sc,my+boss.y*sc,4,0,TAU);hctx.fill();}
   var players=worldPool('players');

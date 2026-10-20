@@ -145,6 +145,7 @@ function buildMap(seed){
     if(!U)WALLS.push({x:i*TILE,y:j*TILE-WT,w:TILE,h:WT,dir:2});
     if(!D)WALLS.push({x:i*TILE,y:(j+1)*TILE,w:TILE,h:WT,dir:3});
   }
+  resetFog();
   rebuildObst();
   prerenderFloor();
   buildMinimapBase();
@@ -485,6 +486,60 @@ function flowDir(x,y){
   }
   if(bx===cx&&by===cy)return null;
   return Math.atan2((by+0.5)*TILE-y,(bx+0.5)*TILE-x);
+}
+
+
+// ---- туман войны (герои-3 стиль): терра инкогнита + затемнённая обстановка + обзор ----
+var FOG={explored:new Uint8Array(GW*GH),vis:new Uint8Array(GW*GH),t:0};
+var SIGHT_TILES=5.5; // радиус обзора в тайлах
+function segHitsRect(x1,y1,x2,y2,r){
+  var dx=x2-x1,dy=y2-y1,t0=0,t1=1;
+  var px=[-dx,dx,-dy,dy],qx=[x1-r.x,r.x+r.w-x1,y1-r.y,r.y+r.h-y1];
+  for(var i=0;i<4;i++){
+    if(px[i]===0){if(qx[i]<0)return false;}
+    else{var tt=qx[i]/px[i];
+      if(px[i]<0){if(tt>t1)return false;if(tt>t0)t0=tt;}
+      else{if(tt<t0)return false;if(tt<t1)t1=tt;}
+    }
+  }
+  return true;
+}
+function losClear(x1,y1,x2,y2){
+  for(var i=0;i<WALLS.length;i++){
+    if(segHitsRect(x1,y1,x2,y2,WALLS[i]))return false;
+  }
+  return true;
+}
+function resetFog(){
+  for(var i=0;i<GW*GH;i++){FOG.explored[i]=0;FOG.vis[i]=0;}
+}
+function computeVis(px,py){
+  for(var i=0;i<GW*GH;i++)FOG.vis[i]=0;
+  var cx=(px/TILE)|0,cy=(py/TILE)|0;
+  var R=SIGHT_TILES;
+  for(var dy=-6;dy<=6;dy++)for(var dx=-6;dx<=6;dx++){
+    var tx=cx+dx,ty=cy+dy;
+    if(tx<0||ty<0||tx>=GW||ty>=GH)continue;
+    if(dx*dx+dy*dy>R*R)continue;
+    if(!grid[ty][tx])continue;
+    var tcx=(tx+0.5)*TILE,tcy=(ty+0.5)*TILE;
+    // угол тайла чуть ближе к игроку — смягчает «ступеньки» у кромок
+    var mx=tcx+(px-tcx)*0.15,my=tcy+(py-tcy)*0.15;
+    if(losClear(px,py,mx,my)){
+      var ti=tx+ty*GW;
+      FOG.vis[ti]=1;FOG.explored[ti]=1;
+    }
+  }
+}
+function tileVis(x,y){
+  var tx=(x/TILE)|0,ty=(y/TILE)|0;
+  if(tx<0||ty<0||tx>=GW||ty>=GH)return 0;
+  return FOG.vis[tx+ty*GW];
+}
+function tileExplored(x,y){
+  var tx=(x/TILE)|0,ty=(y/TILE)|0;
+  if(tx<0||ty<0||tx>=GW||ty>=GH)return 0;
+  return FOG.explored[tx+ty*GW];
 }
 
 function blockedAt(x,y,r){

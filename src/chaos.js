@@ -14,6 +14,7 @@ function drawHoverTag(){
   var boss=(NET.mode==='guest')?VIEW.boss:G.boss;
   if(boss){var db=Math.hypot(boss.x-mwx,boss.y-mwy);if(db<bd+boss.r){best=boss;bd=db;}}
   if(!best)return;
+  if(!tileVis(best.x,best.y))return;
   var name=mobName(best);
   ctx.font='bold 11px Arial';
   var tw2=ctx.measureText(name).width;
@@ -190,6 +191,7 @@ function drawChaos(){
 function drawDebris(){
   var i;
   for(i=0;i<DEBRIS.length;i++){var d=DEBRIS[i];
+    if(d.kind!=='stone'&&!tileVis(d.x,d.y))continue; // души/монеты/папки скрыты туманом
     ctx.save();ctx.translate(d.x,d.y);
     if(d.kind==='coin'){
       var bob2=Math.sin(d.t*6+d.x)*1.2;

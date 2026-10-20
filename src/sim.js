@@ -215,6 +215,13 @@ function updateProjs(dt){
 }
 function updateFx(dt){
   updateChaos(dt);
+  FOG.t-=dt;
+  if(FOG.t<=0){
+    FOG.t=0.12;
+    var fwp=localPlayer();
+    if(fwp&&!fwp.dead)computeVis(fwp.x,fwp.y);
+    else for(var fi2=0;fi2<GW*GH;fi2++)FOG.vis[fi2]=0;
+  }
   if(G.rushT>0)G.rushT-=dt;
   if(R()<0.0006)SFX.whisper(); // редкий мистический шёпот
   if(G.comboT>0){G.comboT-=dt;if(G.comboT<=0)G.combo=0;}
