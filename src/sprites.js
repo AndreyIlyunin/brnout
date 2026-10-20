@@ -609,6 +609,15 @@ function drawPortrait(id,cls){
       PB.closePath();PB.fill();
     }
   }
+  if(cls!=='dev'){ // пряди, обрамляющие лицо
+    PB.strokeStyle=hairD;PB.lineWidth=1.6;PB.lineCap='round';
+    PB.beginPath();PB.moveTo(cx-12.2,cy-2);PB.quadraticCurveTo(cx-12.7,cy+3,cx-10.5,cy+7);PB.stroke();
+    PB.beginPath();PB.moveTo(cx+12.2,cy-2);PB.quadraticCurveTo(cx+12.7,cy+3,cx+10.5,cy+7);PB.stroke();
+  }
+  if(cls==='mkt'||cls==='dev'){ // торчащая антеннка
+    PB.strokeStyle=hairD;PB.lineWidth=1.2;
+    PB.beginPath();PB.moveTo(cx+5,cy-12.4);PB.quadraticCurveTo(cx+8,cy-15,cx+10,cy-13.4);PB.stroke();
+  }
   // брови
   PB.strokeStyle=hairD;PB.lineWidth=1.4;PB.lineCap='round';
   PB.beginPath();
@@ -617,45 +626,57 @@ function drawPortrait(id,cls){
   else{PB.moveTo(cx-7,cy-4.5);PB.lineTo(cx-2,cy-5);PB.moveTo(cx+2,cy-5);PB.lineTo(cx+7,cy-4.5);}
   PB.stroke();
   // глаза
-  if(cls==='dsn'){ // большие глаза с ресницами, тонкие очки
-    PB.fillStyle='#f4efe4';
-    PB.beginPath();PB.ellipse(cx-4.5,cy-0.4,2.9,2.3,0,0,TAU);PB.ellipse(cx+4.5,cy-0.4,2.9,2.3,0,0,TAU);PB.fill();
-    PB.fillStyle='#7a4a5e';
-    PB.beginPath();PB.arc(cx-4.3,cy-0.2,1.8,0,TAU);PB.arc(cx+4.7,cy-0.2,1.8,0,TAU);PB.fill();
-    PB.fillStyle='#fff';
-    PB.beginPath();PB.arc(cx-4.9,cy-0.9,0.7,0,TAU);PB.arc(cx+4.1,cy-0.9,0.7,0,TAU);PB.fill();
-    PB.strokeStyle='rgba(40,25,35,0.85)';PB.lineWidth=0.9;PB.lineCap='round';
-    PB.beginPath();PB.arc(cx-4.5,cy-0.3,3.2,Math.PI*1.12,Math.PI*1.88);PB.stroke();
-    PB.beginPath();PB.arc(cx+4.5,cy-0.3,3.2,Math.PI*1.12,Math.PI*1.88);PB.stroke();
-    PB.strokeStyle='rgba(95,208,192,0.75)';PB.lineWidth=0.9;
-    PB.beginPath();PB.ellipse(cx-4.5,cy-0.4,4.1,3.5,0,0,TAU);PB.ellipse(cx+4.5,cy-0.4,4.1,3.5,0,0,TAU);PB.stroke();
-    PB.beginPath();PB.moveTo(cx-0.7,cy-1.2);PB.lineTo(cx+0.7,cy-1.2);PB.stroke();
-  }else{
-    PB.fillStyle='#f4efe4';
-    PB.beginPath();PB.ellipse(cx-4.5,cy-0.5,2.6,1.9,0,0,TAU);PB.ellipse(cx+4.5,cy-0.5,2.6,1.9,0,0,TAU);PB.fill();
-    var iris={mgr:'#2a5a8a',dev:'#5fd0c2',mkt:'#5a3a6a'}[cls]||'#333';
-    PB.fillStyle=iris;
-    PB.beginPath();PB.arc(cx-4.2,cy-0.3,1.4,0,TAU);PB.arc(cx+4.8,cy-0.3,1.4,0,TAU);PB.fill();
-    PB.fillStyle='#fff';
-    PB.beginPath();PB.arc(cx-4.6,cy-0.8,0.55,0,TAU);PB.arc(cx+4.4,cy-0.8,0.55,0,TAU);PB.fill();
-    if(cls==='mkt'){ // очки
-      PB.strokeStyle='#c8a2e0';PB.lineWidth=1;
-      PB.beginPath();PB.ellipse(cx-4.5,cy-0.5,4,3.2,0,0,TAU);PB.ellipse(cx+4.5,cy-0.5,4,3.2,0,0,TAU);PB.stroke();
-      PB.beginPath();PB.moveTo(cx-0.8,cy-1);PB.lineTo(cx+0.8,cy-1);PB.stroke();
+  // --- глаза в референс-стиле: линия века с изломом, ресница, двойной блик ---
+  var FE={mgr:{lid:2.1,iris:'#2a5a8a',top:'rgba(30,26,22,0.9)'},dev:{lid:2.7,iris:'#5fd0c2',top:'rgba(20,22,28,0.95)'},mkt:{lid:1.3,iris:'#5a3a6a',top:'rgba(50,35,45,0.9)'},dsn:{lid:1.5,iris:'#7a4a5e',top:'rgba(40,25,35,0.9)'}}[cls];
+  for(var s5=-1;s5<=1;s5+=2){
+    var ex=cx+s5*4.6,ey=cy-0.3;
+    if(cls==='mkt'&&s5<0){ // подмигивание
+      PB.strokeStyle=FE.top;PB.lineWidth=1.2;PB.lineCap='round';
+      PB.beginPath();PB.moveTo(ex-2.6,ey);PB.quadraticCurveTo(ex,ey+2.2,ex+2.6,ey-0.4);PB.stroke();
+      continue;
     }
+    PB.fillStyle='#f6f1e6';
+    PB.beginPath();PB.ellipse(ex,ey,2.7,2.4-FE.lid*0.26,0,0,TAU);PB.fill();
+    PB.fillStyle=FE.iris;
+    PB.beginPath();PB.arc(ex+s5*0.25,ey+0.3,1.85,0,TAU);PB.fill();
+    PB.fillStyle='rgba(0,0,0,0.28)';
+    PB.beginPath();PB.arc(ex+s5*0.25,ey-0.4,1.85,Math.PI,TAU);PB.fill();
+    PB.fillStyle='#fff';
+    PB.beginPath();PB.arc(ex+s5*0.25-0.7,ey-0.5,0.62,0,TAU);PB.fill();
+    PB.beginPath();PB.arc(ex+s5*0.25+0.75,ey+0.95,0.34,0,TAU);PB.fill();
+    PB.strokeStyle=FE.top;PB.lineWidth=1.15;PB.lineCap='round';
+    PB.beginPath();PB.moveTo(ex-2.7,ey-0.9+FE.lid*0.2);PB.quadraticCurveTo(ex,ey-2.5-FE.lid*0.4,ex+2.7,ey-0.8+FE.lid*0.34);PB.stroke();
+    PB.beginPath();PB.moveTo(ex+s5*2.5,ey-0.8+FE.lid*0.34);PB.lineTo(ex+s5*3.5,ey-1.7+FE.lid*0.24);PB.stroke();
+  }
+  if(cls==='mkt'){ // очки
+    PB.strokeStyle='rgba(200,162,224,0.85)';PB.lineWidth=1;
+    PB.beginPath();PB.ellipse(cx-4.6,cy-0.4,4,3.3,0,0,TAU);PB.ellipse(cx+4.6,cy-0.4,4,3.3,0,0,TAU);PB.stroke();
+    PB.beginPath();PB.moveTo(cx-0.8,cy-1);PB.lineTo(cx+0.8,cy-1);PB.stroke();
+  }else if(cls==='dsn'){
+    PB.strokeStyle='rgba(95,208,192,0.7)';PB.lineWidth=0.9;
+    PB.beginPath();PB.ellipse(cx-4.6,cy-0.4,4,3.4,0,0,TAU);PB.ellipse(cx+4.6,cy-0.4,4,3.4,0,0,TAU);PB.stroke();
+    PB.beginPath();PB.moveTo(cx-0.7,cy-1.2);PB.lineTo(cx+0.7,cy-1.2);PB.stroke();
   }
   if(cls==='mgr'){PB.fillStyle='#42e0ff';PB.beginPath();PB.arc(cx+11.5,cy+1,1.6,0,TAU);PB.fill();} // блютуз
-  // нос (тень) и рот
-  PB.fillStyle='rgba(0,0,0,0.18)';
-  PB.beginPath();PB.ellipse(cx+0.8,cy+3.4,1.1,1.7,0,0,TAU);PB.fill();
-  PB.strokeStyle='rgba(90,40,30,0.75)';PB.lineWidth=1.3;
-  PB.beginPath();
-  if(cls==='mgr'){PB.moveTo(cx-2,cy+6.5);PB.quadraticCurveTo(cx+1,cy+7.8,cx+3.5,cy+6);} // самодовольная ухмылка
-  else if(cls==='dev'){PB.moveTo(cx-2,cy+7);PB.lineTo(cx+2,cy+7);}
-  else if(cls==='mkt'){PB.moveTo(cx-3,cy+6);PB.quadraticCurveTo(cx,cy+8.5,cx+3,cy+6);}
-  else{PB.moveTo(cx-2.2,cy+6);PB.quadraticCurveTo(cx,cy+8,cx+2.2,cy+6);
-    PB.fillStyle='rgba(60,30,40,0.8)';PB.beginPath();PB.arc(cx+3.4,cy+5.4,0.7,0,TAU);PB.fill();}
-  PB.stroke();
+  PB.fillStyle='rgba(0,0,0,0.22)';PB.fillRect(cx+0.4,cy+3.1,1.1,1.1); // нос-точка
+  var lip={mgr:'#8a3040',dev:'#6a4a4a',mkt:'#c2485e',dsn:'#c04a66'}[cls];
+  PB.fillStyle=lip;
+  if(cls==='mgr'){
+    PB.fillRect(cx-2.6,cy+6.1,5.2,1.2);
+    PB.fillRect(cx+1.2,cy+5.4,1.7,0.9); // приподнятый уголок ухмылки
+  }else if(cls==='dev'){
+    PB.fillRect(cx-1.8,cy+6.4,3.6,1);
+  }else if(cls==='mkt'){ // открытая улыбка с зубками
+    PB.fillRect(cx-3,cy+5.4,6,1.2);
+    PB.fillStyle='rgba(40,15,20,0.75)';PB.fillRect(cx-2.2,cy+6.2,4.4,1.7);
+    PB.fillStyle='#f4efe4';PB.fillRect(cx-1.5,cy+6.2,3,0.55);
+  }else{
+    PB.fillRect(cx-2,cy+6,4,1.2);
+    PB.fillStyle='rgba(255,255,255,0.25)';PB.fillRect(cx-1.2,cy+6,2.4,0.4);
+  }
+  if(cls==='dsn'){PB.fillStyle='rgba(60,30,40,0.8)';PB.beginPath();PB.arc(cx+3.4,cy+5.4,0.7,0,TAU);PB.fill();} // родинка
+  PB.fillStyle='rgba(226,140,150,0.22)'; // лёгкий румянец всем
+  PB.beginPath();PB.ellipse(cx-7.2,cy+3.2,1.9,1.2,0,0,TAU);PB.ellipse(cx+7.2,cy+3.2,1.9,1.2,0,0,TAU);PB.fill();
   if(cls==='dsn'){
     PB.fillStyle='rgba(212,106,142,0.30)';
     PB.beginPath();PB.ellipse(cx-7.5,cy+3.2,2,1.3,0,0,TAU);PB.ellipse(cx+7.5,cy+3.2,2,1.3,0,0,TAU);PB.fill();
