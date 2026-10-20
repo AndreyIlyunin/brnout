@@ -181,14 +181,15 @@ function drawHumanoidBody(c,o){
     c.strokeStyle=L.accent;c.lineWidth=1.6;c.lineCap='round';
     c.beginPath();c.moveTo(-2*s,-8*s);c.lineTo(-2.4*s,-3*s);c.moveTo(2*s,-8*s);c.lineTo(2.4*s,-3*s);c.stroke();
   }
-  // arms toward hold point; frenzy = alternating hammering
+  // руки: плечо -> кисть у бедра СБОКУ (голова спереди, руки её не перекрывают)
   function arm(sx,side){
-    var hy2=-15*s;
-    if(frenzy)hy2=-14*s+Math.sin(G.t*30+side*Math.PI)*3.5*s;
-    if(cast)hy2=-17*s;
+    var hx1=sx*0.9, hy2=1.4*s;
+    if(mv)hy2=1.4*s+Math.sin(ph+(side?Math.PI:0))*3.2*s;   // махи при ходьбе
+    if(cast){hx1=sx*0.34;hy2=-7.2*s;}                       // созвон: руки к подбородку
+    if(frenzy){hx1=sx*0.8;hy2=-2*s+Math.sin(G.t*30+side*Math.PI)*4*s;}
     c.strokeStyle=shade(L.shirt,-10);c.lineWidth=5*s;c.lineCap='round';
-    c.beginPath();c.moveTo(sx,-6*s);c.quadraticCurveTo(sx*1.15,-13*s,sx*0.22,hy2);c.stroke();
-    c.fillStyle=L.skin;c.beginPath();c.arc(sx*0.22,hy2,2.6*s,0,TAU);c.fill();
+    c.beginPath();c.moveTo(sx,-5.5*s);c.quadraticCurveTo(sx*1.18,(hy2-5.5*s)/2,hx1,hy2);c.stroke();
+    c.fillStyle=L.skin;c.beginPath();c.arc(hx1,hy2,2.6*s,0,TAU);c.fill();
   }
   arm(sexy?-8.5*s:-11*s,0);arm(sexy?8.5*s:11*s,1);
   // head
@@ -213,42 +214,58 @@ function drawHumanoidBody(c,o){
     c.beginPath();c.arc(0,0.4*s,1.3*s,0,TAU);c.fill();
   }else
   {c.fillStyle=L.hair;
+  // шапка волос с клином лица СПЕРЕДИ (-y = направление движения):
+  // дуга от -PI/2+fw через затылок до -PI/2-fw, лоб/лицо открыты клином вперёд
+  var fw=1.02;
   if(L.hs===0){
-    c.beginPath();c.arc(0,-3*s,7.5*s,Math.PI*0.15,Math.PI*0.85,false);
-    c.arc(0,-4*s,4.6*s,Math.PI*0.85,Math.PI*0.15,true);c.closePath();c.fill();
+    c.beginPath();c.arc(0,-3*s,7.6*s,-Math.PI/2+fw,-Math.PI/2-fw+TAU,false);c.closePath();c.fill();
+    // мыски-пряди по краям клина
+    c.beginPath();c.moveTo(-3.6*s,-8.6*s);c.lineTo(-2.6*s,-11*s);c.lineTo(-1.2*s,-8.8*s);c.closePath();c.fill();
+    c.beginPath();c.moveTo(3.6*s,-8.6*s);c.lineTo(2.6*s,-11*s);c.lineTo(1.2*s,-8.8*s);c.closePath();c.fill();
   }else if(L.hs===1){
-    c.beginPath();c.arc(0,-2.4*s,8.2*s,0,TAU);c.fill();
-    c.fillStyle=shade(L.shirt,14);c.beginPath();c.arc(0,-6.4*s,4.4*s,0,TAU);c.fill();
+    // капюшон: кольцо по голове, лицо открыто клином, внутри тень + очки
+    c.beginPath();c.arc(0,-3*s,8.2*s,-Math.PI/2+fw,-Math.PI/2-fw+TAU,false);c.closePath();c.fill();
+    c.fillStyle=shade(L.shirt,14);
+    c.beginPath();c.arc(0,-4.2*s,5.4*s,-Math.PI/2+fw*0.8,-Math.PI/2-fw*0.8+TAU,false);c.closePath();c.fill();
   }else if(L.hs===2){
-    c.beginPath();c.arc(0,1.8*s,3.6*s,0,TAU);c.fill();
-    c.beginPath();c.arc(0,-4*s,7.5*s,Math.PI*0.1,Math.PI*0.9,false);c.lineTo(0,-4*s);c.closePath();c.fill();
+    c.beginPath();c.arc(0,2.2*s,3.6*s,0,TAU);c.fill(); // пучок сзади
+    c.beginPath();c.arc(0,-3*s,7.5*s,-Math.PI/2+fw,-Math.PI/2-fw+TAU,false);c.closePath();c.fill();
+    c.beginPath();c.moveTo(-3.4*s,-8.4*s);c.lineTo(-2.4*s,-10.8*s);c.lineTo(-1*s,-8.6*s);c.closePath();c.fill();
+    c.beginPath();c.moveTo(3.4*s,-8.4*s);c.lineTo(2.4*s,-10.8*s);c.lineTo(1*s,-8.6*s);c.closePath();c.fill();
   }else{
     c.fillStyle='#8a2a2a';c.beginPath();c.arc(0,-4.4*s,6.9*s,Math.PI,TAU);c.fill();
     c.fillStyle='#22262e';c.fillRect(-7*s,-5.4*s,14*s,2*s);
-  }}
-  if(o.cls==='dsn'){ // дизайнер: чокер, визор, серьга, румянец
+    // бантики банданы сзади
+    c.fillStyle='#8a2a2a';
+    c.beginPath();c.moveTo(-2*s,3*s);c.lineTo(-4.6*s,7*s);c.lineTo(-1.2*s,5.4*s);c.closePath();c.fill();
+    c.beginPath();c.moveTo(2*s,3*s);c.lineTo(4.6*s,7*s);c.lineTo(1.2*s,5.4*s);c.closePath();c.fill();
+  }
+  }
+  // нос-точка на переднем крае головы: однозначно читается направление лица (все классы)
+  c.fillStyle=shade(L.skin,-14);c.beginPath();c.arc(0,-10.2*s,1*s,0,TAU);c.fill();
+  if(o.cls==='dsn'){ // дизайнер: чокер на шее, визор на лице, серьга, румянец на щеках
     c.fillStyle='#241d2e';
-    c.fillRect(-3.4*s,-10*s,6.8*s,1.6*s);
+    c.fillRect(-3.4*s,-8.4*s,6.8*s,1.6*s);
     c.fillStyle='#1a1d22';
-    rr(c,-6.8*s,-5*s,13.6*s,3.2*s,1.6*s);c.fill();
+    rr(c,-6.6*s,-6.4*s,13.2*s,3.2*s,1.6*s);c.fill();
     c.fillStyle='rgba(95,208,192,0.9)';
-    c.fillRect(-5.6*s,-4.6*s,4.4*s,2.4*s);
-    c.fillRect(1.2*s,-4.6*s,4.4*s,2.4*s);
+    c.fillRect(-5.4*s,-6*s,4.4*s,2.4*s);
+    c.fillRect(1*s,-6*s,4.4*s,2.4*s);
     c.fillStyle='rgba(212,106,142,0.5)';
-    c.beginPath();c.arc(-4.6*s,-0.4*s,1.1*s,0,TAU);c.arc(4.6*s,-0.4*s,1.1*s,0,TAU);c.fill();
-    c.fillStyle='#ffcf5c';c.beginPath();c.arc(7*s,0.4*s,1.2*s,0,TAU);c.fill();
-  }else if(o.cls==='dev'){ // мистер робот: завязки капюшона + круги под глазами
+    c.beginPath();c.arc(-4.8*s,-2.6*s,1.1*s,0,TAU);c.arc(4.8*s,-2.6*s,1.1*s,0,TAU);c.fill();
+    c.fillStyle='#ffcf5c';c.beginPath();c.arc(7*s,-2.2*s,1.2*s,0,TAU);c.fill();
+  }else if(o.cls==='dev'){ // мистер робот: очки в тени капюшона + завязки спереди
+    c.fillStyle='rgba(20,18,26,0.55)';
+    c.beginPath();c.ellipse(0,-5.8*s,4.6*s,2.6*s,0,0,TAU);c.fill();
+    c.fillStyle=L.accent;
+    c.beginPath();c.arc(-2.2*s,-6*s,1*s,0,TAU);c.arc(2.2*s,-6*s,1*s,0,TAU);c.fill();
     c.strokeStyle=L.accent;c.lineWidth=1.3*s;c.lineCap='round';
-    c.beginPath();c.moveTo(-2.2*s,-9.2*s);c.lineTo(-2.8*s,-5.6*s);c.moveTo(2.2*s,-9.2*s);c.lineTo(2.8*s,-5.6*s);c.stroke();
+    c.beginPath();c.moveTo(-2.2*s,-9.2*s);c.lineTo(-2.8*s,-7*s);c.moveTo(2.2*s,-9.2*s);c.lineTo(2.8*s,-7*s);c.stroke();
+  }else if(o.cls==='mkt'){ // шарф на ШЕЕ (под подбородком), хвост вбок-назад
     c.fillStyle=L.accent;
-    c.beginPath();c.arc(-2.8*s,-5.2*s,0.9*s,0,TAU);c.arc(2.8*s,-5.2*s,0.9*s,0,TAU);c.fill();
-    c.fillStyle='rgba(20,18,26,0.5)';
-    c.beginPath();c.ellipse(-3.4*s,-1.4*s,1.9*s,1*s,0,0,TAU);c.ellipse(3.4*s,-1.4*s,1.9*s,1*s,0,0,TAU);c.fill();
-  }else if(o.cls==='mkt'){ // шарф маркетолога
-    c.fillStyle=L.accent;
-    rr(c,-6.8*s,-10.8*s,13.6*s,3.8*s,1.5*s);c.fill();
-    c.fillRect(3.6*s,-9.2*s,2.8*s,6.4*s);
-    c.fillStyle='rgba(0,0,0,0.2)';c.fillRect(3.6*s,-9.2*s,2.8*s,1.2*s);
+    rr(c,-6.6*s,-8.2*s,13.2*s,3.4*s,1.5*s);c.fill();
+    c.fillRect(4.2*s,-5.6*s,2.6*s,6*s);
+    c.fillStyle='rgba(0,0,0,0.2)';c.fillRect(4.2*s,-5.6*s,2.6*s,1.2*s);
   }
   c.restore();
   // off-hand phone during shield
@@ -278,7 +295,9 @@ function drawJiraIcon(c,sc){
 }
 function drawWeapon(c,o,s){
   var f=o.face||0;
-  var hx=o.x+Math.cos(f)*15*s,hy=o.y+Math.sin(f)*15*s;
+  // точка хвата: вперёд на 11 и вбок на 6.5 (правая рука), не по центру перед лицом
+  var fx=Math.cos(f),fy=Math.sin(f);
+  var hx=o.x+(fx*11-fy*6.5)*s,hy=o.y+(fy*11+fx*6.5)*s;
   var frenzy=o.casting==='type';
   var swing=(o.atkT||0)>0?(o.atkT/0.2)*1.1:0;
   var cast=o.castT>0;
