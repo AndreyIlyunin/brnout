@@ -158,6 +158,12 @@ function guestJoin(code,cb){
 function guestOnMsg(d){
   if(!d)return;
   if(d.t==='full'){netLost('Комната заполнена');return;}
+  if(d.t==='map'){
+    buildMap(d.seed);
+    VIEW.mobs.length=0;VIEW.projs.length=0;VIEW.pickups.length=0;VIEW.zones.length=0;
+    G.fx.length=0;G.texts.length=0;
+    DEBRIS.length=0;WATER.length=0;PFX.length=0;STONES.length=0;
+  }
   if(d.t==='lobby'){
     LOBBY=d.list.map(function(l,i){return{id:l.me?NET.peer.id:'p'+i,cls:l.cls};});
     document.getElementById('netStatus').textContent='В лобби. Ждём хоста…';

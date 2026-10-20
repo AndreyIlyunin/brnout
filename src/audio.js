@@ -2,7 +2,7 @@
 // ============================== audio ==============================
 var AC=null,master=null,muted=false,amb=null;
 // настройки звука: общий / музыка / эффекты (persist в localStorage)
-var SET={master:0.8,music:0.55,sfx:0.8};
+var SET={master:0.85,music:0.5,sfx:1.0};
 try{var _s=JSON.parse(localStorage.getItem('brnt_snd')||'null');if(_s)for(var _k in SET)if(typeof _s[_k]==='number')SET[_k]=_s[_k];}catch(e){}
 var sfxBus=null,musGain=null;
 function applyVolumes(){
@@ -41,6 +41,30 @@ function noiz(dur,vol,freq,q,delay){
   n.connect(f);f.connect(g);g.connect(sfxBus||master);n.start(t0);n.stop(t0+dur+0.03);
 }
 var SFX={
+  stapler:function(){tone(1250,0.03,'square',0.2);tone(950,0.04,'square',0.16,0,0.045);noiz(0.04,0.14,2400,3);},
+  thudFlesh:function(){tone(80,0.16,'sine',0.5,-35);noiz(0.1,0.22,240,0.8);},
+  tweet:function(){tone(950,0.06,'sine',0.2,350);tone(1500,0.07,'sine',0.17,250,0.08);tone(2100,0.05,'sine',0.1,300,0.16);},
+  vacuum:function(){noiz(0.34,0.2,420,0.7);noiz(0.3,0.14,900,1.2,0.06);tone(140,0.32,'sawtooth',0.07,110);},
+  scrch:function(){noiz(0.05,0.2,3200,2.5);tone(2200,0.05,'square',0.09,-700);},
+  bell:function(){tone(660,0.5,'triangle',0.2,-15);tone(1320,0.35,'sine',0.1,-20,0.02);},
+  soulAgony:function(pitch){ // муки: нисходящий стон-стонания
+    if(!AC||muted)return;
+    var t0=AC.currentTime,p=(pitch||1);
+    var o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(p*300,t0);
+    o.frequency.exponentialRampToValueAtTime(Math.max(50,p*85),t0+0.6);
+    var lfo=AC.createOscillator(),lg=AC.createGain();
+    lfo.frequency.value=7.5;lg.gain.value=26;
+    lfo.connect(lg);lg.connect(o.detune);
+    f.type='bandpass';f.frequency.value=520;f.Q.value=1.4;
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(0.14,t0+0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+0.68);
+    o.connect(f);f.connect(g);g.connect(sfxBus||master);
+    o.start(t0);o.stop(t0+0.72);lfo.start(t0);lfo.stop(t0+0.72);
+    noiz(0.4,0.09,420,0.9);
+  },
   deathCry:function(pitch){ // диаблоподобный предсмертный стон
     if(!AC||muted)return;
     var t0=AC.currentTime,f0=(pitch||1)*185;
@@ -88,15 +112,15 @@ var SFX={
     }
     noiz(1.8,0.013,560,0.5);
   },
-  pickup:function(){tone(760,0.07,'triangle',0.15);tone(1140,0.1,'triangle',0.12,0,0.05);},
+  pickup:function(){tone(760,0.07,'triangle',0.24);tone(1140,0.1,'triangle',0.2,0,0.05);},
   crit:function(){tone(880,0.08,'square',0.16);tone(1320,0.12,'square',0.13,0,0.05);noiz(0.06,0.15,1800,2);},
-  crack:function(){noiz(0.08,0.2,450,1.2);tone(180,0.07,'square',0.1,-60);},
-  swing:function(){noiz(0.12,0.25,900,1.5);},
+  crack:function(){noiz(0.08,0.32,450,1.2);tone(180,0.07,'square',0.16,-60);},
+  swing:function(){noiz(0.12,0.36,900,1.5);},
   clack:function(){noiz(0.03,0.22,2600,6);tone(1600+R()*700,0.03,'square',0.05);},
   clacks:function(n){for(var i=0;i<n;i++)setTimeout(function(){SFX.clack();},i*55+R()*30);},
-  whoosh:function(){noiz(0.16,0.13,650,2);},
-  hit:function(){tone(120,0.12,'sine',0.28,-60);noiz(0.05,0.12,320,1);},
-  thump:function(){tone(90,0.18,'sine',0.4,-40);},
+  whoosh:function(){noiz(0.16,0.22,650,2);},
+  hit:function(){tone(120,0.12,'sine',0.4,-60);noiz(0.05,0.2,320,1);},
+  thump:function(){tone(90,0.18,'sine',0.55,-40);noiz(0.08,0.15,180,0.8);},
   slurp:function(){tone(520,0.26,'sine',0.16,-280);tone(320,0.2,'triangle',0.1,-120,0.06);},
   ring:function(){tone(425,0.13,'sine',0.22);tone(425,0.13,'sine',0.22,0,0.18);tone(425,0.4,'sine',0.22,0,0.36);},
   slam:function(){noiz(0.4,0.5,130,0.8);tone(60,0.4,'sine',0.5,-30);},

@@ -215,6 +215,31 @@ function updateProjs(dt){
 }
 function updateFx(dt){
   updateChaos(dt);
+  // подбор кружек и сокровищ локальным героем
+  var me=localPlayer();
+  if(me&&!me.dead){
+    for(var pi4=G.pickups.length-1;pi4>=0;pi4--){var pk=G.pickups[pi4];
+      if(Math.hypot(pk.x-me.x,pk.y-me.y)<22){
+        G.pickups.splice(pi4,1);
+        NET.events.push({k:'pkup',id:pk.id});
+        if(pk.kind==='coffee'){me.burnout=Math.max(0,me.burnout-25);me.coffee=Math.min(me.coffeeMax,me.coffee+45);SFX.slurp();}
+        else if(pk.kind==='espresso'){me.coffee=me.coffeeMax;me.burnout=Math.max(0,me.burnout-15);SFX.slurp();SFX.pickup();}
+        else if(pk.kind==='desk'){me.coins=(me.coins||0)+25;SFX.pickup();}
+        else if(pk.kind==='cert'){me.coins=(me.coins||0)+50;SFX.grade();}
+        G.fx.push({type:'flash',x:pk.x,y:pk.y,r:24,t:0,life:0.18});
+      }
+    }
+  }
+  // 5. пыль из-под ног + случайные реплики героев
+  if(me&&me.moving&&R()<0.12)
+    G.fx.push({type:'paper',x:me.x+(R()*10-5),y:me.y+12,vx:R()*20-10,vy:-R()*14,rot:R()*3,vr:R()*2-1,t:0,life:0.35});
+  if(me&&R()<0.0012){
+    var Q={mgr:['давайте синхронизируемся','это не блокер, это возможность','у меня созвон про созвон'],
+           dev:['не трогайте мой бранч','работает — не трогай','это фича, не баг','мой код компилируется с первого раза'],
+           mkt:['это не фича, это гипотеза','CAC окупится к четвертому тарифу','давайте захейтим конкурентов'],
+           dsn:['кегель поехал на полпикселя','это не белый, это сверхбелый','шрифт сам просит кернинг']}[me.cls];
+    if(Q)floatText(me.x,me.y-44,Q[(R()*Q.length)|0],'#8bd17c',11);
+  }
   FOG.t-=dt;
   if(FOG.t<=0){
     FOG.t=0.12;
@@ -266,7 +291,8 @@ function updateWaves(dt){
       G.spawnT-=dt;
       if(G.spawnT<=0){G.spawnT=0.35;spawnMob(G.spawnQ.shift());}
     }else if(G.mobs.length===0&&!G.boss){
-      G.waveState='calm';G.waveT=1.8;
+      G.waveState='calm';G.waveT=2.2;
+      regenLocation(); // спринт закрыт — команда переезжает в новый офис
       for(i=0;i<G.players.length;i++)G.players[i].burnout=Math.max(0,G.players[i].burnout-6);
       msg('Спринт закрыт. Перерыв на кулер.');
     }
@@ -302,4 +328,21 @@ function gameOver(){
   showDeadStats();
   var meD=localPlayer();
   broadcast({t:'stt',s:'dead',stats:{sprint:Math.max(0,G.wave-1),okr:G.okr,ki:G.killsI,kd:G.killsD,gr:G.grade,co:(meD?meD.coins:0)||0}});
+}
+
+// переезд в новую локацию между спринтами: свежая карта+тема, игроки в лобби
+function regenLocation(){
+  var seed=(R()*1e9)|0;
+  buildMap(seed);
+  G.mobs.length=0;G.projs.length=0;G.pickups.length=0;G.zones.length=0;
+  G.fx.length=0;G.texts.length=0;
+  DEBRIS.length=0;WATER.length=0;PFX.length=0;STONES.length=0;
+  var lb=lobbySpawn();
+  for(var i=0;i<G.players.length;i++){var p=G.players[i];
+    p.x=lb.x+lb.w/2+(R()*120-60);p.y=lb.y+lb.h/2+(R()*120-60);
+    p.kx=0;p.ky=0;p.inv=Math.max(p.inv,1.5);
+  }
+  NET.events.push({k:'map',seed:seed});
+  floatText(lb.x+lb.w/2,lb.y+lb.h/2-30,'переезд: «'+MAPTHEME.name+'»','#42e0ff',14);
+  updateCamera(0.016,true);
 }

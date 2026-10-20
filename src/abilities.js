@@ -7,7 +7,8 @@ function tryPrimary(p){
     p.cd1=C.s1.cd;p.atkT=0.18;
     var a=p.aim,spd=p.cls==='mgr'?470:540;
     G.projs.push({id:++G.pkSeq,kind:p.cls==='mgr'?'ticket':'plane',x:p.x+Math.cos(a)*22,y:p.y+Math.sin(a)*22,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg:(p.cls==='mgr'?9:8)*p.dmgMult,life:1.5,rot:R()*TAU});
-    SFX.whoosh();
+    if(p.cls==='mgr'){SFX.whoosh();SFX.stapler();}
+    else{SFX.tweet();}
   }else{
     p.cd1=C.s1.cd;p.atkT=0.18;
     var arc=p.cls==='dsn'?110:130,rad=p.cls==='dsn'?74:86;
@@ -26,7 +27,7 @@ function trySecondary(p){
     p.cd2=C.s2.cd;p.atkT=0.2;
     G.fx.push({type:'slash',x:p.x,y:p.y,a:p.aim,arc:100*Math.PI/180,rad:80,t:0,life:0.18,big:true});
     NET.events.push({k:'slash',x:Math.round(p.x),y:Math.round(p.y),a:p.aim,arc:100,rad:80,big:1});
-    SFX.swing();SFX.hit();
+    SFX.thudFlesh();
     meleeArc(p,100*Math.PI/180,80,22,280,0);
   }else if(p.cls==='dev'){
     if(!spendCoffee(p,C.s2.cost))return;
@@ -60,7 +61,7 @@ function trySecondary(p){
     p.cd2=C.s2.cd;p.atkT=0.25;
     G.fx.push({type:'slash',x:p.x,y:p.y,a:p.aim,arc:200*Math.PI/180,rad:95,t:0,life:0.2,big:true});
     NET.events.push({k:'slash',x:Math.round(p.x),y:Math.round(p.y),a:p.aim,arc:200,rad:95,big:1});
-    G.shake+=3;SFX.slam();
+    G.shake+=3;SFX.bell();SFX.slam();
     meleeArc(p,200*Math.PI/180,95,10,430,0);
   }
 }
@@ -142,7 +143,7 @@ function trySkill2(p){ // Q-скил
     }
     G.fx.push({type:'ring',x:p.x,y:p.y,rad:20,radMax:320,t:0,life:0.4,yellow:true});
     NET.events.push({k:'ring',x:Math.round(p.x),y:Math.round(p.y),rm:320,yellow:1});
-    SFX.clacks(8);
+    SFX.clacks(8);SFX.slam();
     if(!chained)floatText(p.x,p.y-36,'не нашлось целей','#8b949e',11);
   }else if(p.cls==='mkt'){ // таргетинг: mark = +50% damage taken
     if(!spendCoffee(p,C.sk.cost))return;

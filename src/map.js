@@ -1,7 +1,7 @@
 'use strict';
 // ============================== procedural office map ==============================
 // Tile dungeon: rooms + corridors, seeded => identical on all peers. Among Us / Diablo vibe.
-var TILE=56,GW=36,GH=36;
+var TILE=56,GW=30,GH=30;
 var MAP_W=GW*TILE,MAP_H=GH*TILE;
 var MAPSEED=1;
 var grid=null;      // 1 = floor
@@ -15,6 +15,7 @@ var floorCv=null,mmCv=null;
 function buildMap(seed){
   MAPSEED=seed>>>0;if(!MAPSEED)MAPSEED=1;
   _seed=MAPSEED;
+  MAPTHEME=THEMES[(rnd()*THEMES.length)|0]; // тема детерминирована сидом
   grid=[];ROOMS=[];WALLS=[];FURN=[];OBST=[];LIGHTS=[];COFFEES=[];SPAWNS=[];
   var i,j,x,y;
   for(j=0;j<GH;j++){grid[j]=[];for(i=0;i<GW;i++)grid[j][i]=0;}
@@ -22,7 +23,7 @@ function buildMap(seed){
   var roomsT=[],want=14,tries=0;
   while(roomsT.length<want-2&&tries<500){
     tries++;
-    var tw=5+((rnd()*6)|0),th=4+((rnd()*4)|0);
+    var tw=7+((rnd()*5)|0),th=5+((rnd()*3)|0);
     var tx=2+((rnd()*(GW-tw-4))|0),ty=2+((rnd()*(GH-th-4))|0);
     var ok=true;
     for(var r=0;r<roomsT.length;r++){var o=roomsT[r];
@@ -69,7 +70,7 @@ function buildMap(seed){
     carveCorr(i,best,2);
     connected.push(i);
   }
-  for(i=0;i<2&&ROOMS.length>4;i++){
+  for(i=0;i<1&&ROOMS.length>4;i++){
     carveCorr((rnd()*ROOMS.length)|0,(rnd()*ROOMS.length)|0,2);
   }
   // --- connectivity repair: no isolated rooms allowed
@@ -111,19 +112,37 @@ function buildMap(seed){
   for(i=0;i<byArea.length;i++){
     var rr2=byArea[i];
     if(rr2.type!=='office')continue;
-    if(assigned===0||assigned===4){rr2.type='meeting';}
-    else if(assigned===2||assigned===5){rr2.type='pantry';}
+    if(assigned===0||assigned===3){rr2.type='meeting';}
+    else if(assigned===1||assigned===4){rr2.type='pantry';} // кладовки рано: кофе гарантирован
     assigned++;
   }
   // --- furniture + coffee + lights + spawn points
   var fid=1;
   for(i=0;i<ROOMS.length;i++)fid=furnishRoom(ROOMS[i],fid);
   for(i=0;i<FURN.length;i++)FURN[i].hp=FPROPS[FURN[i].t].hp;
+  // страховка: кладовок не оказалось — крупнейшая комната становится кладовкой
+  var hasPantry=false;
+  for(var rp=0;rp<ROOMS.length;rp++)if(ROOMS[rp].type==='pantry')hasPantry=true;
+  if(!hasPantry){
+    var big=ROOMS[0];
+    for(rp=1;rp<ROOMS.length;rp++)if(ROOMS[rp].w*ROOMS[rp].h>big.w*big.h&&ROOMS[rp].type!=='lobby'&&ROOMS[rp].type!=='wc')big=ROOMS[rp];
+    if(big.type!=='lobby'&&big.type!=='wc')big.type='pantry';
+  }
   // coffee machines: 1-2 for the whole office (user request), one per pantry max
   var pantries=[];
   for(i=0;i<ROOMS.length;i++)if(ROOMS[i].type==='pantry')pantries.push(ROOMS[i]);
   for(i=0;i<Math.min(2,pantries.length);i++)COFFEES.push({x:pantries[i].x+pantries[i].w/2,y:pantries[i].y+70,charges:3,t:0});
   SPAWNS.push({x:lobby.x+lobby.w/2,y:lobby.y+lobby.h/2,tag:'ресепшн'});
+  for(i=0;i<ROOMS.length;i++)if(ROOMS[i].type==='openspace'){
+    var osx=ROOMS[i].x+ROOMS[i].w/2,osy=ROOMS[i].y+ROOMS[i].h/2;
+    var osBlocked=false; // OBST ещё не собран — проверяем мебель напрямую
+    for(var fo=0;fo<FURN.length;fo++){var fo2=FURN[fo];
+      var fcx=Math.max(fo2.x,Math.min(osx,fo2.x+fo2.w)),fcy=Math.max(fo2.y,Math.min(osy,fo2.y+fo2.h));
+      if((osx-fcx)*(osx-fcx)+(osy-fcy)*(osy-fcy)<18*18){osBlocked=true;break;}
+    }
+    if(osBlocked){osy=ROOMS[i].y+24;osx=ROOMS[i].x+24;}
+    SPAWNS.push({x:osx,y:osy,tag:'опенспейс'});
+  }
   for(i=0;i<ROOMS.length;i++)if(ROOMS[i].type==='wc')SPAWNS.push({x:ROOMS[i].x+ROOMS[i].w/2,y:ROOMS[i].y+ROOMS[i].h/2,tag:'уборная'});
   for(i=0;i<COFFEES.length;i++)SPAWNS.push({x:COFFEES[i].x,y:COFFEES[i].y+50,tag:'кофепоинт'});
   // corridor lights
@@ -237,13 +256,13 @@ function prerenderFloor(){
     var x=i*TILE,y=j*TILE;
     if(grid[j][i]){
       rm=roomAtTile(i,j);
-      var base='#20242c',alt='#242933';
+      var base=MAPTHEME.floor,alt=MAPTHEME.alt;
       if(rm){
-        if(rm.type==='pantry'){base='#26292c';alt='#2b2f33';}
-        else if(rm.type==='meeting'){base='#232830';alt='#28303a';}
-        else if(rm.type==='lobby'){base='#262a34';alt='#2b303c';}
-        else if(rm.type==='wc'){base='#2d3136';alt='#33383e';}
-      }else{base='#101a26';alt='#122036';}
+        if(rm.type==='pantry'){base=shade(MAPTHEME.floor,6);alt=shade(MAPTHEME.alt,6);}
+        else if(rm.type==='meeting'){base=shade(MAPTHEME.floor,-4);alt=shade(MAPTHEME.alt,-4);}
+        else if(rm.type==='lobby'){base=shade(MAPTHEME.floor,8);alt=shade(MAPTHEME.alt,8);}
+        else if(rm.type==='wc'){base=shade(MAPTHEME.floor,14);alt=shade(MAPTHEME.alt,14);}
+      }else{base=MAPTHEME.corr;alt=MAPTHEME.corrAlt;}
       c.fillStyle=((i+j)%2===0)?base:alt;
       c.fillRect(x,y,TILE,TILE);
       if(!rm){ // corridor seams
@@ -254,11 +273,11 @@ function prerenderFloor(){
   }
   // thin wall strips (drawn after floors so they sit on top of void bg)
   for(var wi=0;wi<WALLS.length;wi++){var w3=WALLS[wi];
-    c.fillStyle='#12161e';c.fillRect(w3.x,w3.y,w3.w,w3.h);
-    c.fillStyle='#141b28';c.fillRect(w3.x+1,w3.y+1,w3.w-2,w3.h-2);
+    c.fillStyle=MAPTHEME.wall;c.fillRect(w3.x,w3.y,w3.w,w3.h);
+    c.fillStyle=MAPTHEME.wallIn;c.fillRect(w3.x+1,w3.y+1,w3.w-2,w3.h-2);
     // неоновая кромка: сталь-циан, изредка — вывеска (маджента/циан)
     var neon=rnd();
-    c.fillStyle=neon<0.10?'#8a2a5a':(neon<0.20?'#15707f':'#2c4258');
+    c.fillStyle=neon<0.10?MAPTHEME.neonA:(neon<0.20?MAPTHEME.neonB:MAPTHEME.steel);
     if(w3.dir===0)c.fillRect(w3.x+w3.w-3,w3.y,3,w3.h);
     else if(w3.dir===1)c.fillRect(w3.x,w3.y,3,w3.h);
     else if(w3.dir===2)c.fillRect(w3.x,w3.y+w3.h-3,w3.w,3);
@@ -488,6 +507,16 @@ function flowDir(x,y){
   return Math.atan2((by+0.5)*TILE-y,(bx+0.5)*TILE-x);
 }
 
+
+// ---- темы локаций: каждый спринт — новый офис в своей стилистике ----
+var THEMES=[
+ {name:'Неоновый опенспейс',floor:'#181d26',alt:'#1b2230',corr:'#101a26',corrAlt:'#122036',wall:'#0c1118',wallIn:'#141b28',neonA:'#8a2a5a',neonB:'#15707f',steel:'#2c4258'},
+ {name:'Ретро-архив',floor:'#1c1812',alt:'#211d15',corr:'#171208',corrAlt:'#1a160c',wall:'#0e0b06',wallIn:'#181209',neonA:'#8a6a2a',neonB:'#8a4a2a',steel:'#4a3f2c'},
+ {name:'Синий корпоратив',floor:'#101828',alt:'#142036',corr:'#0c1524',corrAlt:'#0f1a2e',wall:'#080f1c',wallIn:'#101a2c',neonA:'#2a5a8a',neonB:'#2a7a8a',steel:'#24384f'},
+ {name:'Токсичная лаборатория',floor:'#16201a',alt:'#1a2820',corr:'#0f1c14',corrAlt:'#122218',wall:'#08120b',wallIn:'#101c14',neonA:'#2a8a3a',neonB:'#6a8a2a',steel:'#2a4a38'},
+ {name:'Красная тревога',floor:'#1e1518',alt:'#241a1e',corr:'#180f12',corrAlt:'#1c1216',wall:'#0d0709',wallIn:'#160d10',neonA:'#8a2a2a',neonB:'#8a4a2a',steel:'#4a2c34'}
+];
+var MAPTHEME=THEMES[0];
 
 // ---- туман войны (герои-3 стиль): терра инкогнита + затемнённая обстановка + обзор ----
 var FOG={explored:new Uint8Array(GW*GH),vis:new Uint8Array(GW*GH),t:0};

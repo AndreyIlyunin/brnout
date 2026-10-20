@@ -311,12 +311,16 @@ function drawWeapon(c,o,s){
     c.save();c.translate(-0.6*s,-8.5*s);
     drawJiraIcon(c,0.95*s);
     c.restore();
-  }else if(o.weapon==='plane'){
+  }else if(o.weapon==='plane'){ // твит-птичка в руке
     c.rotate(-0.2+swing*0.8);
-    c.fillStyle='#e8e2d0';
-    c.beginPath();c.moveTo(0,-14*s);c.lineTo(6*s,4*s);c.lineTo(0,1*s);c.lineTo(-6*s,4*s);c.closePath();c.fill();
-    c.strokeStyle='#b9b2a0';c.lineWidth=1;c.stroke();
-    c.fillStyle='#c23b32';c.beginPath();c.arc(0,-6*s,2.2*s,0,TAU);c.fill();
+    c.scale(0.85,0.85);
+    c.fillStyle='#1d9bf0';
+    c.beginPath();c.ellipse(0,0,6,4.6,-0.2,0,TAU);c.fill();
+    c.beginPath();c.arc(4,-2.2,2.6,0,TAU);c.fill();
+    c.fillStyle='#e8f6ff';
+    c.beginPath();c.moveTo(6.4,-2.9);c.lineTo(9.2,-2);c.lineTo(6.2,-1.2);c.closePath();c.fill();
+    c.beginPath();c.moveTo(-0.8,-0.8);c.quadraticCurveTo(-6,-5,-1.6,2.2);c.closePath();c.fill();
+    c.fillStyle='#0c2a40';c.beginPath();c.arc(4.6,-2.6,0.8,0,TAU);c.fill();
   }else if(o.weapon==='stylus'){
     c.rotate(-0.4+swing*1.2);
     c.fillStyle='#e07030';rr(c,-2*s,-16*s,4*s,18*s,2*s);c.fill();

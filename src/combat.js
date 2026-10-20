@@ -14,8 +14,8 @@ function startWave(){
   for(i=0;i<nd;i++)G.spawnQ.push('deadline');
   for(i=G.spawnQ.length-1;i>0;i--){var j=(R()*(i+1))|0;var tmp=G.spawnQ[i];G.spawnQ[i]=G.spawnQ[j];G.spawnQ[j]=tmp;}
   G.spawnT=0.22;
-  if(bossWave)msg('СПРИНТ '+w+' · АУДИТ НАЧИНАЕТСЯ',4);
-  else msg('Спринт '+w+' · '+sprintName+': '+ni+' стажёров'+(nd?', '+nd+' дедлайнов':'')+'. ДЕДЛАЙН УСКОРЯЕТСЯ!');
+  if(bossWave)msg('СПРИНТ '+w+' · «'+MAPTHEME.name+'» · АУДИТ НАЧИНАЕТСЯ',4);
+  else msg('Спринт '+w+' · «'+MAPTHEME.name+'» · '+sprintName+': '+ni+' стажёров'+(nd?', '+nd+' дедлайнов':'')+'. ДЕДЛАЙН УСКОРЯЕТСЯ!');
   G.rushT=4;
 }
 function spawnMob(type){
@@ -193,9 +193,13 @@ function furnInArc(pl,arc,rad,dmg){
 // диабло-смерть: стон, улетающая душа с выдохом, горсть монет
 function dramaOfDeath(x,y,tp,elite){
   var pitch=tp==='deadline'?0.75:(elite?0.6:1.15+R()*0.25);
+  var agony=R()<0.5; // амазонки Диабло: кто-то корчится, кто-то уходит с облегчением
   SFX.deathCry(pitch);
-  spawnDebris({kind:'soul',x:x,y:y-6,pitch:pitch,elite:elite,t:0,life:1.35});
-  setTimeout(function(){SFX.soulSigh(pitch*(elite?0.7:1));},120);
+  spawnDebris({kind:'soul',x:x,y:y-6,pitch:pitch,elite:elite,mood:agony?'agony':'relief',t:0,life:agony?1.6:1.35});
+  setTimeout(function(){
+    if(agony)SFX.soulAgony(pitch*(elite?0.7:1));
+    else SFX.soulSigh(pitch*(elite?0.7:1));
+  },120);
   spawnCoinBurst(x,y,2+((R()*3)|0)+(elite?2:0));
 }
 function killMob(m){
@@ -210,15 +214,15 @@ function killMob(m){
   if(R()<0.25)floatText(m.x+R()*20-10,m.y-28,KILLQUOTES[(R()*KILLQUOTES.length)|0],'#8b949e',10);
   if(m.elite){
     for(var ek=0;ek<3;ek++)spawnDebris({kind:'coin',x:m.x+R()*24-12,y:m.y-10,vx:R()*180-90,vy:-160-R()*120,vr:0,floorY:m.y+20+R()*20,g:900,phys:1,coined:1,t:0,life:8});
-    if(R()<0.5)dropPickup(m.x,m.y,'coffee');
+    if(R()<0.25)dropPickup(m.x,m.y,'coffee');
     floatText(m.x,m.y-60,'элитный уволился красиво','#c88a4a',12);
   }
   if(m.type==='intern'){G.killsI++;addOkr(1);}
   else if(m.type==='deadline'){G.killsD++;addOkr(2);}
   else if(m.type==='boss'){
     SFX.deathCry(0.5);
-    spawnDebris({kind:'soul',x:m.x,y:m.y-10,pitch:0.55,elite:1,t:0,life:2.2});
-    setTimeout(function(){SFX.soulSigh(0.55);},150);
+    spawnDebris({kind:'soul',x:m.x,y:m.y-10,pitch:0.55,elite:1,mood:R()<0.5?'agony':'relief',t:0,life:2.4});
+    setTimeout(function(){if(R()<0.5)SFX.soulAgony(0.55);else SFX.soulSigh(0.55);},150);
   }
   if(m.type!=='boss')dramaOfDeath(m.x,m.y,m.type,m.elite);
   else if(m.type==='boss'){
@@ -234,7 +238,7 @@ function killMob(m){
   for(j=0;j<5;j++)G.fx.push({type:'spark2',x:m.x,y:m.y,t:0,life:0.3,a:R()*TAU});
   G.shake+=2;G.hitStop=Math.max(G.hitStop,0.04);
   NET.events.push({k:'hs',v:0.04});
-  if(R()<0.30)dropPickup(m.x,m.y,'coffee');
+  if(R()<0.10)dropPickup(m.x,m.y,'coffee');
   if(R()<0.035)dropPickup(m.x,m.y,['espresso','desk','cert'][(R()*3)|0]);
   SFX.splat();
 }

@@ -125,12 +125,18 @@ function drawWorld(){
   for(i=0;i<players.length;i++)drawPlayer(players[i],players[i].id===NET.myId);
   for(i=0;i<projs.length;i++){var pj=projs[i];
     ctx.save();ctx.translate(pj.x,pj.y);ctx.rotate(pj.rot||0);
-    if(pj.kind==='plane'){
+    if(pj.kind==='plane'){ // твит: птичка
       var fa=Math.atan2(pj.vy,pj.vx);
       ctx.rotate(fa-pj.rot);
-      ctx.fillStyle='#e8e2d0';
-      ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-7,5);ctx.lineTo(-3,0);ctx.lineTo(-7,-5);ctx.closePath();ctx.fill();
-      ctx.fillStyle='#c23b32';ctx.beginPath();ctx.arc(1,0,2.4,0,TAU);ctx.fill();
+      ctx.fillStyle='#1d9bf0';
+      ctx.beginPath();ctx.ellipse(0,0,7,5.4,-0.2,0,TAU);ctx.fill();
+      ctx.beginPath();ctx.arc(4.6,-2.6,3,0,TAU);ctx.fill();
+      ctx.fillStyle='#e8f6ff';
+      ctx.beginPath();ctx.moveTo(7.4,-3.4);ctx.lineTo(10.6,-2.4);ctx.lineTo(7.2,-1.4);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(-1,-1);ctx.quadraticCurveTo(-7,-6,-2,2.6);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='#e8f6ff';ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.moveTo(-6.5,1.5);ctx.quadraticCurveTo(-9,3.5,-7,5);ctx.stroke();
+      ctx.fillStyle='#0c2a40';ctx.beginPath();ctx.arc(5.4,-3,0.9,0,TAU);ctx.fill();
     }else{
       // билет с жирафом: летит вдоль движения, слегка покачиваясь
       var fa2=Math.atan2(pj.vy,pj.vx);
