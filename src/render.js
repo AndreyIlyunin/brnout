@@ -66,8 +66,10 @@ function drawWorld(){
     }
   }
   for(i=0;i<mobs.length;i++){
+    ctx.globalAlpha=1-Math.max(0,mobs[i].fade||0); // проявление после спавна
     if(mobs[i].type==='deadline')drawDeadline(mobs[i],NET.mode==='guest');
     else drawIntern(mobs[i],NET.mode==='guest');
+    ctx.globalAlpha=1;
   }
   // легаси-цепи + метки таргетинга на всех мобах
   var playersAll=worldPool('players');

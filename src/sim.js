@@ -74,6 +74,7 @@ function updateMobs(dt){
   for(var i=0;i<G.mobs.length;i++){var m=G.mobs[i];
     if(m.dead)continue;
     m.cd-=dt;
+    if(m.fade>0)m.fade-=dt;
     if(m.aggro||m.type==='deadline')m.step=(m.step||0)+dt*m.spd*0.055;
     if(m.mk>0)m.mk-=dt;
     if(m.ch>0){

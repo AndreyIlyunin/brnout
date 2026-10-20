@@ -20,26 +20,40 @@ function startWave(){
 }
 function spawnMob(type){
   var elite=type==='intern'&&R()<0.12;
-  // spawn at reception / WC / coffee points within reach of a player
+  // спавн на ресепшене/в уборных/у кофепоинтов: вне зоны видимости, в дистанции 320-900
   var p0=null;
   if(SPAWNS.length){
-    var near=nearestPlayerTo({x:MAP_W/2,y:MAP_H/2});
     var tries=0,pick=null;
-    while(tries<20&&!pick){
-      tries++;
-      var cand=SPAWNS[(R()*SPAWNS.length)|0];
+    var vw=cv.width/(DPR*G.zoom),vh=cv.height/(DPR*G.zoom);
+    function bandOK(c){
       var dMin=1e9;
       for(var pi=0;pi<G.players.length;pi++){
         if(G.players[pi].dead)continue;
-        var dd=Math.hypot(G.players[pi].x-cand.x,G.players[pi].y-cand.y);
+        var dd=Math.hypot(G.players[pi].x-c.x,G.players[pi].y-c.y);
         if(dd<dMin)dMin=dd;
       }
-      if(dMin>320&&dMin<900)pick=cand;
+      return dMin>320&&dMin<900;
+    }
+    function offscreen(c){
+      var sx=c.x-G.camX,sy=c.y-G.camY;
+      return sx<-80||sx>vw+80||sy<-80||sy>vh+80;
+    }
+    while(tries<24&&!pick){ // сперва — за кадром
+      tries++;
+      var cand=SPAWNS[(R()*SPAWNS.length)|0];
+      if(bandOK(cand)&&offscreen(cand))pick=cand;
+    }
+    tries=0;
+    while(tries<20&&!pick){ // не вышло — хоть в дистанции
+      tries++;
+      var cand2=SPAWNS[(R()*SPAWNS.length)|0];
+      if(bandOK(cand2))pick=cand2;
     }
     if(!pick)pick=SPAWNS[(R()*SPAWNS.length)|0];
     p0={x:pick.x+(R()*70-35),y:pick.y+(R()*70-35)};
     if(blockedAt(p0.x,p0.y,18))p0=freeSpotNear(pick.x,pick.y,0,200,16);
     NET.events.push({k:'spawn',x:Math.round(p0.x),y:Math.round(p0.y),tag:pick.tag});
+    G.fx.push({type:'ring',x:p0.x,y:p0.y,rad:26,radMax:8,t:0,life:0.5,purple:1});
   }else{
     var anyP=G.players.length?G.players[0]:{x:MAP_W/2,y:MAP_H/2};
     var near2=nearestPlayerTo({x:MAP_W/2,y:MAP_H/2});
@@ -48,7 +62,7 @@ function spawnMob(type){
   var w=G.wave;
   if(type==='intern'){
     G.mobs.push({id:++G.mobSeq,type:'intern',x:p0.x,y:p0.y,r:elite?16:13,hp:(16+2*w)*(elite?2.5:1),hpMax:(16+2*w)*(elite?2.5:1),spd:(55+R()*22+w*2)*(elite?0.92:1),elite:elite?1:0,
-      stun:0,kx:0,ky:0,cd:R(),wt:0,wx:0,wy:0,face:0,aggro:false,said:false,tint:(R()*4)|0,emb:0,tilt:R()*6,step:0,
+      stun:0,kx:0,ky:0,cd:R(),wt:0,wx:0,wy:0,face:0,aggro:false,said:false,tint:(R()*4)|0,emb:0,tilt:R()*6,step:0,fade:0.5,
       cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0});
   }else{
     G.mobs.push({id:++G.mobSeq,type:'deadline',x:p0.x,y:p0.y,r:11,hp:9+1.5*w,hpMax:9+1.5*w,spd:150+R()*30,
