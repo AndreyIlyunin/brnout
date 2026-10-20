@@ -472,3 +472,21 @@ function drawBoss(b,remote){
   }
 }
 function s2(){return 2.6;}
+
+// модельки для карточек классов в меню
+function drawClassPreview(id,cls){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var c=el.getContext('2d');
+  c.clearRect(0,0,el.width,el.height);
+  c.save();
+  c.translate(el.width/2,el.height/2+14);
+  var o={x:0,y:0,face:-0.55,step:0.22,look:classLook(cls,0),cls:cls,scale:2.1,moving:true,atkT:0,
+    weapon:CLS[cls]?CLS[cls].weapon:'laptop'};
+  drawHumanoidBody(c,o);
+  c.restore();
+}
+function renderClassPreviews(){
+  var ids=[['mdl-mgr','mgr'],['mdl-dev','dev'],['mdl-mkt','mkt'],['mdl-dsn','dsn']];
+  for(var i=0;i<ids.length;i++)drawClassPreview(ids[i][0],ids[i][1]);
+}

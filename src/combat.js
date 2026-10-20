@@ -1,7 +1,7 @@
 'use strict';
 // ============================== waves & combat ==============================
-function msg(t,d){G.msg=t;G.msgT=d||3;NET.events.push({k:'msg',t:t,d:d||3});}
-function floatText(x,y,text,color,size){if(G.texts.length>40)G.texts.shift();G.texts.push({x:x,y:y,text:text,color:color||'#dfe6ee',size:size||13,t:0,life:1.1,vy:-34});NET.events.push({k:'txt',x:Math.round(x),y:Math.round(y),t:text,c:color||'#dfe6ee',s:size||13});}
+function msg(t,d){G.msg=t;G.msgT=d||4.5;NET.events.push({k:'msg',t:t,d:d||4.5});}
+function floatText(x,y,text,color,size){if(G.texts.length>40)G.texts.shift();G.texts.push({x:x,y:y,text:text,color:color||'#dfe6ee',size:size||13,t:0,life:2.4,vy:-15});NET.events.push({k:'txt',x:Math.round(x),y:Math.round(y),t:text,c:color||'#dfe6ee',s:size||13});}
 function startWave(){
   G.wave++;
   var w=G.wave;

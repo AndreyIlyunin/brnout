@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <div id="burnout">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Pixelify+Sans:wght@400;500;700&display=swap">
 <canvas id="bcv"></canvas>
 <canvas id="bhud"></canvas>
 
@@ -25,24 +25,44 @@
     </div>
     <div class="bgcards hidden" id="classCards">
       <div class="bgcard" id="bmgr">
+        <canvas class="bgmodel" id="mdl-mgr" width="150" height="110"></canvas>
         <h2>МЕНЕДЖЕР</h2>
-        <p class="bgdesc">Дерётся жирой. В упор — «жирный панч», издалека — швыряет жирные тикеты.</p>
-        <p class="bgskill">[УЛЬТА] «Созвон» — щит · [Q] «АСАП» — ускоряет себя и коллег рядом.</p>
+        <p class="bgdesc">Дерётся жирой. JIRA-тикеты в дальний бой.</p>
+        <div class="bgfull">
+          <div><b>ЛКМ</b> тикет · <b>ПКМ</b> жир панч</div>
+          <div><b>ПРОБЕЛ</b> «созвон» — щит от мобов</div>
+          <div><b>Q</b> АСАП — ускоряет себя и коллег</div>
+        </div>
       </div>
       <div class="bgcard" id="bdev">
+        <canvas class="bgmodel" id="mdl-dev" width="150" height="110"></canvas>
         <h2>СЕНЬОР-ПРОГЕР</h2>
-        <p class="bgdesc">Ближний бой той самой механической клавиатурой: свинг и тяжёлый хоткей.</p>
-        <p class="bgskill">[УЛЬТА] «Звук клавы» — паралич пачками · [Q] «Легаси-код» — цепь, ментальный урон.</p>
+        <p class="bgdesc">Механическая клава. Ближний бой и контроль.</p>
+        <div class="bgfull">
+          <div><b>ЛКМ</b> клава · <b>ПКМ</b> хоткей</div>
+          <div><b>ПРОБЕЛ</b> «звук клавы» — паралич</div>
+          <div><b>Q</b> легаси-код — цепь, ментальный урон</div>
+        </div>
       </div>
       <div class="bgcard" id="bmkt">
+        <canvas class="bgmodel" id="mdl-mkt" width="150" height="110"></canvas>
         <h2>МАРКЕТОЛОГ</h2>
-        <p class="bgdesc">Дальновиден: бренд-самолётики и воронка, притягивающая мобов.</p>
-        <p class="bgskill">[УЛЬТА] «Ребрендинг» — мобы теряют цель · [Q] «Таргетинг» — помеченные получают +50% урона.</p>
+        <p class="bgdesc">Воронки и бренд-самолётики. Дебаффы.</p>
+        <div class="bgfull">
+          <div><b>ЛКМ</b> самолётик · <b>ПКМ</b> воронка</div>
+          <div><b>ПРОБЕЛ</b> «ребрендинг» — мобы в ступоре</div>
+          <div><b>Q</b> таргетинг — метка +50% урона</div>
+        </div>
       </div>
       <div class="bgcard" id="bdsn">
+        <canvas class="bgmodel" id="mdl-dsn" width="150" height="110"></canvas>
         <h2>ДИЗАЙНЕР</h2>
-        <p class="bgdesc">Стремительный стилус и отбрасывающая критика.</p>
-        <p class="bgskill">[УЛЬТА] «Мудборд» — оглушение с брызгами краски · [Q] «Пиксель-перфект» — рывок.</p>
+        <p class="bgdesc">Стремительный стилус. Мобильный мили.</p>
+        <div class="bgfull">
+          <div><b>ЛКМ</b> стилус · <b>ПКМ</b> критика</div>
+          <div><b>ПРОБЕЛ</b> «мудборд» — стан с краской</div>
+          <div><b>Q</b> пиксель-перфект — рывок</div>
+        </div>
       </div>
     </div>
     <div class="bgsnd">
@@ -135,21 +155,21 @@
 </div>
 </div>
 
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="src/utils.js?v=8"></script>
-<script src="src/data.js?v=8"></script>
-<script src="src/audio.js?v=8"></script>
-<script src="src/music.js?v=8"></script>
-<script src="src/map.js?v=8"></script>
-<script src="src/chaos.js?v=8"></script>
-<script src="src/combat.js?v=8"></script>
-<script src="src/abilities.js?v=8"></script>
-<script src="src/sim.js?v=8"></script>
-<script src="src/guest.js?v=8"></script>
-<script src="src/sprites.js?v=8"></script>
-<script src="src/render.js?v=8"></script>
-<script src="src/input.js?v=8"></script>
-<script src="src/ui.js?v=8"></script>
-<script src="src/net.js?v=8"></script>
-<script src="src/main.js?v=8"></script>
+<script src="src/utils.js?v=9"></script>
+<script src="src/data.js?v=9"></script>
+<script src="src/audio.js?v=9"></script>
+<script src="src/music.js?v=9"></script>
+<script src="src/map.js?v=9"></script>
+<script src="src/chaos.js?v=9"></script>
+<script src="src/combat.js?v=9"></script>
+<script src="src/abilities.js?v=9"></script>
+<script src="src/sim.js?v=9"></script>
+<script src="src/guest.js?v=9"></script>
+<script src="src/sprites.js?v=9"></script>
+<script src="src/render.js?v=9"></script>
+<script src="src/input.js?v=9"></script>
+<script src="src/ui.js?v=9"></script>
+<script src="src/net.js?v=9"></script>
+<script src="src/main.js?v=9"></script>

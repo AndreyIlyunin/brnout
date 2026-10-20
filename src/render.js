@@ -150,8 +150,9 @@ function drawWorld(){
   for(i=0;i<G.fx.length;i++)drawFx(G.fx[i]);
   drawDebris();
   for(i=0;i<G.texts.length;i++){var t=G.texts[i];
-    ctx.globalAlpha=1-t.t/t.life;
-    ctx.font='bold '+t.size+'px Arial';ctx.fillStyle=t.color;
+    var hold=t.life*0.7; // плато читаемости, затем плавный фейд
+    ctx.globalAlpha=t.t<hold?1:1-(t.t-hold)/(t.life-hold);
+    ctx.font='bold '+t.size+'px "IBM Plex Mono",Arial,monospace';ctx.fillStyle=t.color;
     ctx.textAlign='center';ctx.fillText(t.text,t.x,t.y);ctx.textAlign='left';
     ctx.globalAlpha=1;
   }
@@ -320,7 +321,7 @@ function drawPost(){
   }
 }
 function pixFont(px,bold){
-  return (bold?'700 ':'400 ')+px+'px "Pixelify Sans",Arial,sans-serif';
+  return (bold?'700 ':'500 ')+px+'px "IBM Plex Mono",Arial,monospace';
 }
 function drawCup(x,y,s,fill){
   hctx.save();hctx.translate(x,y);hctx.scale(s,s);

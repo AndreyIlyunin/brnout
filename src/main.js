@@ -23,8 +23,8 @@ function loop(ts){
 // ============================== menu wiring ==============================
 function $(id){return document.getElementById(id);}
 var menuMode='solo';
-$('mSolo').addEventListener('click',function(){menuMode='solo';$('classCards').classList.remove('hidden');});
-$('mCoop').addEventListener('click',function(){menuMode='coop';$('classCards').classList.remove('hidden');});
+$('mSolo').addEventListener('click',function(){menuMode='solo';$('classCards').classList.remove('hidden');renderClassPreviews();});
+$('mCoop').addEventListener('click',function(){menuMode='coop';$('classCards').classList.remove('hidden');renderClassPreviews();});
 $('bmgr').addEventListener('click',function(){
   NET.cls='mgr';
   $('classCards').classList.add('hidden');

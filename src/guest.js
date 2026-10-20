@@ -70,7 +70,7 @@ function guestEvent(e){
     G.fx.push({type:'stamp',x:x,y:y,rad:e.rad,t:0,life:5});G.shake+=10;
   }else if(e.k==='txt'){
     if(G.texts.length>40)G.texts.shift();
-    G.texts.push({x:x,y:y,text:e.t,color:e.c,size:e.s,t:0,life:1.1,vy:-34});
+    G.texts.push({x:x,y:y,text:e.t,color:e.c,size:e.s,t:0,life:2.4,vy:-15});
   }else if(e.k==='spawn'){
     if(G.texts.length>40)G.texts.shift();
     G.texts.push({x:x,y:y-26,text:'(из '+e.tag+')',color:'#6e7681',size:10,t:0,life:1.4,vy:-20});
