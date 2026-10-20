@@ -268,6 +268,7 @@ function updateFx(dt){
   if(NET.mode==='solo')NET.events.length=0;
   G.shake=Math.max(0,G.shake-dt*30);
   G.msgT-=dt;G.capT-=dt;
+  if(G.fadeT>0)G.fadeT-=dt;
   if(G.capT<=0){
     G.capT=20+R()*12;
     G.caption=['19:04. В опенспейсе кто-то плачет. Возможно, ковролин.','Свет мигает в такт сердцебиению. Или это твоё.','В переговорке пусто. Даже эхо ушло домой.','На доске задача открыта с 2019-го. Никто не приходил.','Холодильник гудит. Он последний, кто ещё во что-то верит.','Стикер на мониторе: «вернусь через 5 минут». Прошла неделя.','Кофемашина шепчет: «и это всё, чем ты станешь».','На этаже ниже так же тихо. На всех этажах так же тихо.','Электронные часы показывают 19:04. Уже час.','Где-то звонит телефон. Никогда не возьмёт трубку.'][(R()*10)|0];
@@ -286,15 +287,27 @@ function updateWaves(dt){
       }
     }
     if(G.waveT<=0&&anyPlayer){G.waveState='active';startWave();}
+  }else if(G.waveState==='cleared'){
+    // осязаемая пауза между спринтами: итоги + следующая локация, скип любой клавишей
+    G.interT-=dt;
+    if(G.interT<=0){
+      G.waveState='calm';G.waveT=2.8;
+      regenLocation(G.pendSeed);
+      G.fadeT=0.9;
+      msg('Спринт закрыт. Перерыв на кулер.');
+    }
   }else{
     if(G.spawnQ.length>0){
       G.spawnT-=dt;
       if(G.spawnT<=0){G.spawnT=0.35;spawnMob(G.spawnQ.shift());}
     }else if(G.mobs.length===0&&!G.boss){
-      G.waveState='calm';G.waveT=2.2;
-      regenLocation(); // спринт закрыт — команда переезжает в новый офис
+      G.waveState='cleared';G.interT=3.4;
+      G.pendSeed=(R()*1e9)|0;
+      G.nextTheme=themeNameFor(G.pendSeed);
       for(i=0;i<G.players.length;i++)G.players[i].burnout=Math.max(0,G.players[i].burnout-6);
-      msg('Спринт закрыт. Перерыв на кулер.');
+      var meI=localPlayer();
+      G.interStats={w:G.wave,ki:G.killsI,kd:G.killsD,okr:G.okr,co:(meI?meI.coins:0)||0};
+      broadcast({t:'inter',d:3.4,th:G.nextTheme,st:G.interStats});
     }
   }
   if(G.winT>0){
@@ -331,8 +344,8 @@ function gameOver(){
 }
 
 // переезд в новую локацию между спринтами: свежая карта+тема, игроки в лобби
-function regenLocation(){
-  var seed=(R()*1e9)|0;
+function regenLocation(seed){
+  seed=(seed>0)?(seed|0):((R()*1e9)|0);
   buildMap(seed);
   G.mobs.length=0;G.projs.length=0;G.pickups.length=0;G.zones.length=0;
   G.fx.length=0;G.texts.length=0;

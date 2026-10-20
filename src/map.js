@@ -271,11 +271,27 @@ function prerenderFloor(){
       }
     }
   }
-  // thin wall strips (drawn after floors so they sit on top of void bg)
-  for(var wi=0;wi<WALLS.length;wi++){var w3=WALLS[wi];
-    c.fillStyle=MAPTHEME.wall;c.fillRect(w3.x,w3.y,w3.w,w3.h);
+  // --- псевдо-3D: фронты стен (высота), затем верхние грани ---
+  var EH=12,wi,w3;
+  for(wi=0;wi<WALLS.length;wi++){w3=WALLS[wi];
+    c.fillStyle=shade(MAPTHEME.wall,-6);
+    c.fillRect(w3.x,w3.y+w3.h-1,w3.w,EH);
+    c.fillStyle=shade(MAPTHEME.wallIn,-8);
+    c.fillRect(w3.x+1,w3.y+w3.h,w3.w-2,EH-2);
+    // отблеск неона на низе фронта
+    c.fillStyle='rgba(232,58,156,0.10)';
+    c.fillRect(w3.x+1,w3.y+w3.h+EH-3,w3.w-2,2);
+  }
+  // --- псевдо-3D: фронты мебели ---
+  for(wi=0;wi<FURN.length;wi++){var f3=FURN[wi];
+    c.fillStyle='rgba(0,0,0,0.42)';
+    c.fillRect(f3.x+2,f3.y+f3.h-1,f3.w,9);
+  }
+  // coffee stains — irregular splatters, not circles
+  // верхние грани стен (после фронтов, поверх)
+  for(wi=0;wi<WALLS.length;wi++){w3=WALLS[wi];
+    c.fillStyle=shade(MAPTHEME.wall,6);c.fillRect(w3.x,w3.y,w3.w,w3.h);
     c.fillStyle=MAPTHEME.wallIn;c.fillRect(w3.x+1,w3.y+1,w3.w-2,w3.h-2);
-    // неоновая кромка: сталь-циан, изредка — вывеска (маджента/циан)
     var neon=rnd();
     c.fillStyle=neon<0.10?MAPTHEME.neonA:(neon<0.20?MAPTHEME.neonB:MAPTHEME.steel);
     if(w3.dir===0)c.fillRect(w3.x+w3.w-3,w3.y,3,w3.h);
@@ -510,13 +526,19 @@ function flowDir(x,y){
 
 // ---- темы локаций: каждый спринт — новый офис в своей стилистике ----
 var THEMES=[
- {name:'Неоновый опенспейс',floor:'#181d26',alt:'#1b2230',corr:'#101a26',corrAlt:'#122036',wall:'#0c1118',wallIn:'#141b28',neonA:'#8a2a5a',neonB:'#15707f',steel:'#2c4258'},
- {name:'Ретро-архив',floor:'#1c1812',alt:'#211d15',corr:'#171208',corrAlt:'#1a160c',wall:'#0e0b06',wallIn:'#181209',neonA:'#8a6a2a',neonB:'#8a4a2a',steel:'#4a3f2c'},
- {name:'Синий корпоратив',floor:'#101828',alt:'#142036',corr:'#0c1524',corrAlt:'#0f1a2e',wall:'#080f1c',wallIn:'#101a2c',neonA:'#2a5a8a',neonB:'#2a7a8a',steel:'#24384f'},
- {name:'Токсичная лаборатория',floor:'#16201a',alt:'#1a2820',corr:'#0f1c14',corrAlt:'#122218',wall:'#08120b',wallIn:'#101c14',neonA:'#2a8a3a',neonB:'#6a8a2a',steel:'#2a4a38'},
- {name:'Красная тревога',floor:'#1e1518',alt:'#241a1e',corr:'#180f12',corrAlt:'#1c1216',wall:'#0d0709',wallIn:'#160d10',neonA:'#8a2a2a',neonB:'#8a4a2a',steel:'#4a2c34'}
+ {name:'Пурпурный опенспейс',floor:'#171226',alt:'#1b1630',corr:'#120e20',corrAlt:'#150f28',wall:'#0d0a18',wallIn:'#181231',neonA:'#e83a9c',neonB:'#1fc4ae',steel:'#41336a'},
+ {name:'Ретро-архив',floor:'#1c1424',alt:'#221832',corr:'#150f1e',corrAlt:'#191226',wall:'#0d0916',wallIn:'#1a1230',neonA:'#ff8a3d',neonB:'#c43ed8',steel:'#4e3660'},
+ {name:'Фиолетовый корпоратив',floor:'#131028',alt:'#171340',corr:'#0e0b20',corrAlt:'#110e2c',wall:'#0a0818',wallIn:'#161244',neonA:'#7a6aff',neonB:'#2ab8d8',steel:'#302c62'},
+ {name:'Мятная лаборатория',floor:'#122020',alt:'#16282a',corr:'#0d181a',corrAlt:'#101e20',wall:'#081212',wallIn:'#123032',neonA:'#2ee8a8',neonB:'#b8e83a',steel:'#24504a'},
+ {name:'Розовая тревога',floor:'#1e0f1c',alt:'#251424',corr:'#170b16',corrAlt:'#1c0e1b',wall:'#0e0710',wallIn:'#221028',neonA:'#ff2a7a',neonB:'#ff8a3d',steel:'#5c2450'}
 ];
 var MAPTHEME=THEMES[0];
+
+// имя темы по сиду без постройки карты (первый rnd() после посева = выбор темы)
+function themeNameFor(seed){
+  _seed=(seed>>>0)||1;
+  return THEMES[(rnd()*THEMES.length)|0].name;
+}
 
 // ---- туман войны (герои-3 стиль): терра инкогнита + затемнённая обстановка + обзор ----
 var FOG={explored:new Uint8Array(GW*GH),vis:new Uint8Array(GW*GH),t:0};

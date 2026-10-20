@@ -95,6 +95,8 @@ function guestEvent(e){
 function guestUpdate(dt){
   if(G.hitStop>0){G.hitStop-=dt;return;}
   if(G.state!=='playing'&&G.state!=='win')return;
+  if(G.waveState==='cleared'){G.interT-=dt;if(G.interT<0)G.interT=0;}
+  if(G.fadeT>0)G.fadeT-=dt;
   var i,k=1-Math.exp(-10*dt);
   for(i=0;i<VIEW.players.length;i++){var p=VIEW.players[i],tg=p.tgt;
     if(!tg)continue;

@@ -31,6 +31,7 @@ cv.addEventListener('mousemove',function(e){
 cv.addEventListener('mousedown',function(e){
   audioInit();
   if(isTouch)return;
+  if(G.state==='playing'&&G.waveState==='cleared'&&G.interT>0.3)G.interT=0.3; // скип паузы
   if(e.button===0){mouse.down=true;INPUT.f1=true;}
   if(e.button===2){mouse.rdown=true;INPUT.f2=true;}
 });
@@ -45,6 +46,7 @@ window.addEventListener('keydown',function(e){
   }
   keys[e.code]=true;
   if(e.repeat)return;
+  if(G.state==='playing'&&G.waveState==='cleared'&&G.interT>0.3)G.interT=0.3; // скип паузы
   if(e.code==='Escape')togglePause();
   if(e.code==='Space'&&G.state==='playing')INPUT.sk=true;
   if(e.code==='KeyQ'&&G.state==='playing')INPUT.sk2=true;

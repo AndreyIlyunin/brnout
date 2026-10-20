@@ -15,7 +15,7 @@ function startLocal(){
   initPlayersFromLobby();
   resetWorld();
   NET.mode='solo';NET.myId='me';
-  G.state='playing';showOv(null);
+  G.state='playing';showOv(null);G.fadeT=0.9;
   updateCamera(0.016,true);
 }
 function hostStartGame(){
@@ -25,7 +25,7 @@ function hostStartGame(){
   initPlayersFromLobby();
   resetWorld();
   NET.mode='host';NET.myId='me';NET.started=true;
-  G.state='playing';showOv(null);
+  G.state='playing';showOv(null);G.fadeT=0.9;
   updateCamera(0.016,true);
   broadcast({t:'start',seed:seed});
   msg('Команда собрана. Спринт 1 начинается.');
@@ -43,7 +43,7 @@ function guestStart(seed){
   G.fx.length=0;G.texts.length=0;
   resetWorld();
   NET.mode='guest';NET.myId=NET.peer.id;NET.started=true;
-  G.state='playing';showOv(null);
+  G.state='playing';showOv(null);G.fadeT=0.9;
   updateCamera(0.016,true);
 }
 
@@ -163,6 +163,10 @@ function guestOnMsg(d){
     VIEW.mobs.length=0;VIEW.projs.length=0;VIEW.pickups.length=0;VIEW.zones.length=0;
     G.fx.length=0;G.texts.length=0;
     DEBRIS.length=0;WATER.length=0;PFX.length=0;STONES.length=0;
+    G.waveState='calm';G.interT=0;G.fadeT=0.9;
+  }
+  if(d.t==='inter'){
+    G.waveState='cleared';G.interT=d.d;G.nextTheme=d.th;G.interStats=d.st;
   }
   if(d.t==='lobby'){
     LOBBY=d.list.map(function(l,i){return{id:l.me?NET.peer.id:'p'+i,cls:l.cls};});

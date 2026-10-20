@@ -313,6 +313,10 @@ function drawPost(){
     drawPost.vg=g;drawPost.vgW=W;drawPost.vgH=H;
   }
   ctx.fillStyle=drawPost.vg;ctx.fillRect(0,0,W,H);
+  if(G.fadeT>0){
+    ctx.fillStyle='rgba(3,2,7,'+Math.min(1,G.fadeT/0.9).toFixed(3)+')';
+    ctx.fillRect(0,0,W,H);
+  }
   ctx.save();ctx.globalAlpha=0.5;
   ctx.translate(-R()*160,-R()*160);
   ctx.fillStyle=ctx.createPattern(grainCv,'repeat');
@@ -397,12 +401,28 @@ function drawHUD(){
   }
   if(isTouch&&localNearCoffee())document.getElementById('btnCoffee').classList.remove('hidden');
   else document.getElementById('btnCoffee').classList.add('hidden');
-  hctx.fillStyle='rgba(10,13,18,0.75)';rr(ctx,12,12,190,52,6);hctx.fill();
-  hctx.font=pixFont(16,true);hctx.fillStyle='#e6edf3';
-  hctx.fillText('СПРИНТ '+G.wave,24,34);
+  // === спринт + враги: явный счётчик, чтобы смена локации не была внезапной ===
   var remG=(NET.mode==='guest')?VIEW.mobs.length:(G.spawnQ.length+G.mobs.length);
-  hctx.font=pixFont(12);hctx.fillStyle='#8b949e';
-  hctx.fillText('задач в очереди: '+remG,24,52);
+  var cleared=G.waveState==='cleared';
+  hctx.fillStyle='rgba(10,13,18,0.8)';rr(ctx,12,12,196,66,6);hctx.fill();
+  hctx.strokeStyle=cleared?'rgba(139,209,124,0.8)':'rgba(232,58,156,0.35)';hctx.lineWidth=1;
+  rr(ctx,12,12,196,66,6);hctx.stroke();
+  hctx.font=pixFont(13,true);hctx.fillStyle='#8b949e';
+  hctx.fillText('СПРИНТ '+Math.max(1,G.wave)+(cleared?' · ЗАЧИЩЕНО ✓':''),24,32);
+  hctx.font=pixFont(12);hctx.fillStyle='#6e7681';
+  hctx.fillText('закрыто: '+Math.max(0,G.wave-1)+' · локаций',24,46);
+  if(cleared){
+    hctx.font=pixFont(15,true);hctx.fillStyle='#8bd17c';
+    hctx.fillText('все задачи закрыты',24,68);
+  }else if(G.boss||((NET.mode==='guest')&&VIEW.boss)){
+    hctx.font=pixFont(15,true);hctx.fillStyle='#e5534b';
+    hctx.fillText('АУДИТ ИДЁТ',24,68);
+  }else{
+    var hot=remG<=3;
+    hctx.font=pixFont(18,true);
+    hctx.fillStyle=remG===0?'#8bd17c':(hot?('rgba(229,83,75,'+(0.7+0.3*Math.sin(G.t*9)).toFixed(3)+')'):'#e6edf3');
+    hctx.fillText('ВРАГОВ: '+remG+(hot&&remG>0?' — зачистка!':''),24,68);
+  }
   hctx.fillStyle='rgba(10,13,18,0.75)';rr(ctx,W-160,12,148,52,6);hctx.fill();
   hctx.font=pixFont(16,true);hctx.fillStyle='#d29922';
   hctx.fillText('OKR: '+G.okr,W-148,34);
@@ -464,6 +484,29 @@ function drawHUD(){
   if(G.msgT>0){
     hctx.globalAlpha=Math.min(1,G.msgT);hctx.font=pixFont(17,true);hctx.fillStyle='#e6edf3';hctx.textAlign='center';
     hctx.fillText(G.msg,W/2,H*0.24);hctx.textAlign='left';hctx.globalAlpha=1;
+  }
+  // === межспринтовая пауза: итоги + анонс новой локации ===
+  if(G.waveState==='cleared'&&G.state==='playing'){
+    var st=G.interStats||{w:G.wave,ki:0,kd:0,okr:G.okr,co:(p.coins||0)};
+    hctx.fillStyle='rgba(5,3,10,0.74)';hctx.fillRect(0,0,W,H);
+    var pw=430,px0=W/2-pw/2,py0=H/2-118;
+    hctx.fillStyle='rgba(13,10,24,0.94)';rr(ctx,px0,py0,pw,236,10);hctx.fill();
+    hctx.strokeStyle='rgba(232,58,156,0.7)';hctx.lineWidth=2;rr(ctx,px0,py0,pw,236,10);hctx.stroke();
+    hctx.textAlign='center';
+    hctx.font=pixFont(26,true);hctx.fillStyle='#e6edf3';
+    hctx.fillText('СПРИНТ '+st.w+' ЗАКРЫТ',W/2,py0+44);
+    hctx.font=pixFont(13);hctx.fillStyle='#8b949e';
+    hctx.fillText('стажёров уволено: '+st.ki+'    дедлайнов сгорело: '+st.kd,W/2,py0+74);
+    hctx.fillText('OKR: '+st.okr+'    ✦ '+st.co,W/2,py0+96);
+    hctx.font=pixFont(14,true);hctx.fillStyle='#1fc4ae';
+    hctx.fillText('→ новая локация: «'+(G.nextTheme||'офис')+'»',W/2,py0+132);
+    var left=Math.max(0,Math.ceil(G.interT));
+    hctx.font=pixFont(13);hctx.fillStyle='#c9d1d9';
+    hctx.fillText('переезд через '+left+'…  (любая клавиша — быстрее)',W/2,py0+164);
+    // полоса прогресса паузы
+    hctx.fillStyle='#12161c';rr(ctx,W/2-130,py0+182,260,8,3);hctx.fill();
+    hctx.fillStyle='#e83a9c';hctx.fillRect(W/2-130,py0+182,260*clamp(1-G.interT/3.4,0,1),8);
+    hctx.textAlign='left';
   }
   if(p.dead){
     hctx.fillStyle='rgba(10,13,18,0.8)';rr(ctx,W/2-130,H/2-20,260,44,6);hctx.fill();

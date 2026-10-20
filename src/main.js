@@ -122,7 +122,7 @@ $('bmenu2').addEventListener('click',function(){
 });
 $('bcontinue').addEventListener('click',function(){
   if(NET.mode==='guest')return;
-  G.state='playing';showOv(null);
+  G.state='playing';showOv(null);G.fadeT=0.9;
 });
 window.addEventListener('blur',function(){
   INPUT.f1=false;INPUT.f2=false;INPUT.sk=false;
