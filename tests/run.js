@@ -214,5 +214,17 @@ test('портреты: фронтальный бюст рисуется', () =>
     ok(sp2.includes("cls==='" + cls + "'"), 'ветка ' + cls);
 });
 
+test('портреты: пиксель-карты 30x24 на 4 класса', () => {
+  const sp2 = fs2.readFileSync('src/sprites.js', 'utf8');
+  for (const cls of ['mgr', 'dev', 'mkt', 'dsn']) {
+    const m = sp2.match(new RegExp(cls + ':\\[([\\s\\S]*?)\\]'));
+    ok(m, 'массив ' + cls);
+    const rows = m[1].match(/"([^"]*)"/g).map(s => s.slice(1, -1));
+    eq(rows.length, 24, cls + ' рядов');
+    for (const r of rows) eq(r.length, 30, cls + ' ширина');
+  }
+  ok(sp2.includes('var PPAL='), 'палитры');
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
