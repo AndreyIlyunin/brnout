@@ -1,0 +1,146 @@
+<meta charset="utf-8">
+<div id="burnout">
+<canvas id="bcv"></canvas>
+
+<div id="tui" class="hidden">
+  <div id="joy"><div id="joyk"></div></div>
+  <div id="btnAtk" class="tbtn tbig">АТАКА</div>
+  <div id="btnAlt" class="tbtn">ПРИЁМ</div>
+  <div id="btnSkill" class="tbtn tsk">УЛЬТА</div>
+  <div id="btnSkill2" class="tbtn tsk2">СКИЛ</div>
+  <div id="btnCoffee" class="tbtn tcf hidden">КОФЕ</div>
+</div>
+<div id="btnPauseM" class="hidden">II</div>
+
+<div class="bgov" id="bmenu">
+  <div class="bgpanel">
+    <div class="bgtitle">burnout<span>:</span> corporate evil</div>
+    <div class="bgtag">18:52. Все ушли домой. Кроме вас. И их.</div>
+    <div class="bgrow">
+      <button class="bgbtn bgwide" id="mSolo">СОЛО-СМЕНУ</button>
+      <button class="bgbtn bgwide" id="mCoop">ОНЛАЙН-КООП (до 4)</button>
+    </div>
+    <div class="bgcards hidden" id="classCards">
+      <div class="bgcard" id="bmgr">
+        <h2>МЕНЕДЖЕР</h2>
+        <p class="bgdesc">Дерётся жирой. В упор — «жирный панч», издалека — швыряет жирные тикеты.</p>
+        <p class="bgskill">[УЛЬТА] «Созвон» — щит · [Q] «АСАП» — ускоряет себя и коллег рядом.</p>
+      </div>
+      <div class="bgcard" id="bdev">
+        <h2>СЕНЬОР-ПРОГЕР</h2>
+        <p class="bgdesc">Ближний бой той самой механической клавиатурой: свинг и тяжёлый хоткей.</p>
+        <p class="bgskill">[УЛЬТА] «Звук клавы» — паралич пачками · [Q] «Легаси-код» — цепь, ментальный урон.</p>
+      </div>
+      <div class="bgcard" id="bmkt">
+        <h2>МАРКЕТОЛОГ</h2>
+        <p class="bgdesc">Дальновиден: бренд-самолётики и воронка, притягивающая мобов.</p>
+        <p class="bgskill">[УЛЬТА] «Ребрендинг» — мобы теряют цель · [Q] «Таргетинг» — помеченные получают +50% урона.</p>
+      </div>
+      <div class="bgcard" id="bdsn">
+        <h2>ДИЗАЙНЕР</h2>
+        <p class="bgdesc">Стремительный стилус и отбрасывающая критика.</p>
+        <p class="bgskill">[УЛЬТА] «Мудборд» — оглушение с брызгами краски · [Q] «Пиксель-перфект» — рывок.</p>
+      </div>
+    </div>
+    <div class="bghint">WASD — движение · ЛКМ — атака · ПКМ — приём · ПРОБЕЛ — ульта · Q — скил · E — кофе · ESC — пауза</div>
+    <div class="bghint2">вместо хп — выгорание · вместо маны — стаканчик кофе · кофепоинты спасают</div>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bcoop">
+  <div class="bgpanel bgcenter">
+    <div class="bgtitle bgsmall">КООП: КОМНАТА</div>
+    <div class="bgtag">P2P WebRTC. Сервер игры не нужен — только сигнальный брокер.</div>
+    <button class="bgbtn bgwide" id="cHost">Создать комнату</button>
+    <button class="bgbtn bgwide" id="cJoin">Войти по коду</button>
+    <button class="bgbtn bgwide" id="bBack2">Назад</button>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bjoin">
+  <div class="bgpanel bgcenter">
+    <div class="bgtitle bgsmall">ВХОД ПО КОДУ</div>
+    <input id="joinCode" class="bginput" maxlength="5" placeholder="код комнаты" autocomplete="off">
+    <div class="bgtag" id="joinErr"></div>
+    <button class="bgbtn bgwide" id="bjoinGo">Подключиться</button>
+    <button class="bgbtn bgwide" id="bBack3">Назад</button>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bhost">
+  <div class="bgpanel bgcenter">
+    <div class="bgtitle bgsmall">ЛОББИ</div>
+    <div class="bgtag">Код комнаты:</div>
+    <div id="roomCode">-----</div>
+    <div id="lobbyList" class="bglobby"></div>
+    <button class="bgbtn bgwide" id="bstart">Начать спринт</button>
+    <button class="bgbtn bgwide" id="bBack4">Выйти</button>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bwait">
+  <div class="bgpanel bgcenter">
+    <div class="bgtitle bgsmall">КОМНАТА</div>
+    <div class="bgtag" id="netStatus">Подключение…</div>
+    <div id="lobbyList2" class="bglobby"></div>
+    <button class="bgbtn bgwide" id="bLeaveWait">Покинуть</button>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bpause">
+  <div class="bgpanel bgcenter">
+    <div class="bgtitle bgsmall" style="color:#d29922">ПАУЗА</div>
+    <div class="bgtag">Отдых — это тоже задача. Неоплачиваемая.</div>
+    <button class="bgbtn bgwide" id="bresume">Продолжить</button>
+    <button class="bgbtn bgwide" id="brestart">Заново</button>
+    <button class="bgbtn bgwide" id="bmute">Звук: вкл</button>
+    <button class="bgbtn bgwide" id="bleave">Выйти в меню</button>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bdead">
+  <div class="bgpanel bgcenter">
+    <div class="bgtitle bgsmall" style="color:#e5534b">ПОЛНОЕ ВЫГОРАНИЕ</div>
+    <div class="bgtag">HR выразит соболезнования в следующем спринте. В письме попросят закрыть задачи.</div>
+    <div class="bgstats">
+      <span>Спринтов пройдено</span><b id="dSprint">0</b>
+      <span>OKR собрано</span><b id="dOkr">0</b>
+      <span>Плашек собрано</span><b id="dCoins">0</b>
+      <span>Стажёров отчитано</span><b id="dIntern">0</b>
+      <span>Дедлайнов потушено</span><b id="dDeadline">0</b>
+      <span>Финальный грейд</span><b id="dGrade">1</b>
+    </div>
+    <div id="dBoard" class="bgboard hidden"></div>
+    <div id="dHr" class="bghr"></div>
+    <button class="bgbtn bgwide" id="bagain">Устроиться заново</button>
+    <button class="bgbtn bgwide" id="bmenu2">В меню</button>
+  </div>
+</div>
+
+<div class="bgov bghidden" id="bwin">
+  <div class="bgpanel bgcenter">
+    <div class="bgtitle bgsmall" style="color:#3fb950">АУДИТ ПРОЙДЕН</div>
+    <div class="bgtag">«Замечаний нет». Так не бывает. Но сегодня — бывает.</div>
+    <button class="bgbtn bgwide" id="bcontinue">Продолжить спринты</button>
+  </div>
+</div>
+</div>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="src/utils.js"></script>
+<script src="src/data.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/music.js"></script>
+<script src="src/map.js"></script>
+<script src="src/chaos.js"></script>
+<script src="src/combat.js"></script>
+<script src="src/abilities.js"></script>
+<script src="src/sim.js"></script>
+<script src="src/guest.js"></script>
+<script src="src/sprites.js"></script>
+<script src="src/render.js"></script>
+<script src="src/input.js"></script>
+<script src="src/ui.js"></script>
+<script src="src/net.js"></script>
+<script src="src/main.js"></script>
