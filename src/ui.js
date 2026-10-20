@@ -1,6 +1,6 @@
 'use strict';
 // ============================== overlays ==============================
-var OVERLAYS=['bmenu','bcoop','bjoin','bhost','bwait','bpause','bdead','bwin'];
+var OVERLAYS=['bmenu','bset','bcoop','bjoin','bhost','bwait','bpause','bdead','bwin'];
 function showOv(id){
   for(var i=0;i<OVERLAYS.length;i++){var el=document.getElementById(OVERLAYS[i]);if(el)el.classList.add('bghidden');}
   if(id)document.getElementById(id).classList.remove('bghidden');
