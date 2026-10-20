@@ -117,7 +117,7 @@ window.addEventListener('blur',function(){
 });
 
 // ============================== init ==============================
-var PXL=0.5; // пиксельный масштаб мира: GTA2-ватность
+var PXL=0.34; // пиксельный масштаб мира: крупные чанки, GTA2-ватность
 function resize(){
   var r=root.getBoundingClientRect();
   DPR=Math.min(2,window.devicePixelRatio||1);

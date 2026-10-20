@@ -291,9 +291,11 @@ function drawPost(){
   ctx.fillStyle=ctx.createPattern(grainCv,'repeat');
   ctx.fillRect(0,0,W+160,H+160);
   ctx.restore();
-  // ретро-сканлайны
-  ctx.fillStyle='rgba(0,0,0,0.05)';
+  // ретро-сканлайны + лёгкий CRT-дуотон
+  ctx.fillStyle='rgba(0,0,0,0.09)';
   for(var sy2=0;sy2<H;sy2+=3)ctx.fillRect(0,sy2,W,1);
+  ctx.fillStyle='rgba(20,60,90,0.05)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(120,30,80,0.04)';ctx.fillRect(0,0,W,H*0.5);
   var me=localPlayer();
   if(me&&me.burnout>65&&!me.dead){
     var a=Math.min(0.3,(me.burnout-65)/35*0.3)*(0.7+0.3*Math.sin(G.t*6));

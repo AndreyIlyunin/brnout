@@ -242,7 +242,7 @@ function prerenderFloor(){
         else if(rm.type==='meeting'){base='#232830';alt='#28303a';}
         else if(rm.type==='lobby'){base='#262a34';alt='#2b303c';}
         else if(rm.type==='wc'){base='#2d3136';alt='#33383e';}
-      }else{base='#131c24';alt='#16202a';}
+      }else{base='#101a26';alt='#122036';}
       c.fillStyle=((i+j)%2===0)?base:alt;
       c.fillRect(x,y,TILE,TILE);
       if(!rm){ // corridor seams
@@ -257,7 +257,7 @@ function prerenderFloor(){
     c.fillStyle='#141b28';c.fillRect(w3.x+1,w3.y+1,w3.w-2,w3.h-2);
     // неоновая кромка: сталь-циан, изредка — вывеска (маджента/циан)
     var neon=rnd();
-    c.fillStyle=neon<0.06?'#8a2a5a':(neon<0.12?'#15707f':'#2c4258');
+    c.fillStyle=neon<0.10?'#8a2a5a':(neon<0.20?'#15707f':'#2c4258');
     if(w3.dir===0)c.fillRect(w3.x+w3.w-3,w3.y,3,w3.h);
     else if(w3.dir===1)c.fillRect(w3.x,w3.y,3,w3.h);
     else if(w3.dir===2)c.fillRect(w3.x,w3.y+w3.h-3,w3.w,3);

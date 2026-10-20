@@ -18,7 +18,7 @@ function refreshAim(){
     if(best)INPUT.aim=angTo(me,best);
     else if(Math.hypot(INPUT.ix,INPUT.iy)>0.1)INPUT.aim=Math.atan2(INPUT.iy,INPUT.ix);
   }else{
-    var mx=mouse.x/DPR/G.zoom+G.camX,my2=mouse.y/DPR/G.zoom+G.camY;
+    var mx=mouse.x/G.zoom+G.camX,my2=mouse.y/G.zoom+G.camY;
     if(me)INPUT.aim=Math.atan2(my2-me.y,mx-me.x);
   }
 }
