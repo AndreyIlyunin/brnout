@@ -4,12 +4,12 @@ var MUS={on:false,timer:null,next:0,step:0,chord:0,bus:null,dly:null};
 function kickAt(t){
   var o=AC.createOscillator(),g=AC.createGain();
   o.type='sine';
-  o.frequency.setValueAtTime(150,t);
-  o.frequency.exponentialRampToValueAtTime(44,t+0.1);
+  o.frequency.setValueAtTime(120,t);
+  o.frequency.exponentialRampToValueAtTime(38,t+0.12);
   g.gain.setValueAtTime(0.3,t);
-  g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
   o.connect(g);g.connect(MUS.bus);
-  o.start(t);o.stop(t+0.2);
+  o.start(t);o.stop(t+0.24);
 }
 function leadAt(t,midi,len){
   var o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();
@@ -30,7 +30,7 @@ function leadAt(t,midi,len){
 function bassAt(t,midi,len,inten){
   var o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();
   o.type='sawtooth';o.frequency.value=mtof(midi);
-  f.type='lowpass';f.frequency.value=240+inten*480;
+  f.type='lowpass';f.frequency.value=180+inten*380;
   g.gain.setValueAtTime(0.0001,t);
   g.gain.exponentialRampToValueAtTime(0.14,t+0.012);
   g.gain.exponentialRampToValueAtTime(0.0001,t+len);
@@ -57,7 +57,7 @@ function musicTick(){
     if(sec>=1&&inten>0.12){
       if(s%4===0)kickAt(t);
       if(s===4||s===12)noiz(0.09,0.13,1600,1.2,t-AC.currentTime);
-      if(inten>0.45&&s%4===2)noiz(0.03,0.028,8000,1.5,t-AC.currentTime);
+      if(inten>0.45&&s%4===2)noiz(0.03,0.02,5000,1.2,t-AC.currentTime);
       if(bar===7&&s>=12){ // филл
         noiz(0.05,0.1,1800,1,t-AC.currentTime);
         if(s%2===0)kickAt(t);
@@ -69,9 +69,9 @@ function musicTick(){
     if(sec>=2&&ARPPAT[s]){
       var vi=pr[1][(s*3+stepAbs)%pr[1].length]+12;
       var o2=AC.createOscillator(),g2=AC.createGain();
-      o2.type='square';o2.frequency.value=mtof(vi);
+      o2.type='triangle';o2.frequency.value=mtof(vi);
       g2.gain.setValueAtTime(0.0001,t);
-      g2.gain.exponentialRampToValueAtTime(0.02+inten*0.02,t+0.006);
+      g2.gain.exponentialRampToValueAtTime(0.016+inten*0.016,t+0.006);
       g2.gain.exponentialRampToValueAtTime(0.0001,t+dt16*0.9);
       o2.connect(g2);g2.connect(MUS.dly);g2.connect(MUS.bus);
       o2.start(t);o2.stop(t+dt16*1.1);
@@ -87,7 +87,7 @@ function musicTick(){
       for(var pi=0;pi<pr[1].length;pi++){
         var po=AC.createOscillator(),pg=AC.createGain();
         po.type='sawtooth';po.frequency.value=mtof(pr[1][pi]);
-        po.detune.value=(pi-1.5)*7;
+        po.detune.value=(pi-1.5)*11;
         pg.gain.setValueAtTime(0.0001,t);
         pg.gain.linearRampToValueAtTime(sec===0?0.028:0.018,t+0.6);
         pg.gain.linearRampToValueAtTime(0.0001,t+dt16*15);
@@ -96,14 +96,16 @@ function musicTick(){
       }
     }
     // ---- дрон-педаль на тонику, раз в 4 цикла переподгоняем
-    if(s===0&&stepAbs%128===0){
-      var dr=AC.createOscillator(),dg2=AC.createGain();
-      dr.type='sine';dr.frequency.value=mtof(33);
-      dg2.gain.setValueAtTime(0.0001,t);
-      dg2.gain.linearRampToValueAtTime(0.05,t+1.5);
-      dg2.gain.linearRampToValueAtTime(0.0001,t+dt16*127);
-      dr.connect(dg2);dg2.connect(MUS.bus);
-      dr.start(t);dr.stop(t+dt16*128);
+    if(s===0&&stepAbs%64===0){ // дрон-педаль с биениями (диссонирующая пара)
+      for(var dj=0;dj<2;dj++){
+        var dr=AC.createOscillator(),dg2=AC.createGain();
+        dr.type='sine';dr.frequency.value=mtof(33)+(dj?0.7:0);
+        dg2.gain.setValueAtTime(0.0001,t);
+        dg2.gain.linearRampToValueAtTime(0.055,t+1.8);
+        dg2.gain.linearRampToValueAtTime(0.0001,t+dt16*63);
+        dr.connect(dg2);dg2.connect(MUS.bus);
+        dr.start(t);dr.stop(t+dt16*64);
+      }
     }
     MUS.step++;MUS.next+=dt16;
   }
