@@ -1,6 +1,31 @@
 'use strict';
 // ============================== sprites (GTA2-style layered humanoids) ==============================
+// пиксельный рендер моделей: рисуем в мелкий оффскрин, блиним крупными чанками.
+// Мир, свет и тексты остаются чёткими — чанки только у персонажей.
+var SPRCV=document.createElement('canvas');SPRCV.width=128;SPRCV.height=128;
+var SPRC=SPRCV.getContext('2d');
+var SPR_SCALE=0.5; // 1 модельный пиксель = 2 мировых
+function pixWrap(o,fn){
+  var sc=o.scale||1;
+  SPRC.setTransform(1,0,0,1,0,0);
+  SPRC.clearRect(0,0,128,128);
+  SPRC.save();
+  SPRC.translate(64,64);
+  SPRC.scale(SPR_SCALE*sc,SPR_SCALE*sc);
+  var o2={};for(var k in o)o2[k]=o[k];
+  o2.x=0;o2.y=0;o2.scale=1;
+  fn(SPRC,o2);
+  SPRC.restore();
+  ctx.save();
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(SPRCV,Math.round(o.x-64),Math.round(o.y-64));
+  ctx.restore();
+}
 function drawHumanoid(c,o){
+  if(c===ctx){pixWrap(o,drawHumanoidBody);return;}
+  drawHumanoidBody(c,o);
+}
+function drawHumanoidBody(c,o){
   var s=o.scale||1,L=o.look,f=o.face||0;
   var frenzy=o.casting==='type';
   var cast=o.castT>0;
