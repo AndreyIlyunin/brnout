@@ -76,6 +76,15 @@ test('кофе-машины: не больше двух на карту', () => 
     ok(COFFEES.length >= 1 && COFFEES.length <= 2, 'coffee=' + COFFEES.length);
   }
 });
+test('спавны и кофе досягаемы на 100 сидах', () => {
+  let bad = 0;
+  for (let s = 1; s <= 100; s++) {
+    buildMap(s * 7919 + 13);
+    for (const sp of SPAWNS) if (!reachOK(sp.x, sp.y) || blockedAt(sp.x, sp.y, 16)) bad++;
+    for (const cf of COFFEES) if (!reachOK(cf.x, cf.y) || blockedAt(cf.x, cf.y, 16)) bad++;
+  }
+  eq(bad, 0);
+});
 test('связность: 0 изолированных комнат на 300 сидах', () => {
   let bad = 0;
   for (let s = 1; s <= 300; s++) {

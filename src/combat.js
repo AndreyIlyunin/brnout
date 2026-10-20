@@ -41,17 +41,21 @@ function spawnMob(type){
     while(tries<24&&!pick){ // сперва — за кадром
       tries++;
       var cand=SPAWNS[(R()*SPAWNS.length)|0];
-      if(bandOK(cand)&&offscreen(cand))pick=cand;
+      if(bandOK(cand)&&offscreen(cand)&&reachOK(cand.x,cand.y))pick=cand;
     }
     tries=0;
     while(tries<20&&!pick){ // не вышло — хоть в дистанции
       tries++;
       var cand2=SPAWNS[(R()*SPAWNS.length)|0];
-      if(bandOK(cand2))pick=cand2;
+      if(bandOK(cand2)&&reachOK(cand2.x,cand2.y))pick=cand2;
     }
-    if(!pick)pick=SPAWNS[(R()*SPAWNS.length)|0];
+    if(!pick){ // крайний случай: гарантированно досягаемый тайл
+      var rc=REACH_LIST.length?REACH_LIST[(R()*REACH_LIST.length)|0]:null;
+      pick=rc?{x:rc.x,y:rc.y,tag:'офис'}:SPAWNS[(R()*SPAWNS.length)|0];
+    }
     p0={x:pick.x+(R()*70-35),y:pick.y+(R()*70-35)};
     if(blockedAt(p0.x,p0.y,18))p0=freeSpotNear(pick.x,pick.y,0,200,16);
+    if(!reachOK(p0.x,p0.y))p0=snapReachable(p0); // фолбэк мог утащить за стену
     NET.events.push({k:'spawn',x:Math.round(p0.x),y:Math.round(p0.y),tag:pick.tag});
     G.fx.push({type:'ring',x:p0.x,y:p0.y,rad:26,radMax:8,t:0,life:0.5,purple:1});
   }else{

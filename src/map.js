@@ -166,8 +166,65 @@ function buildMap(seed){
   }
   resetFog();
   rebuildObst();
+  validateSpawns();
   prerenderFloor();
   buildMinimapBase();
+}
+
+// ---- гарантия досягаемости: спавны и кофе только в связной зоне, свободной от мебели ----
+var REACH=new Uint8Array(GW*GH); // структурно досягаемые тайлы (стены+мебель)
+var REACH_LIST=[];                // центры таких тайлов — безопасный фолбэк спавна
+function tileFree(tx,ty,r){
+  if(!grid[ty]||!grid[ty][tx])return false;
+  return !blockedAt(tx*TILE+TILE/2,ty*TILE+TILE/2,r);
+}
+function buildReach(){
+  REACH.fill(0);REACH_LIST.length=0;
+  var c0=roomCenter(lobbyRoom()),sx=c0[0],sy=c0[1];
+  if(!tileFree(sx,sy,16)){ // центр лобби может быть занят мебелью — ищем ближайший свободный
+    search: for(var r2=1;r2<6;r2++)
+      for(var dy=-r2;dy<=r2;dy++)for(var dx=-r2;dx<=r2;dx++){
+        var xx=sx+dx,yy=sy+dy;
+        if(xx>=0&&yy>=0&&xx<GW&&yy<GH&&tileFree(xx,yy,16)){sx=xx;sy=yy;break search;}
+      }
+  }
+  var q=[sx+sy*GW];REACH[sx+sy*GW]=1;
+  for(var head=0;head<q.length;head++){
+    var cur=q[head],cx=cur%GW,cy=(cur/GW)|0;
+    REACH_LIST.push({x:cx*TILE+TILE/2,y:cy*TILE+TILE/2});
+    for(var k=0;k<4;k++){
+      var nx=cx+(k===0?1:(k===1?-1:0)),ny=cy+(k===2?1:(k===3?-1:0));
+      if(nx<0||ny<0||nx>=GW||ny>=GH)continue;
+      var ni=nx+ny*GW;
+      if(REACH[ni]||!grid[ny][nx]||!tileFree(nx,ny,16))continue;
+      REACH[ni]=1;q.push(ni);
+    }
+  }
+}
+function snapReachable(p){ // ближайший досягаемый свободный тайл-центр
+  var tx=clamp((p.x/TILE)|0,0,GW-1),ty=clamp((p.y/TILE)|0,0,GH-1);
+  if(REACH[tx+ty*GW]&&!blockedAt(p.x,p.y,16))return{x:p.x,y:p.y};
+  var best=null,bd=1e18;
+  for(var i=0;i<REACH_LIST.length;i++){
+    var t=REACH_LIST[i],dd=(t.x-p.x)*(t.x-p.x)+(t.y-p.y)*(t.y-p.y);
+    if(dd<bd){bd=dd;best=t;}
+  }
+  return best?{x:best.x,y:best.y}:{x:p.x,y:p.y};
+}
+function reachOK(x,y){
+  var tx=clamp((x/TILE)|0,0,GW-1),ty=clamp((y/TILE)|0,0,GH-1);
+  return !!REACH[tx+ty*GW];
+}
+function validateSpawns(){
+  buildReach();
+  for(var i=0;i<SPAWNS.length;i++){
+    var sn=snapReachable(SPAWNS[i]);
+    SPAWNS[i]={x:sn.x,y:sn.y,tag:SPAWNS[i].tag};
+  }
+  for(i=0;i<COFFEES.length;i++){
+    var cc=snapReachable(COFFEES[i]);
+    COFFEES[i].x=cc.x;COFFEES[i].y=cc.y;
+  }
 }
 function rebuildObst(){
   OBST.length=0;
