@@ -126,7 +126,7 @@ function resize(){
   ctx.imageSmoothingEnabled=false;
   bhud.width=Math.max(320,Math.round(r.width*DPR));
   bhud.height=Math.max(240,Math.round(r.height*DPR));
-  G.zoom=clamp(r.width/900,0.55,1.15);
+  G.zoom=clamp(r.width/900,0.55,1.15)*(PXL/DPR); // мир в half-res: компенсируем, видимая область как раньше
   drawPost.vg=null;
 }
 window.addEventListener('resize',resize);

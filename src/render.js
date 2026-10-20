@@ -264,17 +264,17 @@ function drawGlows(){
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();
   }
   var mobs=worldPool('mobs');
-  for(i=0;i<mobs.length;i++)if(mobs[i].type==='deadline')glow(mobs[i].x,mobs[i].y,60,'rgba(255,130,30,A)',0.10+0.03*Math.sin(G.t*9));
+  for(var gi=0;gi<mobs.length;gi++)if(mobs[gi].type==='deadline')glow(mobs[gi].x,mobs[gi].y,60,'rgba(255,130,30,A)',0.10+0.03*Math.sin(G.t*9));
   // уютные лампы: тёплые и холодные
-  for(i=0;i<LIGHTS.length;i++){var L2=LIGHTS[i];
+  for(gi=0;gi<LIGHTS.length;gi++){var L2=LIGHTS[gi];
     if(L2.dead)continue;
-    if(i%2)glow(L2.x,L2.y,84,'rgba(255,190,110,A)',0.045);
+    if(gi%2)glow(L2.x,L2.y,84,'rgba(255,190,110,A)',0.045);
     else glow(L2.x,L2.y,92,'rgba(110,212,224,A)',0.035);
   }
-  for(i=0;i<G.fx.length;i++){var f=G.fx[i];
+  for(gi=0;gi<G.fx.length;gi++){var f=G.fx[gi];
     if(f.type==='ember')glow(f.x,f.y,14,'rgba(255,150,50,A)',0.25*(1-f.t/f.life));
   }
-  for(i=0;i<COFFEES.length;i++)if(COFFEES[i].charges>0)glow(COFFEES[i].x,COFFEES[i].y,70,'rgba(80,220,120,A)',0.07);
+  for(gi=0;gi<COFFEES.length;gi++)if(COFFEES[gi].charges>0)glow(COFFEES[gi].x,COFFEES[gi].y,70,'rgba(80,220,120,A)',0.07);
   ctx.globalCompositeOperation='source-over';
 }
 function drawPost(){
