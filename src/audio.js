@@ -1,8 +1,25 @@
 'use strict';
 // ============================== audio ==============================
 var AC=null,master=null,muted=false,amb=null;
+// настройки звука: общий / музыка / эффекты (persist в localStorage)
+var SET={master:0.8,music:0.55,sfx:0.8};
+try{var _s=JSON.parse(localStorage.getItem('brnt_snd')||'null');if(_s)for(var _k in SET)if(typeof _s[_k]==='number')SET[_k]=_s[_k];}catch(e){}
+var sfxBus=null,musGain=null;
+function applyVolumes(){
+  if(master)master.gain.value=muted?0:SET.master;
+  if(sfxBus)sfxBus.gain.value=SET.sfx;
+  if(musGain)musGain.gain.value=SET.music;
+}
+function saveVolumes(){try{localStorage.setItem('brnt_snd',JSON.stringify(SET));}catch(e){}}
 function audioInit(){
-  if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.5;master.connect(AC.destination);}catch(e){}}
+  if(!AC){try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain();
+    sfxBus=AC.createGain();
+    musGain=AC.createGain();
+    sfxBus.connect(master);musGain.connect(master);master.connect(AC.destination);
+    applyVolumes();
+  }catch(e){}}
   if(AC&&AC.state==='suspended')AC.resume();
 }
 function tone(f,dur,type,vol,slide,delay){
@@ -11,7 +28,7 @@ function tone(f,dur,type,vol,slide,delay){
   o.type=type||'sine';o.frequency.setValueAtTime(f,t0);
   if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(24,f+slide),t0+dur);
   g.gain.setValueAtTime(vol||0.2,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
-  o.connect(g);g.connect(master);o.start(t0);o.stop(t0+dur+0.03);
+  o.connect(g);g.connect(sfxBus||master);o.start(t0);o.stop(t0+dur+0.03);
 }
 function noiz(dur,vol,freq,q,delay){
   if(!AC||muted)return;delay=delay||0;
@@ -21,7 +38,7 @@ function noiz(dur,vol,freq,q,delay){
   var n=AC.createBufferSource();n.buffer=buf;
   var f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=freq||800;f.Q.value=q||1;
   var g=AC.createGain();g.gain.setValueAtTime(vol||0.2,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
-  n.connect(f);f.connect(g);g.connect(master);n.start(t0);n.stop(t0+dur+0.03);
+  n.connect(f);f.connect(g);g.connect(sfxBus||master);n.start(t0);n.stop(t0+dur+0.03);
 }
 var SFX={
   deathCry:function(pitch){ // диаблоподобный предсмертный стон
@@ -38,7 +55,7 @@ var SFX={
     g.gain.setValueAtTime(0.0001,t0);
     g.gain.exponentialRampToValueAtTime(0.15,t0+0.03);
     g.gain.exponentialRampToValueAtTime(0.0001,t0+0.42);
-    o.connect(fl);fl.connect(g);g.connect(master);
+    o.connect(fl);fl.connect(g);g.connect(sfxBus||master);
     o.start(t0);o.stop(t0+0.46);lfo.start(t0);lfo.stop(t0+0.46);
   },
   soulSigh:function(pitch){ // улетающая душа: выдох «аааах»
@@ -52,7 +69,7 @@ var SFX={
     g.gain.setValueAtTime(0.0001,t0+0.05);
     g.gain.exponentialRampToValueAtTime(0.09,t0+0.13);
     g.gain.exponentialRampToValueAtTime(0.0001,t0+0.62);
-    o.connect(g);g.connect(master);
+    o.connect(g);g.connect(sfxBus||master);
     o.start(t0+0.05);o.stop(t0+0.66);
     tone(p*262,0.5,'sine',0.045,-150,0.05);
     tone(p*392,0.4,'sine',0.03,-190,0.08);
@@ -66,7 +83,7 @@ var SFX={
       g.gain.setValueAtTime(0.0001,t0);
       g.gain.linearRampToValueAtTime(0.011,t0+1.3);
       g.gain.linearRampToValueAtTime(0.0001,t0+2.8);
-      o.connect(g);g.connect(master);
+      o.connect(g);g.connect(sfxBus||master);
       o.start(t0);o.stop(t0+2.9);
     }
     noiz(1.8,0.013,560,0.5);
@@ -95,6 +112,6 @@ function startAmbient(){
   var o1=AC.createOscillator(),o2=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();
   o1.type='sawtooth';o1.frequency.value=55;o2.type='sawtooth';o2.frequency.value=55.7;
   f.type='lowpass';f.frequency.value=150;g.gain.value=0.045;
-  o1.connect(f);o2.connect(f);f.connect(g);g.connect(master);
+  o1.connect(f);o2.connect(f);f.connect(g);g.connect(musGain||master);
   o1.start();o2.start();amb={o1:o1,o2:o2,g:g};
 }

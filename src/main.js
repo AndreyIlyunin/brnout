@@ -90,9 +90,20 @@ $('brestart').addEventListener('click',function(){
 });
 $('bmute').addEventListener('click',function(){
   muted=!muted;
-  if(master)master.gain.value=muted?0:0.5;
+  applyVolumes();
   $('bmute').textContent='Звук: '+(muted?'выкл':'вкл');
 });
+function sndUI(id,key){
+  var el=$(id);if(!el)return;
+  el.value=Math.round(SET[key]*100);
+  var lab=$(id+'V');
+  if(lab)lab.textContent=Math.round(SET[key]*100)+'%';
+  el.addEventListener('input',function(){
+    SET[key]=el.value/100;applyVolumes();saveVolumes();
+    if(lab)lab.textContent=el.value+'%';
+  });
+}
+sndUI('sndMaster','master');sndUI('sndMusic','music');sndUI('sndSfx','sfx');
 $('bleave').addEventListener('click',function(){
   try{if(NET.hostConn)NET.hostConn.send({t:'leave'});}catch(e){}
   try{broadcast({t:'stt',s:'dead'});}catch(e){}
@@ -132,6 +143,7 @@ window.addEventListener('resize',resize);
 if(window.ResizeObserver){new ResizeObserver(resize).observe(root);}
 makeGrain();
 buildMap(20261020);
+for(var mi=0;mi<GW*GH;mi++)FOG.explored[mi]=1; // фон меню: офис виден до старта
 resize();
 window.__bo={G:G,NET:NET,VIEW:VIEW,INPUT:INPUT,startLocal:startLocal,hostStartGame:hostStartGame,buildMap:buildMap,
   spawns:function(){return SPAWNS;},rooms:function(){return ROOMS;},blockedAt:blockedAt,

@@ -267,6 +267,7 @@ function drawLighting(){
   }
   var players=worldPool('players');
   for(i=0;i<players.length;i++)if(!players[i].dead)hole(players[i].x,players[i].y,190,0.85);
+  if(G.state==='menu')hole(menuCam.x,menuCam.y,230,0.8);
   for(i=0;i<COFFEES.length;i++)if(COFFEES[i].charges>0)hole(COFFEES[i].x,COFFEES[i].y,90,0.5+0.1*Math.sin(G.t*3));
   var mobs=worldPool('mobs');
   for(i=0;i<mobs.length;i++)if(mobs[i].type==='deadline')hole(mobs[i].x,mobs[i].y,70,0.5);
@@ -527,6 +528,26 @@ function drawMinimap(){
     hctx.beginPath();hctx.arc(mx+players[i].x*sc,my+players[i].y*sc,3,0,TAU);hctx.fill();
   }
 }
+var menuCam={x:0,y:0,tx:0,ty:0,init:0,lastVis:0};
+function renderMenu(){
+  if(!menuCam.init){
+    menuCam.init=1;menuCam.x=MAP_W/2;menuCam.y=MAP_H/2;
+  }
+  if(Math.hypot(menuCam.tx-menuCam.x,menuCam.ty-menuCam.y)<60){
+    var r=ROOMS[(R()*ROOMS.length)|0];
+    menuCam.tx=r.x+r.w/2;menuCam.ty=r.y+r.h/2;
+  }
+  menuCam.x+=(menuCam.tx-menuCam.x)*0.005;
+  menuCam.y+=(menuCam.ty-menuCam.y)*0.005;
+  var Wc=cv.width/(DPR*G.zoom),Hc=cv.height/(DPR*G.zoom);
+  G.camX=Wc>=MAP_W?(MAP_W-Wc)/2:clamp(menuCam.x-Wc/2,0,MAP_W-Wc);
+  G.camY=Hc>=MAP_H?(MAP_H-Hc)/2:clamp(menuCam.y-Hc/2,0,MAP_H-Hc);
+  if(G.t-menuCam.lastVis>0.15){ // «камера наблюдения» открывает обзор
+    menuCam.lastVis=G.t;
+    computeVis(menuCam.x,menuCam.y);
+  }
+  drawWorld();drawGlows();drawLighting();drawPost();
+}
 function render(){
   ctx.setTransform(1,0,0,1,0,0);
   ctx.clearRect(0,0,cv.width,cv.height);
@@ -536,7 +557,6 @@ function render(){
     drawWorld();drawGlows();drawLighting();drawPost();
     drawHUD();
   }else{
-    applyScreenT();
-    ctx.fillStyle='#05070a';ctx.fillRect(0,0,cv.width,cv.height);
+    renderMenu();
   }
 }

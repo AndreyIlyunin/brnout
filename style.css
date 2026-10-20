@@ -46,3 +46,19 @@
 #burnout #btnCoffee{right:30px;bottom:170px;width:62px;height:62px;border-color:rgba(63,185,80,.9);}
 #burnout .tbtn:active{background:rgba(229,83,75,.55);}
 #burnout #btnPauseM{position:absolute;top:10px;right:10px;z-index:4;width:40px;height:40px;border-radius:8px;background:rgba(33,38,45,.7);border:1px solid #30363d;color:#e6edf3;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:auto;}
+
+/* ===== неоновое главное меню ===== */
+#burnout .bgtitle{font-family:'Pixelify Sans',Arial,sans-serif;font-weight:700;font-size:clamp(24px,5.4cqw,46px);letter-spacing:2px;color:#eaf6ff;
+  text-shadow:0 0 6px rgba(66,224,255,0.85),0 0 20px rgba(21,112,127,0.75),0 0 46px rgba(138,42,90,0.5);
+  animation:boflick 4s infinite;}
+#burnout .bgtitle span{color:#ff5fa8;text-shadow:0 0 6px rgba(255,95,168,0.9),0 0 22px rgba(138,42,90,0.8);}
+#burnout .bgov{background:rgba(2,4,8,0.45);}
+#burnout .bgpanel{background:rgba(8,11,17,0.82);backdrop-filter:blur(3px);border:1px solid rgba(44,66,88,0.6);}
+#burnout .bgbtn{background:rgba(10,16,24,0.6);border:1px solid #2c4258;color:#cfe6f2;letter-spacing:1px;transition:all .15s;}
+#burnout .bgbtn:hover{border-color:#42e0ff;color:#fff;background:rgba(21,112,127,0.18);box-shadow:0 0 14px rgba(66,224,255,0.35),inset 0 0 10px rgba(21,112,127,0.15);}
+#burnout .bgsnd{margin:14px auto 0;max-width:320px;}
+#burnout .sndrow{display:flex;align-items:center;gap:10px;margin:5px 0;}
+#burnout .sndlab{width:64px;font-family:'Pixelify Sans',Arial;font-size:13px;color:#7d8590;text-align:right;}
+#burnout input[type=range]{flex:1;accent-color:#15707f;height:4px;cursor:pointer;}
+#burnout .sndval{width:40px;font-family:'Pixelify Sans',Arial;font-size:12px;color:#42e0ff;text-align:right;}
+#burnout .bgcredit{margin-top:12px;font-size:10px;color:#4d5560;text-align:center;letter-spacing:1px;}
