@@ -214,16 +214,14 @@ test('портреты: фронтальный бюст рисуется', () =>
     ok(sp2.includes("cls==='" + cls + "'"), 'ветка ' + cls);
 });
 
-test('портреты: пиксель-карты 30x24 на 4 класса', () => {
+test('портреты Dave the Diver: буфер 64x52 + апскейл', () => {
   const sp2 = fs2.readFileSync('src/sprites.js', 'utf8');
-  for (const cls of ['mgr', 'dev', 'mkt', 'dsn']) {
-    const m = sp2.match(new RegExp(cls + ':\\[([\\s\\S]*?)\\]'));
-    ok(m, 'массив ' + cls);
-    const rows = m[1].match(/"([^"]*)"/g).map(s => s.slice(1, -1));
-    eq(rows.length, 24, cls + ' рядов');
-    for (const r of rows) eq(r.length, 30, cls + ' ширина');
-  }
-  ok(sp2.includes('var PPAL='), 'палитры');
+  ok(sp2.includes('PBUF.width=64') && sp2.includes('PBUF.height=52'), 'низкорез буфер');
+  ok(sp2.includes('imageSmoothingEnabled=false'), 'nearest-апскейл');
+  for (const cls of ['mgr', 'dev', 'mkt', 'dsn'])
+    ok(sp2.includes("cls==='" + cls + "'"), 'ветка ' + cls);
+  for (const f of ['createRadialGradient(cx-5,cy-5', 'rim', 'скан-полосы'])
+    ok(sp2.includes(f), 'деталь: ' + f.slice(0, 20));
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

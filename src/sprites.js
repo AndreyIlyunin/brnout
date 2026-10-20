@@ -478,117 +478,11 @@ function drawBoss(b,remote){
 function s2(){return 2.6;}
 
 
-// ===== SA-стайл пиксельные портреты (30x24, чанки 5x5) =====
-// легенда: . нет, H/h волосы, S/s кожа, E глаза/очки, e блик, m рот, n нос,
-// W рубашка, C/c одежда, A акцент, b аксессуар, r румянец
-var PORTRAITS={
-mgr:[
-"..............................",
-".......HHHHHHHHHHHH...........",
-"......HHHHHHHHHHHHHH..........",
-".....HHHHhHHHHHHHHHH..........",
-".....HHhSSSSSSSSShHH..........",
-"....HHhSSSSSSSSSSShH..........",
-"....HHSSSSSSSSSSSSHb..........",
-"....HHSSSSSSSSSSSSSb..........",
-".....HSSSSSSSSSSSSSS..........",
-".....SSEnSSSSSSSnESS..........",
-".....SEEEESSSSEEEEES..........",
-".....SSEESSSSSSEESS...........",
-".....SSSSSSSSSSSSSS...........",
-"......SSSSSnnSSSSS............",
-"......SSSSSSSSSSSS............",
-"......SSSSSmmmmmSS............",
-".......SSSSSmmSSSS............",
-"........SSSSSSSSS.............",
-".........sssssss..............",
-"...WWWWW.WssssW.WWWWW.........",
-"..WWWWWWWWssssWWWWWWWW........",
-".CCCCWWWWWWWAAWWWWWWCCC.......",
-".CCCCCWWWWWAAAAWWWWWCCCC......",
-".CCCCCWWWWWAAAAWWWWWCCCC......"],
-dev:[
-"..............................",
-".....CCCCCCCCCCCCCC...........",
-"....CCCCCCCCCCCCCCCC..........",
-"...CCCCCCCCCCCCCCCCCC.........",
-"...CCCCCCCCCCCCCCCCCC.........",
-"...CCCcSSSSSSSSSScCCC.........",
-"..CCCcSSSSSSSSSSSScCC.........",
-"..CCCcSSSSSSSSSSSSSCC.........",
-"..CCCcSSSSSSSSSSSSSCC.........",
-"..CCCcSSEESSSSSSEESCC.........",
-"..CCCcSEEEESSSSEEEESC.........",
-"..CCCcSSEESSSSSSEESCC.........",
-"..CCCcSSSSSSnnSSSSCC..........",
-"..CCCcuSSSSSSSSSuCC...........",
-"..CCCcSuSSSSSSSSuCC...........",
-"..CCCcSSSSSmmmSSSSC...........",
-"..CCCccSSSSSSSSSccC...........",
-"...CCCccSSSSSSSccCC...........",
-"....CCCccssssscCCCT...........",
-"...CCCCCCCcsssCCCCCT..........",
-"..CCCCCCCCWWWWCCCCCCT.........",
-".CCCCCCCWWWWWWWWCCCCT.........",
-".CCCCCCWWWWccWWWWCCCT.........",
-".CCCCCCWWWkkkkWWWCCCT........."],
-mkt:[
-"..............................",
-".......HHHHHHHHHHHH...........",
-"......HHHHHHHHHHHHHH..........",
-".....HHHHHHHHHHHHHHHH.........",
-".....HHhSSSSSSSSShHH..........",
-"....HHhSSSSSSSSSSShH..........",
-"....HHSSSSSSSSSSSSHH..........",
-"....HHSEEEESSSSEEEEH..........",
-"....HSEeEEeESSeEEeESH.........",
-"....HSEEEESSSSEEEESH..........",
-"....HSEEEESSSSEEEESH..........",
-"....HHSEEEESSSSEEEH...........",
-".....HSSSSSnnSSSSSH...........",
-".....SSSSSSSSSSSSSS...........",
-".....SSSSSmmmmSSSSS...........",
-"......SSSSSmmSSSSS............",
-".......SSSSSSSSSS.............",
-"........ssssssss..............",
-"...CCCCC.WssssW.CCCCC.........",
-"..CCCCCCCWssWWCCCCCC..........",
-".AACCCCCWWWWWWCCCCCA..........",
-"AAACCCCCWWWWWWCCCCCAAA........",
-"AAACCCCCWWWWWWCCCCCAAA........",
-".AACCCCCWWWWWWCCCCCAA........."],
-dsn:[
-"..............................",
-".......HHHHHHHHHHHH.HH........",
-"......HHHHHHHHHHHHHHHH........",
-".....HHHHHHHHHHHHHHHHH........",
-".....HHhSSSSSSSSShHHHH........",
-"....HHhSSSSSSSSSSShHHH........",
-"....HHSSSSSSSSSSSSHHA.........",
-"....HHSSSSSSSSSSSSSHA.........",
-".....HSSSSSSSSSSSSS...........",
-".....SSEEEEEEEEEESS...........",
-".....SEeEEeEEEeEEeES..........",
-".....SSEEEEEEEEEESS...........",
-".....SSSSSSnnSSSSSS...........",
-".....SSrSSSSSSSSrSS...........",
-"......SSSSSSSSSSSS............",
-"......SSSSSmmSSSSS............",
-".......SSSSSSSSSS.............",
-"........ssssssss..............",
-"....CCCCC.WssssW.CCCCC........",
-"...CCCCCCCWssWWCCCCCC.........",
-"..ACCCCCCCCCAAAAAAAAAA........",
-".AACCCCCCCCCAAAAAAAAAAA.......",
-".AAACCCCCCCCrrAAAAAAAAA.......",
-"..AACCCCCCCCCAAAAAAAAA........"]
-};
-var PPAL={
- mgr:{H:'#3a2a1a',h:'#241a10',S:'#e8c39e',s:'#c9a077',E:'#1e1a16',e:'#f2ede2',m:'#7a3b30',n:'#c9a077',W:'#dfe6ee',C:'#2c4e57',c:'#1f3641',A:'#8b2020',b:'#42e0ff',T:'#454c59',k:'#8bd17c'},
- dev:{H:'#1e1a16',h:'#141210',S:'#d9b48f',s:'#a8875f',E:'#5fd0c2',e:'#c8fff5',m:'#5a3b2c',n:'#a8875f',W:'#8b949e',C:'#26282e',c:'#1b1d21',A:'#5a616e',b:'#8bd17c',T:'#8a6d3b',u:'#14161c',k:'#454c59'},
- mkt:{H:'#6a3a1a',h:'#4a2812',S:'#f0d0b0',s:'#d0aa84',E:'#c8a2e0',e:'#f2ede2',m:'#7a4b30',n:'#d0aa84',W:'#dfe6ee',C:'#5a3a6a',c:'#41294e',A:'#c8a2e0',b:'#e8f6ff',T:'#8a6d3b',k:'#454c59'},
- dsn:{H:'#6e3a52',h:'#4e2838',S:'#f0d0b0',s:'#d0aa84',E:'#1a1d22',e:'#5fd0c2',m:'#b04a5e',n:'#d0aa84',W:'#dfe6ee',C:'#9c6b8e',c:'#6e4a60',A:'#5fd0c0',b:'#ffcf5c',r:'#d46a8e',T:'#8a6d3b',k:'#454c59'}
-};
+// ===== портреты в стиле Dave the Diver: детальный рендер в буфер 64x52,
+// апскейл без сглаживания => честные крупные пиксели с плавными тональными переходами =====
+var PBUF=document.createElement('canvas');PBUF.width=64;PBUF.height=52;
+var PB=PBUF.getContext('2d');
+function _rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
 function drawPortrait(id,cls){
   var el=document.getElementById(id);
   if(!el)return;
@@ -596,52 +490,167 @@ function drawPortrait(id,cls){
   var W=el.width,H=el.height;
   c.clearRect(0,0,W,H);
   c.imageSmoothingEnabled=false;
-  var map=PORTRAITS[cls],pal=PPAL[cls];
-  var rows=map.length,cols=map[0].length;
-  var px=W/cols,py=H/rows; // 150/30=5, 120/24=5
-  // фон: аура класса + символика (чанками той же сетки)
-  var glow={mgr:'42,224,255',dev:'95,208,194',mkt:'200,162,224',dsn:'95,208,192'}[cls];
-  var g=c.createRadialGradient(W/2,H*0.42,6,W/2,H*0.42,H*0.75);
-  g.addColorStop(0,'rgba('+glow+',0.16)');
-  g.addColorStop(1,'rgba(0,0,0,0)');
-  c.fillStyle=g;c.fillRect(0,0,W,H);
-  var rngP={mgr:1,dev:2,mkt:3,dsn:4}[cls];
-  var rs=function(){rngP=(rngP*1103515245+12345)&0x7fffffff;return rngP/0x7fffffff;};
-  if(cls==='dev'){ // падающие цифры матрицы
-    c.font='bold '+Math.round(px*1.6)+'px monospace';
-    for(var k=0;k<14;k++){
-      var dx=(rs()*cols)|0,dy=(rs()*rows)|0;
-      c.fillStyle=rs()<0.5?'rgba(42,138,58,0.5)':'rgba(66,224,255,0.35)';
-      c.fillText(rs()<0.5?'1':'0',dx*px,dy*py+py);
+  var L=classLook(cls,0);
+  var cx=32,cy=20; // голова в буфере
+  PB.setTransform(1,0,0,1,0,0);
+  PB.clearRect(0,0,64,52);
+  // --- фон: аура + символика класса
+  var glow={mgr:'66,224,255',dev:'95,208,194',mkt:'200,162,224',dsn:'255,110,160'}[cls];
+  var gg=PB.createRadialGradient(cx,cy,4,cx,cy,34);
+  gg.addColorStop(0,'rgba('+glow+',0.22)');
+  gg.addColorStop(1,'rgba(0,0,0,0)');
+  PB.fillStyle=gg;PB.fillRect(0,0,64,52);
+  PB.fillStyle='rgba(8,12,18,0.55)';PB.fillRect(0,0,64,52);
+  if(cls==='mgr'){ // KPI-график
+    PB.fillStyle='rgba(66,224,255,0.30)';
+    for(var b=0;b<5;b++)PB.fillRect(8+b*10,44-b*7,6,4+b*7);
+    PB.strokeStyle='rgba(66,224,255,0.65)';PB.lineWidth=2;
+    PB.beginPath();PB.moveTo(6,44);PB.lineTo(56,8);PB.stroke();
+    PB.beginPath();PB.moveTo(50,6);PB.lineTo(57,9);PB.lineTo(52,14);PB.closePath();
+    PB.fillStyle='rgba(66,224,255,0.7)';PB.fill();
+  }else if(cls==='dev'){ // матрица
+    PB.font='bold 7px monospace';
+    for(var d2=0;d2<12;d2++){
+      PB.fillStyle=d2%2?'rgba(42,138,58,0.5)':'rgba(66,224,255,0.35)';
+      PB.fillText((d2*7)%3?'1':'0',4+(d2*13)%54,6+(d2*11)%44);
     }
-  }else if(cls==='mgr'){ // растущий график
-    c.fillStyle='rgba(66,224,255,0.4)';
-    for(var b2=0;b2<5;b2++)c.fillRect((4+b2*4)*px,H-(4+b2*3)*py,px*2,py*(1+b2*0.6));
-    c.strokeStyle='rgba(66,224,255,0.7)';c.lineWidth=px*0.6;
-    c.beginPath();c.moveTo(3*px,H-4*py);c.lineTo(W-3*px,4*py);c.stroke();
-    c.beginPath();c.moveTo(W-5*px,3*py);c.lineTo(W-3*px,4*py);c.lineTo(W-6*px,6*py);c.stroke();
-  }else if(cls==='mkt'){ // воронка + стрелка
-    c.fillStyle='rgba(200,162,224,0.30)';
-    c.beginPath();c.moveTo(4*px,3*py);c.lineTo(W-4*px,3*py);c.lineTo(W/2+px*2,10*py);c.lineTo(W/2+px*2,14*py);c.lineTo(W/2-px*2,14*py);c.lineTo(W/2-px*2,10*py);c.closePath();c.fill();
-  }else{ // палитра дизайнера
-    var sw=['#e5534b','#d29922','#3fb950','#42e0ff','#c8a2e0'];
-    for(var s2=0;s2<5;s2++){c.fillStyle=sw[s2];c.globalAlpha=0.55;c.fillRect((4+s2*4.6)*px,H-3.4*py,px*3,py*1.6);}
-    c.globalAlpha=1;
+  }else if(cls==='mkt'){ // воронка
+    PB.fillStyle='rgba(200,162,224,0.30)';
+    PB.beginPath();PB.moveTo(8,8);PB.lineTo(56,8);PB.lineTo(40,26);PB.lineTo(40,34);PB.lineTo(24,34);PB.lineTo(24,26);PB.closePath();PB.fill();
+    PB.strokeStyle='rgba(200,162,224,0.4)';PB.lineWidth=1;PB.stroke();
+  }else{ // палитра
+    var sw=['#e5534b','#d29922','#3fb950','#42e0ff','#c8a2e0','#f0d0b0'];
+    for(var s3=0;s3<6;s3++){PB.fillStyle=sw[s3];PB.globalAlpha=0.6;PB.fillRect(7+s3*9,42,7,7);}
+    PB.globalAlpha=1;
   }
-  // сам портрет
-  for(var y2=0;y2<rows;y2++){
-    var line=map[y2];
-    for(var x2=0;x2<cols;x2++){
-      var ch=line[x2];
-      if(ch==='.'||ch===' ')continue;
-      var col=pal[ch];
-      if(!col)continue;
-      c.fillStyle=col;
-      c.fillRect(Math.round(x2*px),Math.round(y2*py),Math.ceil(px),Math.ceil(py));
+  // --- плечи/торс с градиентом и rim-светом
+  var cloth={mgr:['#2c4e57','#1f3641','#42e0ff'],dev:['#2a2d33','#1b1d21','#8bd17c'],mkt:['#5a3a6a','#41294e','#c8a2e0'],dsn:['#9c6b8e','#6e4a60','#5fd0c0']}[cls];
+  var cg=PB.createLinearGradient(0,34,0,52);
+  cg.addColorStop(0,cloth[0]);cg.addColorStop(1,cloth[1]);
+  PB.fillStyle=cg;
+  PB.beginPath();
+  PB.moveTo(6,52);PB.quadraticCurveTo(9,38,20,35);
+  PB.lineTo(44,35);PB.quadraticCurveTo(55,38,58,52);PB.closePath();PB.fill();
+  PB.strokeStyle='rgba(0,0,0,0.55)';PB.lineWidth=1.2;PB.stroke();
+  PB.strokeStyle=cloth[2];PB.globalAlpha=0.5;PB.lineWidth=1; // rim
+  PB.beginPath();PB.moveTo(7,52);PB.quadraticCurveTo(10,39,20,36);PB.stroke();
+  PB.globalAlpha=1;
+  // шея с тенью
+  PB.fillStyle=shade(L.skin,-28);PB.fillRect(cx-5,26,10,10);
+  PB.fillStyle=L.skin;PB.fillRect(cx-4,26,8,5);
+  // --- классовые детали одежды
+  if(cls==='mgr'){
+    PB.fillStyle='rgba(240,244,250,0.95)'; // рубашка V
+    PB.beginPath();PB.moveTo(cx-9,36);PB.lineTo(cx,47);PB.lineTo(cx+9,36);PB.lineTo(cx+13,52);PB.lineTo(cx-13,52);PB.closePath();PB.fill();
+    var tg=PB.createLinearGradient(cx-3,36,cx+3,52);
+    tg.addColorStop(0,'#a32525');tg.addColorStop(1,'#6d1414'); // галстук
+    PB.fillStyle=tg;
+    PB.beginPath();PB.moveTo(cx-2.4,36);PB.lineTo(cx+2.4,36);PB.lineTo(cx+3.4,51);PB.lineTo(cx-3.4,51);PB.closePath();PB.fill();
+    PB.fillStyle='#d8dce2';_rr(PB,cx+13,41,6,9,1);PB.fill(); // бейдж
+    PB.fillStyle='#c23b32';PB.fillRect(cx+14,42.5,2,2);
+  }else if(cls==='dev'){
+    PB.fillStyle='rgba(0,0,0,0.30)';PB.fillRect(18,36,28,16); // тень худи
+    PB.strokeStyle='#5a616e';PB.lineWidth=1.6;PB.lineCap='round'; // завязки
+    PB.beginPath();PB.moveTo(cx-6,38);PB.lineTo(cx-8,50);PB.moveTo(cx+6,38);PB.lineTo(cx+8,50);PB.stroke();
+    PB.fillStyle='#454c59';_rr(PB,cx-9,42,18,8,1.5);PB.fill(); // клава на груди
+    PB.fillStyle='#2b2e34';
+    for(var ky=43.5;ky<49;ky+=2.6)for(var kx=cx-7.5;kx<cx+8;kx+=2.6)PB.fillRect(kx,ky,1.6,1.6);
+    PB.fillStyle='#8bd17c';PB.fillRect(cx-2,44.5,2.4,2); // подсвеченная клавиша
+  }else if(cls==='mkt'){
+    PB.fillStyle='#c8a2e0';_rr(PB,cx-12,35,24,7,3);PB.fill(); // шарф
+    PB.fillStyle='#a584c0';PB.fillRect(cx+7,39,5,11);
+    PB.fillStyle='rgba(240,244,250,0.9)'; // рубашка
+    PB.beginPath();PB.moveTo(cx-8,36);PB.lineTo(cx,44);PB.lineTo(cx+8,36);PB.lineTo(cx+11,52);PB.lineTo(cx-11,52);PB.closePath();PB.fill();
+  }else{
+    PB.fillStyle='#241d2e';PB.fillRect(cx-4,32,8,4); // чокер
+    PB.strokeStyle='#5fd0c0';PB.lineWidth=1.4;
+    PB.beginPath();PB.moveTo(cx-10,40);PB.quadraticCurveTo(cx,46,cx+10,40);PB.stroke(); // кайма платья
+    PB.fillStyle='rgba(240,244,250,0.85)';
+    PB.beginPath();PB.moveTo(cx-7,36);PB.lineTo(cx,43);PB.lineTo(cx+7,36);PB.lineTo(cx+10,52);PB.lineTo(cx-10,52);PB.closePath();PB.fill();
+  }
+  // --- голова: базовый тон + светотень
+  var hg=PB.createRadialGradient(cx-5,cy-5,3,cx,cy,15);
+  hg.addColorStop(0,shade(L.skin,14));hg.addColorStop(0.6,L.skin);hg.addColorStop(1,shade(L.skin,-18));
+  PB.fillStyle=hg;
+  PB.beginPath();PB.arc(cx,cy,12.5,0,TAU);PB.fill();
+  PB.strokeStyle='rgba(20,15,10,0.55)';PB.lineWidth=1;PB.stroke(); // контур
+  PB.strokeStyle='rgba(255,255,255,0.25)'; // rim-свет слева-сверху
+  PB.beginPath();PB.arc(cx,cy,12.5,Math.PI*1.05,Math.PI*1.55);PB.stroke();
+  // причёска с двумя тонами
+  var hairL=shade(L.hair,16),hairD=shade(L.hair,-16);
+  if(cls==='dev'){
+    PB.fillStyle=shade(cloth[0],6);
+    PB.beginPath();PB.arc(cx,cy-1,14,Math.PI*0.86,Math.PI*2.14);PB.fill(); // капюшон
+    PB.strokeStyle='rgba(0,0,0,0.5)';PB.stroke();
+    PB.fillStyle=hairL;
+    PB.beginPath();PB.arc(cx,cy-6,8,Math.PI,TAU);PB.fill();
+    PB.fillStyle='rgba(20,18,26,0.5)'; // тень капюшона на лоб
+    PB.beginPath();PB.ellipse(cx,cy-6,12,5,0,0,Math.PI);PB.fill();
+    PB.fillStyle='rgba(20,18,26,0.45)'; // круги под глазами
+    PB.beginPath();PB.ellipse(cx-6,cy+4,3.2,1.8,0,0,TAU);PB.ellipse(cx+6,cy+4,3.2,1.8,0,0,TAU);PB.fill();
+  }else{
+    PB.fillStyle=L.hair;
+    PB.beginPath();PB.arc(cx,cy-0.5,12.7,Math.PI*0.92,Math.PI*2.08);PB.fill();
+    PB.fillStyle=hairL; // блик на волосах
+    PB.beginPath();PB.ellipse(cx-4,cy-8,5,3,-0.5,0,TAU);PB.fill();
+    PB.fillStyle=hairD;
+    if(cls==='mgr'){
+      PB.beginPath();PB.moveTo(cx-12.7,cy-1);PB.quadraticCurveTo(cx-10,cy+6,cx-5,cy+9);PB.lineTo(cx-9,cy+1);PB.closePath();PB.fill();
+      PB.beginPath();PB.ellipse(cx+3,cy-11,3,1.2,0.3,0,TAU);PB.fill(); // пробор
+    }else if(cls==='mkt'){
+      PB.beginPath();PB.moveTo(cx-12.7,cy);PB.quadraticCurveTo(cx-11,cy+8,cx-6,cy+11);PB.lineTo(cx-10,cy+2);PB.closePath();PB.fill();
+    }else{
+      PB.beginPath();PB.ellipse(cx+13,cy-4,4.5,8,-0.4,0,TAU);PB.fill(); // хвост
+      PB.fillStyle=L.accent;PB.beginPath();PB.arc(cx+10,cy-10,2,0,TAU);PB.fill();
     }
   }
-  // пиксельная рамка-скан для стиля
-  c.fillStyle='rgba(0,0,0,0.18)';
+  // брови
+  PB.strokeStyle=hairD;PB.lineWidth=1.4;PB.lineCap='round';
+  PB.beginPath();
+  if(cls==='mgr'){PB.moveTo(cx-7,cy-4);PB.lineTo(cx-2,cy-5);PB.moveTo(cx+2,cy-5.5);PB.lineTo(cx+7,cy-4.5);} // одна выше
+  else if(cls==='dev'){PB.moveTo(cx-7,cy-3);PB.lineTo(cx-2,cy-3.4);PB.moveTo(cx+2,cy-3.4);PB.lineTo(cx+7,cy-3);}
+  else{PB.moveTo(cx-7,cy-4.5);PB.lineTo(cx-2,cy-5);PB.moveTo(cx+2,cy-5);PB.lineTo(cx+7,cy-4.5);}
+  PB.stroke();
+  // глаза
+  if(cls==='dsn'){
+    PB.fillStyle='#1a1d22';_rr(PB,cx-8,cy-2.6,7,3.8,1.6);PB.fill();_rr(PB,cx+1,cy-2.6,7,3.8,1.6);PB.fill();
+    PB.fillStyle='rgba(95,208,192,0.9)';PB.fillRect(cx-7,cy-1.8,5,2.2);PB.fillRect(cx+2,cy-1.8,5,2.2);
+    PB.fillStyle='rgba(255,255,255,0.7)';PB.fillRect(cx-6,cy-1.2,1.5,1);PB.fillRect(cx+3,cy-1.2,1.5,1);
+  }else{
+    PB.fillStyle='#f4efe4';
+    PB.beginPath();PB.ellipse(cx-4.5,cy-0.5,2.6,1.9,0,0,TAU);PB.ellipse(cx+4.5,cy-0.5,2.6,1.9,0,0,TAU);PB.fill();
+    var iris={mgr:'#2a5a8a',dev:'#5fd0c2',mkt:'#5a3a6a'}[cls]||'#333';
+    PB.fillStyle=iris;
+    PB.beginPath();PB.arc(cx-4.2,cy-0.3,1.4,0,TAU);PB.arc(cx+4.8,cy-0.3,1.4,0,TAU);PB.fill();
+    PB.fillStyle='#fff';
+    PB.beginPath();PB.arc(cx-4.6,cy-0.8,0.55,0,TAU);PB.arc(cx+4.4,cy-0.8,0.55,0,TAU);PB.fill();
+    if(cls==='mkt'){ // очки
+      PB.strokeStyle='#c8a2e0';PB.lineWidth=1;
+      PB.beginPath();PB.ellipse(cx-4.5,cy-0.5,4,3.2,0,0,TAU);PB.ellipse(cx+4.5,cy-0.5,4,3.2,0,0,TAU);PB.stroke();
+      PB.beginPath();PB.moveTo(cx-0.8,cy-1);PB.lineTo(cx+0.8,cy-1);PB.stroke();
+    }
+  }
+  if(cls==='mgr'){PB.fillStyle='#42e0ff';PB.beginPath();PB.arc(cx+11.5,cy+1,1.6,0,TAU);PB.fill();} // блютуз
+  // нос (тень) и рот
+  PB.fillStyle='rgba(0,0,0,0.18)';
+  PB.beginPath();PB.ellipse(cx+0.8,cy+3.4,1.1,1.7,0,0,TAU);PB.fill();
+  PB.strokeStyle='rgba(90,40,30,0.75)';PB.lineWidth=1.3;
+  PB.beginPath();
+  if(cls==='mgr'){PB.moveTo(cx-2,cy+6.5);PB.quadraticCurveTo(cx+1,cy+7.8,cx+3.5,cy+6);} // самодовольная ухмылка
+  else if(cls==='dev'){PB.moveTo(cx-2,cy+7);PB.lineTo(cx+2,cy+7);}
+  else if(cls==='mkt'){PB.moveTo(cx-3,cy+6);PB.quadraticCurveTo(cx,cy+8.5,cx+3,cy+6);}
+  else{PB.moveTo(cx-2,cy+6.3);PB.quadraticCurveTo(cx,cy+7.6,cx+2,cy+6.3);}
+  PB.stroke();
+  if(cls==='dsn'){
+    PB.fillStyle='rgba(212,106,142,0.4)';
+    PB.beginPath();PB.arc(cx-8,cy+3,1.8,0,TAU);PB.arc(cx+8,cy+3,1.8,0,TAU);PB.fill();
+    PB.fillStyle='#ffcf5c';PB.beginPath();PB.arc(cx+12,cy+2,1.4,0,TAU);PB.fill(); // серьга
+  }
+  // пиксельный апскейл на карточку
+  c.imageSmoothingEnabled=false;
+  c.drawImage(PBUF,0,0,64,52,0,0,W,H);
+  // скан-полосы для стиля
+  c.fillStyle='rgba(0,0,0,0.16)';
   for(var sy=0;sy<H;sy+=3)c.fillRect(0,sy,W,1);
 }
 function renderClassPreviews(){
