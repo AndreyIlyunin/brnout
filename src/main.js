@@ -140,7 +140,6 @@ window.addEventListener('blur',function(){
 // ============================== init ==============================
 function resize(){
   var r=root.getBoundingClientRect();
-  root.classList.toggle('zlow', r.height < 560); // портрет телефона: компактный тач-кластер
   DPR=Math.min(2,window.devicePixelRatio||1);
   cv.width=Math.max(320,Math.round(r.width*DPR));
   cv.height=Math.max(240,Math.round(r.height*DPR));

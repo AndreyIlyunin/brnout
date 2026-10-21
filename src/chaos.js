@@ -160,7 +160,13 @@ function updateChaos(dt){
     if(st.t>=st.dur){
       var tgt=null;
       for(var pi2=0;pi2<G.players.length;pi2++)if(G.players[pi2].id===st.tgtId)tgt=G.players[pi2];
-      if(tgt&&!tgt.dead)addBurnout(tgt,st.dmg);
+      // честный снаряд: попал, только если игрок в 30px от точки прибытия (успел уйти — промах)
+      if(tgt&&!tgt.dead&&Math.hypot(tgt.x-st.tx,tgt.y-st.ty)<30){
+        addBurnout(tgt,st.dmg,'stone');
+        stoneImpact(tgt.x,tgt.y); // эффект там, где игрок, а не где был снапшот
+      }else if(tgt){
+        stoneImpact(st.tx,st.ty); // видимый промах
+      }
       STONES.splice(i,1);
     }
   }
@@ -224,18 +230,22 @@ function drawDebris(){
       ctx.fillStyle='#14171c';ctx.fillRect(-10,-4,14,9);
       if(d.vx>0){ctx.fillStyle='rgba(150,190,220,0.35)';ctx.fillRect(-8,-3,10,7);}
     }else if(d.kind==='stone'){
+      // угроза читается ДО попадания: пунктир к точке прибытия + оранжевая зона
+      ctx.strokeStyle='rgba(255,138,61,'+(0.3+0.2*Math.sin(G.t*10)).toFixed(2)+')';
+      ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.tx,d.ty);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle='rgba(255,138,61,0.16)';
+      ctx.beginPath();ctx.arc(d.tx,d.ty,13+3*Math.sin(G.t*8),0,TAU);ctx.fill();
+      ctx.strokeStyle='rgba(255,170,80,0.8)';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(d.tx,d.ty,10,0,TAU);ctx.stroke();
+      // само слово: оранжево-красное, пульсирует (серый = фон, так не читается)
       var k=Math.min(1,d.t/d.dur);
-      var sc=1+Math.sin(k*Math.PI)*0.25;
-      ctx.scale(sc,sc);
-      ctx.font='bold 17px Georgia';
-      ctx.fillStyle='rgba(0,0,0,0.45)';
-      ctx.fillText(d.word,2,6);
-      var g=ctx.createLinearGradient(0,-14,0,10);
-      g.addColorStop(0,'#9aa0a8');g.addColorStop(0.5,'#6e747c');g.addColorStop(1,'#4a4f57');
-      ctx.fillStyle=g;
-      ctx.fillText(d.word,0,4);
-      ctx.strokeStyle='rgba(30,33,38,0.8)';ctx.lineWidth=0.8;
-      ctx.strokeText(d.word,0,4);
+      var wx=d.sx+(d.tx-d.sx)*k,wy=d.sy+(d.ty-d.sy)*k;
+      ctx.font='bold '+(15+3*Math.sin(G.t*12))+'px Georgia,serif';
+      ctx.strokeStyle='rgba(40,10,4,0.9)';ctx.lineWidth=3;
+      ctx.strokeText(d.word,wx,wy);
+      ctx.fillStyle=(k>0.75)?'#ff5f45':'#ff9a3d';
+      ctx.fillText(d.word,wx,wy);
     }
     ctx.restore();
   }
@@ -250,14 +260,7 @@ function drawSouls(){
     var k4=1-d.t/d.life,al4=0.85*k4;
     var agony=d.mood==='agony';
     ctx.save();
-    if(agony){ // корчится в муках: дрожь и рывки
-      d.x+=Math.sin(d.t*22)*0.5;
-      ctx.translate(d.x+Math.sin(d.t*18)*3,d.y+Math.abs(Math.sin(d.t*9))*-4);
-      ctx.rotate(Math.sin(d.t*15)*0.25);
-      al4*= (0.75+0.25*Math.abs(Math.sin(d.t*11)));
-    }else{
-      ctx.translate(d.x,d.y);
-    }
+    ctx.translate(d.x,d.y);
     ctx.globalCompositeOperation='lighter';
     if(d.elite){
       ctx.strokeStyle='rgba(255,207,92,'+(al4*0.6)+')';ctx.lineWidth=2;

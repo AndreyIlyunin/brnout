@@ -8,13 +8,14 @@ function startWave(){
   var w=G.wave;
   G.spawnQ.length=0;
   var sprintName=SPRINTNAMES[(R()*SPRINTNAMES.length)|0];
-  var ni=Math.min(4+3*w,34),nd=w>=2?Math.min(2*(w-1),12):0;
+  var ni=(w===1)?5:Math.min(4+3*w,34),nd=w>=2?Math.min(2*(w-1),12):0;
   var bossWave=(w===5)||(w>5&&(w-5)%5===0);
   if(bossWave){ni=Math.min(ni,5);nd=Math.min(nd,2);spawnBoss();}
   for(var i=0;i<ni;i++)G.spawnQ.push('intern');
   for(i=0;i<nd;i++)G.spawnQ.push('deadline');
   for(i=G.spawnQ.length-1;i>0;i--){var j=(R()*(i+1))|0;var tmp=G.spawnQ[i];G.spawnQ[i]=G.spawnQ[j];G.spawnQ[j]=tmp;}
   G.spawnT=0.14;
+  if(w===2)msg('Стажёры выучили новые слова — уходи с линии броска!',5);
   if(bossWave)msg('СПРИНТ '+w+' · «'+MAPTHEME.name+'» · АУДИТ НАЧИНАЕТСЯ',4);
   else msg('Спринт '+w+' · «'+MAPTHEME.name+'» · '+sprintName+': '+ni+' стажёров'+(nd?', '+nd+' дедлайнов':'')+'. ДЕДЛАЙН УСКОРЯЕТСЯ!');
   G.rushT=4;
@@ -118,12 +119,13 @@ function spendCoffee(p,n){
   if(p.coffee<n){floatText(p.x,p.y-30,'НЕ ХВАТАЕТ КОФЕ','#d29922',12);return false;}
   p.coffee-=n;return true;
 }
-function addBurnout(p,n){
+function addBurnout(p,n,src){
   if(p.shield>0){floatText(p.x,p.y-30,'заблокировано созвоном','#7aa2c8',12);return;}
   if(p.inv>0)return;
   if(G.combo>2)floatText(p.x,p.y-52,'комбо сброшено','#8b949e',10);
   G.combo=0;G.comboT=0;
   p.burnout+=n;p.inv=0.4;p.flash=1;G.shake+=4;SFX.thump();
+  if(window.__tm&&p===localPlayer())__tm.hurt=(__tm.hurt||0)+n,(__tm.src=__tm.src||{})[src||'mob']=((__tm.src[src||'mob']||0)+n);
   floatText(p.x,p.y-34,'+'+Math.round(n)+' выгорания','#e5534b',14);
   if(p.burnout>=100){
     p.dead=true;p.respT=0;
@@ -234,6 +236,7 @@ function dramaOfDeath(x,y,tp,elite){
 }
 function killMob(m){
   addXp((m.type==='deadline'?9:6)*(m.elite?2:1),m.x,m.y);
+  for(var sci=0;sci<G.players.length;sci++)G.players[sci].superC=Math.min(1,(G.players[sci].superC||0)+(m.elite?0.5:0.22)); // СУПЕР-заряд (BS)
   NET.events.push({k:'die',x:Math.round(m.x),y:Math.round(m.y),tp:m.type,elite:m.elite?1:0});
   // комбо: серия убийств без получения урона
   G.combo=Math.min(9,(G.combo||0)+1);G.comboT=3;

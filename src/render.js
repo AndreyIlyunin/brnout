@@ -190,14 +190,17 @@ function drawWorld(){
       ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(4.2,-4.2,0.9,0,TAU);ctx.fill();
       }
     }else{
-      // JIRA-тикет: крупный читаемый логотип
+      // JIRA-тикет: карточка кувыркается по полёту, шеврон Jira всегда вертикален и вписан
       var fa2=Math.atan2(pj.vy,pj.vx);
-      ctx.rotate(fa2-pj.rot+Math.sin((pj.rot||0)*3+G.t*8)*0.15);
-      ctx.fillStyle='#fbfcfe';rr(ctx,-13,-8,26,16,3);ctx.fill();
-      ctx.strokeStyle='#2684FF';ctx.lineWidth=2;rr(ctx,-13,-8,26,16,3);ctx.stroke();
-      ctx.fillStyle='#2684FF';ctx.fillRect(-13,-8,26,4);
-      ctx.save();ctx.translate(0,1.5);
-      drawJiraIcon(ctx,2.1);
+      var tilt=fa2-pj.rot+Math.sin((pj.rot||0)*3+G.t*8)*0.15;
+      ctx.rotate(tilt);
+      ctx.fillStyle='#fbfcfe';rr(ctx,-14,-9,28,18,3);ctx.fill();
+      ctx.strokeStyle='#2684FF';ctx.lineWidth=2;rr(ctx,-14,-9,28,18,3);ctx.stroke();
+      ctx.fillStyle='#2684FF';ctx.fillRect(-14,-9,28,4);
+      ctx.save();
+      ctx.rotate(-tilt);          // глиф держим вертикально к экрану, как логотип
+      ctx.translate(0,0.5);
+      drawJiraIcon(ctx,1.28);     // вписан в карточку (не вылезает за края)
       ctx.restore();
     }
     ctx.restore();
@@ -475,7 +478,7 @@ function drawHUD(){
     {n:'уворот',cd:p.cdD||0,cdm:2.6,cost:0},
     {n:C.ult.n,cd:Math.max(p.cdQ||0,p.qT||0),cdm:C.ult.cd,cost:C.ult.cost},
     {n:C.sk.n,cd:p.cdS||0,cdm:C.sk.cd,cost:C.sk.cost},
-    {n:'АБСОЛЮТ',cd:G.wave<G.ultAt?-1:Math.max(p.cdU||0,0),cdm:25,cost:40}
+    {n:'СУПЕР',cd:G.wave<G.ultAt?-1:Math.max(p.cdU||0,0),cdm:25,cost:0,chg:p.superC||0}
   ];
   var slotW=isTouch?48:66,gap=isTouch?5:7;
   var sx0=isTouch?12:W/2-((slots.length*(slotW+gap)-8)/2);
@@ -484,13 +487,18 @@ function drawHUD(){
     hctx.strokeStyle='#333b47';rr(ctx,x,sy,slotW,52,6);hctx.stroke();
     if(s.cd>0){hctx.fillStyle='rgba(0,0,0,0.6)';hctx.fillRect(x,sy,slotW,52*Math.min(1,s.cd/s.cdm));}
     hctx.font=pixFont(11,true);hctx.fillStyle='#d29922';hctx.textAlign='center';
-    var KL=['ЛКМ','ПКМ','ПРОБЕЛ','F','Q','R'];
-    hctx.fillText('['+KL[i]+']',x+slotW/2,sy+16);
+    var KL=isTouch?['АТК','ПРИЁМ','РЫВОК','СКИЛ','УЛЬТА','R']:['ЛКМ','ПКМ','ПРОБЕЛ','F','Q','R'];
+    hctx.fillText(isTouch?KL[i]:'['+KL[i]+']',x+slotW/2,sy+16);
     hctx.font=pixFont(11);
-    if(s.cd===-1){ // ульта ещё закрыта
+    if(s.cd===-1){ // СУПЕР ещё закрыт
       hctx.fillStyle='rgba(0,0,0,0.55)';hctx.fillRect(x,sy,slotW,52);
       hctx.fillStyle='#6e7681';hctx.fillText('с '+G.ultAt+'-го',x+slotW/2,sy+30);
-    }else{
+    }else if(s.chg!==undefined){ // сектор заряда СУПЕРа
+      hctx.fillStyle='rgba(0,0,0,0.5)';hctx.fillRect(x,sy+36,slotW,16);
+      hctx.fillStyle=(p.superC>=1)?'#ffce00':'#8a7a2a';
+      hctx.fillRect(x+2,sy+38,(slotW-4)*clamp(p.superC,0,1),12);
+      if(p.superC>=1){hctx.fillStyle='#1c1600';hctx.font=pixFont(9,true);hctx.fillText('ГОТОВ',x+slotW/2,sy+47);}
+    }else if(!isTouch){
       hctx.fillStyle='#c9d1d9';
       hctx.fillText(s.n,x+slotW/2,sy+30);
     }
@@ -502,8 +510,6 @@ function drawHUD(){
     hctx.fillStyle='rgba(139,209,124,'+(0.7+0.3*Math.sin(G.t*10))+')';hctx.font='bold 11px Arial';
     hctx.fillText('АСАП! +55%',bx+bw+(narrow?64:80),by-6);
   }
-  if(isTouch&&localNearCoffee())document.getElementById('btnCoffee').classList.remove('hidden');
-  else document.getElementById('btnCoffee').classList.add('hidden');
   // === спринт + враги: явный счётчик, чтобы смена локации не была внезапной ===
   var remG=(NET.mode==='guest')?VIEW.mobs.length:(G.spawnQ.length+G.mobs.length);
   var cleared=G.waveState==='cleared';
@@ -575,6 +581,13 @@ function drawHUD(){
       hctx.fillStyle='#8bd17c';hctx.fillRect(x0+18,16,80*clamp(tp.coffee/(tp.coffeeMax||100),0,1),3);
     }
   }
+  if(isTouch){ // КД-затемнение и заряд СУПЕРа на тач-кнопках
+    var tb={btnAlt:p.cd2||0,btnSkill:p.cdD||0,btnSkill2:p.cdS||0,btnFU:Math.max(p.cdQ||0,p.qT||0),btnR:p.cdU||0};
+    for(var tk in tb){var el=document.getElementById(tk);if(el)el.classList.toggle('oncd',tb[tk]>0.05);}
+    var rBtn=document.getElementById('btnR');
+    if(rBtn){rBtn.classList.toggle('nochg',(p.superC||0)<1||G.wave<G.ultAt);
+      rBtn.style.background='radial-gradient(circle at 50% 120%,rgba(255,206,0,'+(0.15+0.5*clamp(p.superC||0,0,1)).toFixed(2)+'),rgba(60,50,10,.8))';}
+  }
   var boss=(NET.mode==='guest')?VIEW.boss:G.boss;
   if(boss){
     var hpF=(NET.mode==='guest')?(boss.hpF||0):clamp(boss.hp/boss.hpMax,0,1);
@@ -616,7 +629,7 @@ function drawHUD(){
   // === межспринтовая пауза: НЕ блокирует — собирайте лут; старт кнопкой/Enter/таймером ===
   if(G.waveState==='cleared'&&G.state==='playing'){
     var st=G.interStats||{w:G.wave,ki:0,kd:0,okr:G.okr,co:(p.coins||0)};
-    var pw=Math.min(620,W-40),px0=W/2-pw/2,py0=Math.max(12,H/2-170);
+    var pw=Math.min(620,W-40),px0=W/2-pw/2,py0=10; // сверху: центр свободен для боя и лута
     hctx.fillStyle='rgba(13,10,24,0.93)';rr(hctx,px0,py0,pw,218,14);hctx.fill();
     hctx.strokeStyle='rgba(232,58,156,0.8)';hctx.lineWidth=2.5;rr(hctx,px0,py0,pw,218,14);hctx.stroke();
     hctx.strokeStyle='rgba(31,196,174,0.35)';hctx.lineWidth=1;rr(hctx,px0+6,py0+6,pw-12,206,10);hctx.stroke();
@@ -644,11 +657,6 @@ function drawHUD(){
     window.__nextBtnRect={x:bx0,y:by0,w:bw,h:34}; // хит-зона для тача
     hctx.textAlign='left';
     if(hov&&mouse.down)G.interT=Math.min(G.interT,0.05);
-    var nb=document.getElementById('btnNext');
-    if(nb)nb.classList.toggle('hidden',!isTouch);
-  }else{
-    var nb2=document.getElementById('btnNext');
-    if(nb2&&!nb2.classList.contains('hidden'))nb2.classList.add('hidden');
   }
   if(p.dead){
     hctx.fillStyle='rgba(10,13,18,0.8)';rr(ctx,W/2-130,H/2-20,260,44,6);hctx.fill();
@@ -711,6 +719,13 @@ function drawMinimap(){
   var mobs=worldPool('mobs');
   hctx.fillStyle='#c23b32';
   for(i=0;i<mobs.length;i++)if(tileVis(mobs[i].x,mobs[i].y))hctx.fillRect(mx+mobs[i].x*sc-1,my+mobs[i].y*sc-1,2.5,2.5);
+  if(isTouch){ // КД-затемнение и заряд СУПЕРа на тач-кнопках
+    var tb={btnAlt:p.cd2||0,btnSkill:p.cdD||0,btnSkill2:p.cdS||0,btnFU:Math.max(p.cdQ||0,p.qT||0),btnR:p.cdU||0};
+    for(var tk in tb){var el=document.getElementById(tk);if(el)el.classList.toggle('oncd',tb[tk]>0.05);}
+    var rBtn=document.getElementById('btnR');
+    if(rBtn){rBtn.classList.toggle('nochg',(p.superC||0)<1||G.wave<G.ultAt);
+      rBtn.style.background='radial-gradient(circle at 50% 120%,rgba(255,206,0,'+(0.15+0.5*clamp(p.superC||0,0,1)).toFixed(2)+'),rgba(60,50,10,.8))';}
+  }
   var boss=(NET.mode==='guest')?VIEW.boss:G.boss;
   if(boss){hctx.fillStyle='#e5534b';hctx.beginPath();hctx.arc(mx+boss.x*sc,my+boss.y*sc,4,0,TAU);hctx.fill();}
   var players=worldPool('players');

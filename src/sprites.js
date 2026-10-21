@@ -349,6 +349,14 @@ function drawIntern(m,remote){
   var elite=m.elite;
   drawHumanoid(ctx,{x:m.x,y:m.y,face:(m.face||0)+wob,step:remote?G.t*2.6:(m.step||m.tilt||0),look:L,cls:'intern',scale:elite?1.55:1.15,moving:true,
     weapon:'laptop',casting:(m.cf>0)?'type':null});
+  if(m.wu>0){ // замах слова: маркер над головой раздувается
+    var wprog=1-m.wu/0.5;
+    ctx.font='bold '+Math.round(10+8*wprog)+'px Georgia,serif';
+    ctx.fillStyle=wprog<0.6?'#8b949e':'#ff9a3d';
+    ctx.globalAlpha=0.92;
+    ctx.fillText('!',m.x,m.y-30-4*Math.sin(wprog*Math.PI));
+    ctx.globalAlpha=1;
+  }
   if(elite){
     ctx.strokeStyle='rgba(200,120,60,'+(0.5+0.3*Math.sin(G.t*6))+')';ctx.lineWidth=2;
     ctx.beginPath();ctx.arc(m.x,m.y,20,0,TAU);ctx.stroke();

@@ -101,6 +101,7 @@ function guestUpdate(dt){
   var i,k=1-Math.exp(-10*dt);
   for(i=0;i<VIEW.players.length;i++){var p=VIEW.players[i],tg=p.tgt;
     if(!tg)continue;
+    if(tg.sc!==undefined)p.superC=tg.sc; // заряд СУПЕРа от хоста
     var isMe=p.id===NET.myId;
     if(isMe&&G.state==='playing'){
       var l=Math.hypot(INPUT.ix,INPUT.iy);
@@ -185,7 +186,7 @@ function sendSnapshot(){
   if(!NET.conns.length)return;
   var p=G.players.map(function(pl,i){return{id:pl.id,cls:pl.cls,x:Math.round(pl.x),y:Math.round(pl.y),face:Math.round(pl.aim*100)/100,
     burn:Math.round(pl.burnout),cof:Math.round(pl.coffee),sh:Math.round(pl.shield*10)/10,qt:Math.round(pl.qT*10)/10,
-    dd:pl.dead?1:0,c1:Math.round(pl.cd1*100)/100,c2:Math.round(pl.cd2*100)/100,cq:Math.round(pl.cdQ*10)/100,cs:Math.round(pl.cdS*10)/100,cm:pl.coffeeMax,
+    dd:pl.dead?1:0,c1:Math.round(pl.cd1*100)/100,c2:Math.round(pl.cd2*100)/100,cq:Math.round(pl.cdQ*10)/100,cs:Math.round(pl.cdS*10)/100,cm:pl.coffeeMax,sc:Math.round(clamp(pl.superC||0,0,1)*100)/100,
     mv:pl.moving?1:0,st:Math.round(pl.step*10)/10,as:Math.round(pl.haste*10)/10,ct:Math.round(pl.castT*10)/10,co:pl.coins||0};});
   var m=G.mobs.map(function(mo){return[mo.id,mo.type==='intern'?0:1,Math.round(mo.x),Math.round(mo.y),Math.round(clamp(mo.hp/mo.hpMax,0,1)*100),mo.stun>0?1:0,mo.tint||0,Math.round(mo.face*100)/100,
     Math.round((mo.ch||0)*10)/10,Math.round((mo.cf||0)*10)/10,mo.mk>0?1:0,mo.chSrc===undefined?-1:mo.chSrc,mo.elite?1:0];});

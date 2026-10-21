@@ -153,8 +153,6 @@ bindBtn('btnAlt',function(){INPUT.f2=true;},function(){INPUT.f2=false;});
 bindBtn('btnSkill',function(){INPUT.sk=true;},function(){INPUT.sk=false;});   // ПРОБЕЛ: уворот
 bindBtn('btnSkill2',function(){INPUT.sk2=true;},function(){INPUT.sk2=false;});  // Q
 bindBtn('btnFU',function(){INPUT.fk=true;},function(){INPUT.fk=false;});        // F: класс-ульта
-bindBtn('btnNext',function(){if(G.state==='playing'&&G.waveState==='cleared')G.interT=0.05;},function(){});
-bindBtn('btnCoffee',function(){INPUT.cf=true;},function(){INPUT.cf=false;});
 bindBtn('btnR',function(){INPUT.ultTap=true;},function(){});
 (function(){
   var fs=document.getElementById('btnFS');
