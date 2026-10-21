@@ -150,14 +150,17 @@ bindBtn('btnR',function(){INPUT.ultTap=true;},function(){});
   var fs=document.getElementById('btnFS');
   var fakeOK=true; // iOS Safari не даёт fullscreen элементам — используем псевдофуллскрин
   function toggle(){
-    if(document.fullscreenElement||document.webkitFullscreenElement){
-      (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+    if(document.fullscreenElement||document.webkitFullscreenElement||root.classList.contains('zfsfake')){
+      root.classList.remove('zfsfake');
+      if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);
       return;
     }
     if(root.requestFullscreen||root.webkitRequestFullscreen){
       var pr=(root.requestFullscreen||root.webkitRequestFullscreen).call(root);
-      if(pr&&pr.catch)pr.catch(function(){root.classList.add('zfsfake');});
       if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){});
+      setTimeout(function(){ // тихий отказ вебвью — включаем псевдофуллскрин
+        if(!(document.fullscreenElement||document.webkitFullscreenElement))root.classList.add('zfsfake');
+      },350);
     }else if(fakeOK){
       root.classList.toggle('zfsfake'); // CSS-фуллскрин
     }

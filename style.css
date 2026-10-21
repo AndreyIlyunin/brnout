@@ -49,10 +49,6 @@
 #burnout #joyk{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(230,237,243,.35);}
 #burnout .tbtn{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(33,38,45,.72);border:2px solid rgba(110,118,129,.8);color:#e6edf3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;letter-spacing:.5px;touch-action:none;}
 #burnout #btnAtk{right:18px;bottom:64px;width:84px;height:84px;border-color:rgba(229,83,75,.85);font-size:13px;}
-#burnout #btnAlt{right:112px;bottom:28px;width:62px;height:62px;}
-#burnout #btnSkill{right:118px;bottom:104px;width:62px;height:62px;border-color:rgba(210,153,52,.85);}
-#burnout #btnSkill2{right:196px;bottom:36px;width:56px;height:56px;border-color:rgba(122,162,200,.85);font-size:11px;}
-#burnout #btnCoffee{right:30px;bottom:170px;width:62px;height:62px;border-color:rgba(63,185,80,.9);}
 #burnout .tbtn:active{background:rgba(229,83,75,.55);}
 #burnout .tb{width:66px;height:66px;font-size:11px;white-space:nowrap;}
 #burnout .tb-alt{right:104px;bottom:96px;border-color:rgba(66,224,255,.85);}
