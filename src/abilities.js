@@ -6,9 +6,10 @@ function tryPrimary(p){
   if(p.cls==='mgr'||p.cls==='mkt'){
     p.cd1=C.s1.cd;p.atkT=0.18;
     var a=p.aim,spd=p.cls==='mgr'?470:540;
-    G.projs.push({id:++G.pkSeq,kind:p.cls==='mgr'?'ticket':'plane',x:p.x+Math.cos(a)*22,y:p.y+Math.sin(a)*22,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg:(p.cls==='mgr'?9:8)*p.dmgMult,life:1.5,rot:R()*TAU});
+    var pk2=p.cls==='mgr'?'ticket':['tw','tg','ig'][(R()*3)|0]; // твит / телеграм / инстаграм
+    G.projs.push({id:++G.pkSeq,kind:pk2,x:p.x+Math.cos(a)*22,y:p.y+Math.sin(a)*22,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg:(p.cls==='mgr'?9:8)*p.dmgMult,life:1.5,rot:R()*TAU});
     if(p.cls==='mgr'){SFX.whoosh();SFX.stapler();}
-    else{SFX.tweet();}
+    else{SFX.notif();}
   }else{
     p.cd1=C.s1.cd;p.atkT=0.18;
     var arc=p.cls==='dsn'?110:130,rad=p.cls==='dsn'?74:86;

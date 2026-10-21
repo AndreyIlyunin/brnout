@@ -188,7 +188,7 @@ test('души: настроение agony|relief', () => {
 });
 test('классовые звуки определены', () => {
   const au = fs2.readFileSync('src/audio.js', 'utf8');
-  for (const s of ['stapler', 'thudFlesh', 'tweet', 'vacuum', 'scrch', 'bell', 'soulAgony'])
+  for (const s of ['stapler', 'thudFlesh', 'notif', 'vacuum', 'scrch', 'bell', 'soulAgony'])
     ok(au.includes(s + ':function'), s);
 });
 test('ротация локаций: regenLocation существует и чистит', () => {

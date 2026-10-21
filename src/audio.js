@@ -43,7 +43,12 @@ function noiz(dur,vol,freq,q,delay){
 var SFX={
   stapler:function(){tone(1250,0.03,'square',0.2);tone(950,0.04,'square',0.16,0,0.045);noiz(0.04,0.14,2400,3);},
   thudFlesh:function(){tone(80,0.16,'sine',0.5,-35);noiz(0.1,0.22,240,0.8);},
-  tweet:function(){tone(950,0.06,'sine',0.2,350);tone(1500,0.07,'sine',0.17,250,0.08);tone(2100,0.05,'sine',0.1,300,0.16);},
+  notif:function(){ // звуки уведомлений телефона: случайно один из трёх
+    var n=(R()*3)|0;
+    if(n===0){tone(1319,0.09,'triangle',0.15);tone(1047,0.13,'triangle',0.13,0,0.08);}       // «ду-дин»
+    else if(n===1){tone(520,0.05,'sine',0.16,400);tone(1040,0.08,'sine',0.11,0,0.05);}        // «поп» телеграма
+    else{tone(880,0.05,'sine',0.14);tone(1175,0.07,'sine',0.12,0,0.06);}                      // двойной блип
+  },
   vacuum:function(){noiz(0.34,0.2,420,0.7);noiz(0.3,0.14,900,1.2,0.06);tone(140,0.32,'sawtooth',0.07,110);},
   scrch:function(){noiz(0.05,0.2,3200,2.5);tone(2200,0.05,'square',0.09,-700);},
   bell:function(){tone(660,0.5,'triangle',0.2,-15);tone(1320,0.35,'sine',0.1,-20,0.02);},

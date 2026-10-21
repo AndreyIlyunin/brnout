@@ -32,8 +32,9 @@ function guestApplySnapshot(s){
   var newPr=[];
   for(i=0;i<s.pr.length;i++){var spr=s.pr[i];var old=null;
     for(j=0;j<VIEW.projs.length;j++)if(VIEW.projs[j].id===spr[0]){old=VIEW.projs[j];break;}
-    if(old){old.tgt={x:spr[1],y:spr[2]};old.vx=spr[3];old.vy=spr[4];newPr.push(old);}
-    else newPr.push({id:spr[0],x:spr[1],y:spr[2],vx:spr[3],vy:spr[4],tgt:null,rot:R()*TAU});
+    var kname=spr[1]===0?'ticket':(spr[1]===2?'tg':(spr[1]===3?'ig':'tw'));
+    if(old){old.kind=kname;old.tgt={x:spr[2],y:spr[3]};old.vx=spr[4];old.vy=spr[5];newPr.push(old);}
+    else newPr.push({id:spr[0],kind:kname,x:spr[2],y:spr[3],vx:spr[4],vy:spr[5],tgt:null,rot:R()*TAU});
   }
   VIEW.projs=newPr;
   VIEW.pickups=s.pk.map(function(p){return{id:p[0],kind:p[1],x:p[2],y:p[3],t:G.t};});
@@ -162,7 +163,7 @@ function guestLocalAttackCosmetics(){
   if(!me)return;
   var C=CLS[me.cls]||CLS.mgr;
   if(me.cls==='mgr'||me.cls==='mkt'){
-    if(INPUT.f1&&me.cd1<=0){me.cd1=C.s1.cd;me.atkT=0.18;if(me.cls==='mgr'){SFX.whoosh();SFX.stapler();}else SFX.tweet();}
+    if(INPUT.f1&&me.cd1<=0){me.cd1=C.s1.cd;me.atkT=0.18;if(me.cls==='mgr'){SFX.whoosh();SFX.stapler();}else SFX.notif();}
     if(INPUT.f2&&me.cd2<=0){me.cd2=C.s2.cd;me.atkT=0.25;
       if(me.cls==='mgr'){G.fx.push({type:'slash',x:me.x,y:me.y,a:me.aim,arc:100*Math.PI/180,rad:80,t:0,life:0.18,big:true});SFX.thudFlesh();}
       else{G.fx.push({type:'ring',x:me.x,y:me.y,rad:240,radMax:40,t:0,life:0.35,purple:true});SFX.whoosh();}
@@ -191,7 +192,8 @@ function sendSnapshot(){
   var b=null;
   if(G.boss)b={x:Math.round(G.boss.x),y:Math.round(G.boss.y),hp:Math.round(clamp(G.boss.hp/G.boss.hpMax,0,1)*100),ph:G.boss.phase,f:Math.round(G.boss.face*100)/100,
     wu:G.boss.windup>0?1:0,wt:Math.round(G.boss.wuT*100)/100,tx:Math.round(G.boss.tx),ty:Math.round(G.boss.ty)};
-  var pr=G.projs.map(function(q){return[q.id,Math.round(q.x),Math.round(q.y),Math.round(q.vx),Math.round(q.vy)];});
+  var KINDIDX={ticket:0,tw:1,tg:2,ig:3,plane:1};
+  var pr=G.projs.map(function(q){return[q.id,KINDIDX[q.kind]===undefined?0:KINDIDX[q.kind],Math.round(q.x),Math.round(q.y),Math.round(q.vx),Math.round(q.vy)];});
   var pk=G.pickups.map(function(q){return[q.id,q.kind,Math.round(q.x),Math.round(q.y)];});
   var z=G.zones.map(function(zz){return[Math.round(zz.x),Math.round(zz.y),Math.round(zz.w),Math.round(zz.h),Math.round(zz.t*10)/10];});
   var cf=COFFEES.map(function(c){return c.charges;});

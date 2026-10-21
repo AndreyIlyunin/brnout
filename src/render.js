@@ -125,9 +125,10 @@ function drawWorld(){
   for(i=0;i<players.length;i++)drawPlayer(players[i],players[i].id===NET.myId);
   for(i=0;i<projs.length;i++){var pj=projs[i];
     ctx.save();ctx.translate(pj.x,pj.y);ctx.rotate(pj.rot||0);
-    if(pj.kind==='plane'){ // твит: птичка
+    if(pj.kind==='tw'||pj.kind==='tg'||pj.kind==='ig'){ // соц-снаряды маркетолога
       var fa=Math.atan2(pj.vy,pj.vx);
-      ctx.rotate(fa-pj.rot);
+      ctx.rotate(fa-pj.rot+Math.sin((pj.rot||0)*3+G.t*8)*0.15);
+      if(pj.kind==='tw'){ // твит: птичка
       ctx.fillStyle='#1d9bf0';
       ctx.beginPath();ctx.ellipse(0,0,7,5.4,-0.2,0,TAU);ctx.fill();
       ctx.beginPath();ctx.arc(4.6,-2.6,3,0,TAU);ctx.fill();
@@ -137,6 +138,23 @@ function drawWorld(){
       ctx.strokeStyle='#e8f6ff';ctx.lineWidth=1.4;
       ctx.beginPath();ctx.moveTo(-6.5,1.5);ctx.quadraticCurveTo(-9,3.5,-7,5);ctx.stroke();
       ctx.fillStyle='#0c2a40';ctx.beginPath();ctx.arc(5.4,-3,0.9,0,TAU);ctx.fill();
+      }else if(pj.kind==='tg'){ // телеграм: бумажный самолётик
+      ctx.fillStyle='#2aabee';
+      ctx.beginPath();ctx.moveTo(-9,-5);ctx.lineTo(10,0);ctx.lineTo(-9,5);ctx.lineTo(-5.5,0);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#1d84c9';
+      ctx.beginPath();ctx.moveTo(-5.5,0);ctx.lineTo(10,0);ctx.lineTo(-9,5);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#e8f6ff';
+      ctx.beginPath();ctx.moveTo(-6.5,-1.2);ctx.lineTo(6,-0.4);ctx.lineTo(-6.5,1.4);ctx.closePath();ctx.fill();
+      }else{ // инстаграм: квадратик-камера
+      var ig=ctx.createLinearGradient(-8,-8,8,8);
+      ig.addColorStop(0,'#f5a24b');ig.addColorStop(0.5,'#e1306c');ig.addColorStop(1,'#a437c9');
+      ctx.fillStyle=ig;
+      rr(ctx,-7.5,-7.5,15,15,4.5);ctx.fill();
+      ctx.strokeStyle='#ffffff';ctx.lineWidth=1.6;
+      rr(ctx,-4.6,-4.6,9.2,9.2,3);ctx.stroke();
+      ctx.beginPath();ctx.arc(0,0,2.4,0,TAU);ctx.stroke();
+      ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(4.2,-4.2,0.9,0,TAU);ctx.fill();
+      }
     }else{
       // билет с жирафом: летит вдоль движения, слегка покачиваясь
       var fa2=Math.atan2(pj.vy,pj.vx);
