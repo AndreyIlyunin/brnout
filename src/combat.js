@@ -101,7 +101,7 @@ function spawnBoss(){
   if(!p)p=snapReachable({x:cx,y:cy});
   G.bossN++;
   bossStinger();
-  var bh=1100*(1+0.4*(G.bossN-1))*(1+0.25*(G.level-1));
+  var bh=550*(1+0.4*(G.bossN-1))*(1+0.25*(G.level-1));
   G.boss={type:'boss',x:p.x,y:p.y,r:44,hp:bh,hpMax:bh,spd:40,phase:1,
     atkCd:2.5,summonCd:8,tapeCd:11,windup:0,wuT:0,tx:0,ty:0,face:0,cd:0,step:0};
 }
