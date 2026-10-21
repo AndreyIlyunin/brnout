@@ -616,27 +616,32 @@ function drawHUD(){
   // === межспринтовая пауза: НЕ блокирует — собирайте лут; старт кнопкой/Enter/таймером ===
   if(G.waveState==='cleared'&&G.state==='playing'){
     var st=G.interStats||{w:G.wave,ki:0,kd:0,okr:G.okr,co:(p.coins||0)};
-    var pw=470,px0=W/2-pw/2,py0=14;
-    hctx.fillStyle='rgba(13,10,24,0.92)';rr(ctx,px0,py0,pw,96,10);hctx.fill();
-    hctx.strokeStyle='rgba(232,58,156,0.7)';hctx.lineWidth=2;rr(ctx,px0,py0,pw,96,10);hctx.stroke();
+    var pw=Math.min(620,W-40),px0=W/2-pw/2,py0=Math.max(12,H/2-170);
+    hctx.fillStyle='rgba(13,10,24,0.93)';rr(hctx,px0,py0,pw,218,14);hctx.fill();
+    hctx.strokeStyle='rgba(232,58,156,0.8)';hctx.lineWidth=2.5;rr(hctx,px0,py0,pw,218,14);hctx.stroke();
+    hctx.strokeStyle='rgba(31,196,174,0.35)';hctx.lineWidth=1;rr(hctx,px0+6,py0+6,pw-12,206,10);hctx.stroke();
     hctx.textAlign='center';
-    hctx.font=pixFont(19,true);hctx.fillStyle='#e6edf3';
-    hctx.fillText('СПРИНТ '+st.w+' ЗАКРЫТ — соберите лут',W/2,py0+26);
-    hctx.font=pixFont(12);hctx.fillStyle='#8b949e';
-    hctx.fillText('стажёров: '+st.ki+' · дедлайнов: '+st.kd+' · OKR: '+st.okr+' · ✦ '+st.co,W/2,py0+46);
-    hctx.font=pixFont(12,true);hctx.fillStyle='#1fc4ae';
-    hctx.fillText('→ «'+(G.nextTheme||'офис')+'»',W/2,py0+64);
+    hctx.font=pixFont(30,true);
+    hctx.strokeStyle='rgba(0,0,0,0.6)';hctx.lineWidth=4;
+    hctx.strokeText('СПРИНТ '+st.w+' ЗАКРЫТ',W/2,py0+44);
+    hctx.fillStyle='#e6edf3';hctx.fillText('СПРИНТ '+st.w+' ЗАКРЫТ',W/2,py0+44);
+    hctx.font=pixFont(16,true);hctx.fillStyle='#8bd17c';
+    hctx.fillText('соберите лут — время не тикает против вас',W/2,py0+70);
+    hctx.font=pixFont(18,true);hctx.fillStyle='#dfe6ee';
+    hctx.fillText('стажёров уволено: '+st.ki+'    ·    дедлайнов сгорело: '+st.kd,W/2,py0+106);
+    hctx.fillStyle='#ffcf5c';
+    hctx.fillText('OKR: '+st.okr+'    ·    ✦ '+st.co+'    ·    ур.'+G.level,W/2,py0+132);
+    hctx.font=pixFont(17,true);hctx.fillStyle='#1fc4ae';
+    hctx.fillText('→ следующая локация: «'+(G.nextTheme||'офис')+'»',W/2,py0+160);
     var left=Math.max(0,Math.ceil(G.interT));
-    // кнопка «запустить следующий спринт»
-    var bw=300,bx0=W/2-bw/2,by0=py0+72;
-    var hov=(mouse.x/DPR)>=bx0&&(mouse.x/DPR)<=bx0+bw&&(mouse.y/DPR)>=by0&&(mouse.y/DPR)<=by0+22;
-    hctx.fillStyle=hov?'rgba(63,185,80,0.9)':'rgba(26,58,42,0.9)';
-    rr(ctx,bx0,by0,bw,22,5);hctx.fill();
-    hctx.strokeStyle='#42e0aa';hctx.lineWidth=1.5;rr(ctx,bx0,by0,bw,22,5);hctx.stroke();
-    hctx.font=pixFont(12,true);hctx.fillStyle='#d8ffe8';
-    hctx.fillText('▶ ЗАПУСТИТЬ СЛЕДУЮЩИЙ СПРИНТ  [ENTER] · авто '+left+'с',W/2,by0+16);
+    var bw=Math.min(470,pw-40),bx0=W/2-bw/2,by0=py0+172;
+    var hov=(mouse.x/DPR)>=bx0&&(mouse.x/DPR)<=bx0+bw&&(mouse.y/DPR)>=by0&&(mouse.y/DPR)<=by0+34;
+    hctx.fillStyle=hov?'rgba(63,185,80,0.95)':'rgba(26,58,42,0.92)';
+    rr(hctx,bx0,by0,bw,34,8);hctx.fill();
+    hctx.strokeStyle='#42e0aa';hctx.lineWidth=2;rr(hctx,bx0,by0,bw,34,8);hctx.stroke();
+    hctx.font=pixFont(16,true);hctx.fillStyle='#d8ffe8';
+    hctx.fillText('▶ ЗАПУСТИТЬ СЛЕДУЮЩИЙ СПРИНТ [ENTER] · авто '+left+'с',W/2,by0+23);
     hctx.textAlign='left';
-    // тач/мышь клики по кнопке
     if(hov&&mouse.down)G.interT=Math.min(G.interT,0.05);
     var nb=document.getElementById('btnNext');
     if(nb)nb.classList.toggle('hidden',!isTouch);
