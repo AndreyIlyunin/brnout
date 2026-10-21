@@ -237,19 +237,25 @@ function drawHumanoidBody(c,o){
   // weapon at hold point (world space, in front)
   if(o.weapon)drawWeapon(c,o,s);
 }
-// JIRA-значок (Atlassian): голубой шеврон-стрела
+// JIRA-значок (Atlassian): фирменный двойной шеврон вверх в градиенте Jira-blue
 function drawJiraIcon(c,sc){
   c.save();c.scale(sc,sc);
-  c.fillStyle='#2684FF';
-  c.beginPath();
-  c.moveTo(-4.6,2.6);c.lineTo(-1.6,-5.4);c.lineTo(0.8,-5.4);c.lineTo(-2.2,2.6);
-  c.closePath();c.fill();
-  c.fillStyle='#0052CC';
-  c.beginPath();
-  c.moveTo(-1,2.6);c.lineTo(2.6,-2.2);c.lineTo(4.8,-2.2);c.lineTo(2.9,2.6);
-  c.closePath();c.fill();
-  c.fillStyle='#2684FF';
-  c.fillRect(-2.6,4,8,1.8);
+  var gr=c.createLinearGradient(-7,-6,7,8);
+  gr.addColorStop(0,'#2684FF');
+  gr.addColorStop(1,'#0052CC');
+  c.fillStyle=gr;
+  function chev(y0){ // полоса-шеврон толщиной 3.4
+    c.beginPath();
+    c.moveTo(-7.4,y0+4.2);
+    c.lineTo(-7.4,y0+1.2);
+    c.lineTo(0,y0-6);
+    c.lineTo(7.4,y0+1.2);
+    c.lineTo(7.4,y0+4.2);
+    c.lineTo(0,y0-2.6);
+    c.closePath();c.fill();
+  }
+  chev(2.4);   // верхний шеврон
+  chev(-2.6);  // нижний, чуть ниже — классическая «птичка» Jira
   c.restore();
 }
 function drawWeapon(c,o,s){
