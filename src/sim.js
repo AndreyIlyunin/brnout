@@ -60,7 +60,7 @@ function updatePlayer(p,dt){
   if(p.ult){p.ult=false;tryUlt(p);}
   if(p.cdD>0)p.cdD-=dt;
   for(i=0;i<COFFEES.length;i++){var cp=COFFEES[i];
-    if(cp.charges>0&&dist(p,cp)<60&&(p.burnout>2||p.coffee<p.coffeeMax-2)&&p.cf){drinkCoffee(p,cp);p.cf=false;}
+    if(cp.charges>0&&dist(p,cp)<58&&(p.burnout>2||p.coffee<p.coffeeMax-2)){drinkCoffee(p,cp);} // авто: подошёл — пьёшь
   }
 }
 // wall-slide steering: try direct, then angled steps, so mobs round corners instead of grinding walls
@@ -110,7 +110,7 @@ function updateMobs(dt){
         G.fx.push({type:'ember',x:m.x+R()*10-5,y:m.y+R()*10-5,vx:R()*20-10,vy:-30-R()*20,t:0,life:0.5,r:2+R()*3});
       }
       if(d<m.r+tgt.r+4){
-        addBurnout(tgt,16);
+        addBurnout(tgt,16,'deadline');
         G.fx.push({type:'ring',x:m.x,y:m.y,rad:6,radMax:76,t:0,life:0.35,orange:true});
         G.fx.push({type:'flash',x:m.x,y:m.y,r:60,t:0,life:0.22});
         for(var e2=0;e2<14;e2++)G.fx.push({type:'ember',x:m.x,y:m.y,vx:R()*260-130,vy:R()*260-130,t:0,life:0.6,r:2+R()*4});
@@ -126,10 +126,20 @@ function updateMobs(dt){
           var a2=(d>90&&flowDir(m.x,m.y)!==null)?flowDir(m.x,m.y):angTo(m,tgt);
           m.face=angTo(m,tgt);
           steerMove(m,Math.cos(a2),Math.sin(a2),m.spd*slow*dt);
-        }else if(m.cd<=0){
-          m.cd=0.95;
-          // passive-aggressive strike: words materialize as stone and fly at the hero
-          spawnStone(m.x,m.y-12,tgt.x,tgt.y,STONEWORDS[(R()*STONEWORDS.length)|0],10,tgt.id);
+        }else if(m.wu>0){ // телеграф замаха: слово над головой, звука и позы достаточно, чтобы уйти
+          m.wu-=dt;
+          if(m.wu<=0){
+            m.cd=1.4; // реже бросают
+            var inFlight=0;
+            for(var si=0;si<STONES.length;si++)if(STONES[si].tgtId===tgt.id)inFlight++;
+            if(inFlight<2){ // потолок: не более 2 слов в воздухе на игрока
+              var snapx=tgt.x,snapy=tgt.y; // снапшот в момент БРОСКА — увернуться можно
+              spawnStone(m.x,m.y-12,snapx,snapy,STONEWORDS[(R()*STONEWORDS.length)|0],(6+0.5*G.wave)|0,tgt.id);
+              SFX.swish&&SFX.swish();
+            }
+          }
+        }else if(m.cd<=0&&G.wave>=2){ // спринт-1 — стажёры ещё не выучили слова
+          m.wu=0.5;
         }
         if(!m.said&&d<300){m.said=true;if(R()<0.5)floatText(m.x,m.y-24,['а дизайн уже согласовали?','у меня один вопрос…','а куда нажимать?'][(R()*3)|0],'#8b949e',11);}
       }else{
@@ -165,7 +175,7 @@ function updateBoss(dt){
       aoeFurn(b.tx,b.ty,150+20*b.phase,60);
       var d=dist(p,{x:b.tx,y:b.ty});
       if(d<150+20*b.phase+p.r){
-        addBurnout(p,30);
+        addBurnout(p,30,'boss');
         var a=angTo({x:b.tx,y:b.ty},p);p.kx+=Math.cos(a)*420;p.ky+=Math.sin(a)*420;
       }
     }
@@ -195,7 +205,7 @@ function updateBoss(dt){
     }
     floatText(b.x,b.y-60,'красная лента','#e5534b',12);
   }
-  if(dist(b,p)<b.r+p.r+2&&b.cd<=0){b.cd=1.1;addBurnout(p,12);}
+  if(dist(b,p)<b.r+p.r+2&&b.cd<=0){b.cd=1.1;addBurnout(p,12,'boss');}
 }
 function updateProjs(dt){
   for(var i=0;i<G.projs.length;i++){var pr=G.projs[i];
@@ -335,7 +345,7 @@ function updateWaves(dt){
   }else{
     if(G.spawnQ.length>0){
       G.spawnT-=dt;
-      if(G.spawnT<=0){G.spawnT=0.18;spawnMob(G.spawnQ.shift());}
+      if(G.spawnT<=0){G.spawnT=0.45;spawnMob(G.spawnQ.shift());}
     }else if(G.mobs.length===0&&!G.boss){
       G.waveState='cleared';G.interT=20;
       G.pendSeed=(R()*1e9)|0;

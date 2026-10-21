@@ -123,11 +123,12 @@ function tryDodge(p){ // ПРОБЕЛ: рывок-уворот с i-frames
   NET.events.push({k:'ring',x:Math.round(p.x),y:Math.round(p.y),rm:70});
   SFX.dodge();
 }
-function tryUlt(p){ // R — абсолютная ульта (с предпоследнего спринта)
+function tryUlt(p){ // R — СУПЕР (Brawl Stars): заряд от убийств, не от кофе
   if(p.dead)return;
-  if(G.wave<G.ultAt){floatText(p.x,p.y-48,'ульта откроется на '+G.ultAt+'-м спринте','#8b949e',13);return;}
+  if(G.wave<G.ultAt){floatText(p.x,p.y-48,'СУПЕР откроется на '+G.ultAt+'-м спринте','#8b949e',13);return;}
   if(p.cdU>0)return;
-  if(!spendCoffee(p,40))return;
+  if((p.superC||0)<1){floatText(p.x,p.y-48,'СУПЕР не заряжен — бей стажёров','#8b949e',13);return;}
+  p.superC=0;
   p.cdU=25;p.castT=0.6;
   if(p.cls==='mgr'){ // ПЛАНИРОВКА: усиление команды
     G.plan=8;
