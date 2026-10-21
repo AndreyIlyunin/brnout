@@ -19,14 +19,14 @@ function showDeadStats(st){
   var players=worldPool('players');
   if(players.length>1){
     var rows=players.map(function(p,i){
-      return{name:(CLS[p.cls]?CLS[p.cls].name:p.cls),co:p.coins||0,okr:G.okr,me:p.id===NET.myId,pi:i};
+      return{name:(CLS[p.cls]?CLS[p.cls].name:'???'),co:p.coins||0,okr:G.okr,me:p.id===NET.myId,pi:i};
     }).map(function(r){r.score=r.okr*10+r.co*5;return r;})
       .sort(function(a,b){return b.score-a.score;});
     var html='<div style="text-align:center;color:#8b949e;font-size:11px;margin-bottom:4px">ЛИДЕРБОРД</div>';
     for(var i2=0;i2<rows.length;i2++){var r2=rows[i2];
       html+='<div class="row'+(r2.me?' me':'')+'"><span>'+(i2+1)+'. '+r2.name+(r2.me?' (вы)':'')+'</span><span><b>'+r2.score+'</b> · '+r2.co+' плашек</span></div>';
     }
-    board.innerHTML=html;
+    board.innerHTML=html; /*safe: строки только из CLS*/
     board.classList.remove('hidden');
   }else board.classList.add('hidden');
   var again=document.getElementById('bagain');

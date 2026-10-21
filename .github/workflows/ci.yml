@@ -9,3 +9,4 @@ jobs:
         with:
           node-version: 22
       - run: node tests/run.js
+      - run: node scripts/security-check.js

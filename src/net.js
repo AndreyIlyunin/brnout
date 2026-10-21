@@ -61,9 +61,9 @@ function lobbyRender(){
   else el=document.getElementById('lobbyList2');
   var html='';
   for(var i=0;i<LOBBY.length;i++){
-    html+='<div><span style="color:'+PCOLORS[i]+'">●</span> '+(CLS[LOBBY[i].cls]?CLS[LOBBY[i].cls].name:LOBBY[i].cls)+(LOBBY[i].id==='me'?' (вы — хост)':'')+'</div>';
+    html+='<div><span style="color:'+PCOLORS[i]+'">●</span> '+(CLS[LOBBY[i].cls]?CLS[LOBBY[i].cls].name:'???')+(LOBBY[i].id==='me'?' (вы — хост)':'')+'</div>';
   }
-  el.innerHTML=html;
+  el.innerHTML=html; /*safe: строки только из CLS/PCOLORS*/
   document.getElementById('bstart').textContent='Начать спринт ('+LOBBY.length+'/4)';
 }
 function hostCreate(cb,tries){
@@ -185,9 +185,9 @@ function lobbyRenderGuest(){
   var el=document.getElementById('lobbyList2');
   var html='';
   for(var i=0;i<LOBBY.length;i++){
-    html+='<div><span style="color:'+PCOLORS[i]+'">●</span> '+(CLS[LOBBY[i].cls]?CLS[LOBBY[i].cls].name:LOBBY[i].cls)+(LOBBY[i].id===NET.peer.id?' (вы)':'')+'</div>';
+    html+='<div><span style="color:'+PCOLORS[i]+'">●</span> '+(CLS[LOBBY[i].cls]?CLS[LOBBY[i].cls].name:'???')+(LOBBY[i].id===NET.peer.id?' (вы)':'')+'</div>';
   }
-  el.innerHTML=html;
+  el.innerHTML=html; /*safe: строки только из CLS/PCOLORS*/
 }
 function netLost(reason){
   if(G.state==='playing'||G.state==='paused')G.state='menu';
