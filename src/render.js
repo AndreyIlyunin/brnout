@@ -602,6 +602,16 @@ function drawHUD(){
     var rBtn=document.getElementById('btnR');
     if(rBtn){rBtn.classList.toggle('nochg',(p.superC||0)<1||G.wave<G.ultAt);
       rBtn.style.background='radial-gradient(circle at 50% 120%,rgba(255,206,0,'+(0.15+0.5*clamp(p.superC||0,0,1)).toFixed(2)+'),rgba(60,50,10,.8))';}
+    // кнопка следующего спринта в cleared (панель сверху уже есть — кнопка в ней)
+    if(G.waveState==='cleared'&&G.state==='playing'){
+      var left=Math.max(0,Math.ceil(G.interT));
+      var bw=Math.min(300,W-40),bx=W/2-bw/2,by=168;
+      hctx.fillStyle='rgba(26,58,42,0.92)';rr(hctx,bx,by,bw,36,8);hctx.fill();
+      hctx.strokeStyle='#42e0aa';hctx.lineWidth=2;rr(hctx,bx,by,bw,36,8);hctx.stroke();
+      hctx.font=pixFont(13,true);hctx.fillStyle='#d8ffe8';hctx.textAlign='center';
+      hctx.fillText('СТАРТ СЛЕДУЮЩЕГО СПРИНТА · авто '+left+'с',W/2,by+23);hctx.textAlign='left';
+      window.__nextBtnRect={x:bx,y:by,w:bw,h:36};
+    }else window.__nextBtnRect=null;
   }
   var boss=(NET.mode==='guest')?VIEW.boss:G.boss;
   if(boss){
