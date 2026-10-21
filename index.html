@@ -101,7 +101,7 @@
 <div class="bgov bghidden" id="bjoin">
   <div class="bgpanel bgcenter">
     <div class="bgtitle bgsmall">ВХОД ПО КОДУ</div>
-    <input id="joinCode" class="bginput" maxlength="5" placeholder="код комнаты" autocomplete="off">
+    <input id="joinCode" class="bginput" maxlength="5" placeholder="код комнаты" autocomplete="off" inputmode="latin" autocapitalize="off">
     <div class="bgtag" id="joinErr"></div>
     <button class="bgbtn bgwide" id="bjoinGo">Подключиться</button>
     <button class="bgbtn bgwide" id="bBack3">Назад</button>
@@ -113,6 +113,8 @@
     <div class="bgtitle bgsmall">ЛОББИ</div>
     <div class="bgtag">Код комнаты:</div>
     <div id="roomCode">-----</div>
+    <button class="bgbtn bgwide bshare" id="bshare">Поделиться ссылкой</button>
+    <div class="bgtag" id="shareHint">ссылка сама введёт код другу · или продиктуйте код</div>
     <div id="lobbyList" class="bglobby"></div>
     <button class="bgbtn bgwide" id="bstart">Начать спринт</button>
     <button class="bgbtn bgwide" id="bBack4">Выйти</button>
@@ -132,6 +134,8 @@
   <div class="bgpanel bgcenter">
     <div class="bgtitle bgsmall" style="color:#d29922">ПАУЗА</div>
     <div class="bgtag">Отдых — это тоже задача. Неоплачиваемая.</div>
+    <div id="pauseNet" class="bgtag hidden">Комната: <b id="pauseCode" style="color:#3fb950;letter-spacing:3px"></b></div>
+    <button class="bgbtn bgwide hidden" id="pauseShare">Поделиться ссылкой</button>
     <button class="bgbtn bgwide" id="bresume">Продолжить</button>
     <button class="bgbtn bgwide" id="brestart">Заново</button>
     <button class="bgbtn bgwide" id="bmute">Звук: вкл</button>
@@ -167,21 +171,21 @@
 </div>
 </div>
 
-<link rel="stylesheet" href="style.css?v=57">
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="src/utils.js?v=57"></script>
-<script src="src/data.js?v=57"></script>
-<script src="src/audio.js?v=57"></script>
-<script src="src/music.js?v=57"></script>
-<script src="src/map.js?v=57"></script>
-<script src="src/chaos.js?v=57"></script>
-<script src="src/combat.js?v=57"></script>
-<script src="src/abilities.js?v=57"></script>
-<script src="src/sim.js?v=57"></script>
-<script src="src/guest.js?v=57"></script>
-<script src="src/sprites.js?v=57"></script>
-<script src="src/render.js?v=57"></script>
-<script src="src/input.js?v=57"></script>
-<script src="src/ui.js?v=57"></script>
-<script src="src/net.js?v=57"></script>
-<script src="src/main.js?v=57"></script>
+<link rel="stylesheet" href="style.css?v=58">
+<script src="src/utils.js?v=58"></script>
+<script src="src/mqtt.js?v=58"></script>
+<script src="src/data.js?v=58"></script>
+<script src="src/audio.js?v=58"></script>
+<script src="src/music.js?v=58"></script>
+<script src="src/map.js?v=58"></script>
+<script src="src/chaos.js?v=58"></script>
+<script src="src/combat.js?v=58"></script>
+<script src="src/abilities.js?v=58"></script>
+<script src="src/sim.js?v=58"></script>
+<script src="src/guest.js?v=58"></script>
+<script src="src/sprites.js?v=58"></script>
+<script src="src/render.js?v=58"></script>
+<script src="src/input.js?v=58"></script>
+<script src="src/ui.js?v=58"></script>
+<script src="src/net.js?v=58"></script>
+<script src="src/main.js?v=58"></script>

@@ -261,6 +261,7 @@ function updateFx(dt){
     var fwp=localPlayer();
     if(fwp&&!fwp.dead)computeVis(fwp.x,fwp.y);
     else for(var fi2=0;fi2<GW*GH;fi2++)FOG.vis[fi2]=0;
+    FOG.dirty=true;
   }
   if(G.rushT>0)G.rushT-=dt;
   if(R()<0.0006)SFX.whisper(); // редкий мистический шёпот
@@ -369,7 +370,7 @@ function update(dt){
   // flow-field к ближайшему живому игроку
   FLOW.t-=dt;
   var fp=null;
-  for(var i=0;i<G.players.length;i++)if(!G.players[i].dead&&(fp===null||G.players[i].respT<G.players[fp].respT))fp=G.players[i];
+  for(var i=0;i<G.players.length;i++)if(!G.players[i].dead&&(fp===null||G.players[i].respT<fp.respT))fp=G.players[i];
   if(fp){
     var ftx=(fp.x/TILE)|0,fty=(fp.y/TILE)|0;
     if(ftx!==FLOW.tx||fty!==FLOW.ty||FLOW.t<=0){
@@ -379,7 +380,6 @@ function update(dt){
   }
   for(i=0;i<G.players.length;i++)updatePlayer(G.players[i],dt);
   updateMobs(dt);updateBoss(dt);updateProjs(dt);updateFx(dt);updateWaves(dt);
-  if(NET.mode==='host'){NET.snapT-=dt;if(NET.snapT<=0){NET.snapT=1/15;sendSnapshot();}}
 }
 function gameOver(){
   if(G.state==='dead')return;

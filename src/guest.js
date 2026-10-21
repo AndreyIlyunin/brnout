@@ -141,12 +141,6 @@ function guestUpdate(dt){
     if(pr.tgt){pr.x+=(pr.tgt.x-pr.x)*k;pr.y+=(pr.tgt.y-pr.y)*k;}
   }
   updateFx(dt);
-  var now=performance.now();
-  if(now-NET.lastSent>33&&NET.hostConn&&NET.hostConn.open){
-    NET.lastSent=now;
-    NET.hostConn.send({t:'in',x:Math.round(INPUT.ix*100)/100,y:Math.round(INPUT.iy*100)/100,
-      a:Math.round(INPUT.aim*100)/100,f1:(INPUT.f1||INPUT.f1Tap)?1:0,f2:INPUT.f2?1:0,sk:INPUT.sk?1:0,s2:INPUT.sk2?1:0,fk:INPUT.fk?1:0,cf:INPUT.cf?1:0,u:(INPUT.ultTap?1:0)});
-  }
   var me=localPlayer();
   if(me&&INPUT.cf&&G.state==='playing'){G.fx.push({type:'ring',x:me.x,y:me.y,rad:8,radMax:56,t:0,life:0.4,green:true});INPUT.cf=false;}
   if(me&&!me.dead){
@@ -207,5 +201,5 @@ function sendSnapshot(){
   broadcast(snap);
 }
 function broadcast(d){
-  for(var i=0;i<NET.conns.length;i++){var c=NET.conns[i];if(c.open){try{c.send(d);}catch(e){}}}
+  relayBroadcast(d); // один publish на всех: адресация на брокере, не на клиентах
 }

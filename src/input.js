@@ -74,17 +74,13 @@ var joyHinted=false;
 function enableTouch(){
   if(isTouch)return;
   isTouch=true;
-  document.getElementById('tui').classList.remove('hidden');
-  document.getElementById('btnPauseM').classList.remove('hidden');
-  var jh=document.getElementById('joyHint');
-  if(jh&&!joyHinted)jh.classList.remove('hidden'); // подсказка джойстика до первого касания
+  if(window.tuiSync)tuiSync(); // видимость бой-слоя решает ui.js: кнопки только в бою
 }
 // PC has no joystick: real mouse activity switches touch mode off on hybrid devices
 root.addEventListener('pointermove',function(e){
   if(e.pointerType==='mouse'&&isTouch&&joyId===null){
     isTouch=false;
-    document.getElementById('tui').classList.add('hidden');
-    document.getElementById('btnPauseM').classList.add('hidden');
+    if(window.tuiSync)tuiSync();
     joy.style.display='none';
     INPUT.ix=0;INPUT.iy=0;
   }
@@ -182,3 +178,6 @@ bindBtn('btnR',function(){INPUT.ultTap=true;},function(){});
 })();
 document.getElementById('btnPauseM').addEventListener('touchstart',function(e){e.preventDefault();togglePause();},{passive:false});
 document.getElementById('btnPauseM').addEventListener('mousedown',function(e){e.preventDefault();togglePause();});
+// тач-устройство видно сразу при загрузке: кнопки и миникарта в тач-позиции с первого кадра,
+// а не после первого касания (гибриды выключит тач первый же pointermove мышью)
+if(('ontouchstart' in window)||navigator.maxTouchPoints>0)enableTouch();

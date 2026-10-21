@@ -230,5 +230,40 @@ test('меню: отдельные настройки, углы, старт', ()
   ok((ih.slice(ih.indexOf('id="bset"'), ih.indexOf('id="bset"') + 900)).includes('sndMaster'), 'слайдеры в настройках');
 });
 
+// ---------- layout-стражи: следим за раскладкой ключевых элементов ----------
+console.log('layout guards:');
+const fsL = require('fs');
+const rjs = fsL.readFileSync('src/render.js', 'utf8');
+test('миникарта рисуется до тач-return в drawHUD (регресс-страж)', () => {
+  const i0 = rjs.indexOf('function drawHUD');
+  const i1 = rjs.indexOf('function localNearCoffee');
+  const body = rjs.slice(i0, i1);
+  const mm = body.indexOf('drawMinimap();');
+  const tr = body.indexOf('if(isTouch){drawHudTouch');
+  ok(mm > 0, 'drawMinimap вызывается в drawHUD');
+  ok(mm < tr, 'вызов стоит выше раннего return тача — иначе на телефоне миникарты нет');
+  eq(body.split('drawMinimap();').length - 1, 1, 'ровно один вызов в drawHUD');
+});
+test('миникарта экспортирует хит-зону __mmRect для QA', () => {
+  const i0 = rjs.indexOf('function drawMinimap');
+  const body = rjs.slice(i0, i0 + 2500);
+  ok(body.indexOf('__mmRect') > 0, '__mmRect присваивается в drawMinimap');
+});
+test('дуга тач-кнопок: у всех 5 кнопок заданы позиции right/bottom', () => {
+  const css = fsL.readFileSync('style.css', 'utf8');
+  for (const sel of ['#burnout .tb-abs', '#burnout .tb-alt', '#burnout .tb-dodge', '#burnout .tb-skill', '#burnout .tb-ult']) {
+    const i = css.lastIndexOf(sel + '{'); // последнее = индивидуальная позиция кнопки
+    ok(i > 0, sel + ' есть');
+    ok(css.slice(i, css.indexOf('}', i)).includes('right:calc('), sel + ' имеет right:calc');
+    ok(css.slice(i, css.indexOf('}', i)).includes('bottom:calc('), sel + ' имеет bottom:calc');
+  }
+});
+test('аудит раскладки встроен в QA по всем сценам', () => {
+  const q = fsL.readFileSync('qa/shots.js', 'utf8');
+  for (const sc of ['menu', 'game', 'wave', 'interstitial', 'pause'])
+    ok(q.includes("auditLayout(page, '" + sc), 'сцена ' + sc + ' под аудитом');
+  ok(q.includes('__mmRect'), 'QA знает про миникарту');
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

@@ -27,7 +27,7 @@ function hostStartGame(){
   NET.mode='host';NET.myId='me';NET.started=true;
   G.state='playing';showOv(null);G.fadeT=0.9;
   updateCamera(0.016,true);
-  broadcast({t:'start',seed:seed});
+  relayBroadcast({t:'start',seed:seed});
   msg('Команда собрана. Спринт 1 начинается.');
 }
 function resetWorld(){
@@ -42,18 +42,28 @@ function guestStart(seed){
   VIEW.players=[];VIEW.mobs=[];VIEW.projs=[];VIEW.boss=null;
   G.fx.length=0;G.texts.length=0;
   resetWorld();
-  NET.mode='guest';NET.myId=NET.peer.id;NET.started=true;
+  NET.mode='guest';NET.myId=guestPid;NET.started=true;
   G.state='playing';showOv(null);G.fadeT=0.9;
   updateCamera(0.016,true);
 }
 
-// ============================== networking ==============================
-var BROKER=null;
-try{var _qp=new URL(location.href).searchParams.get('broker');if(_qp)BROKER=_qp;}catch(e){}
-function peerOpts(){
-  if(!BROKER)return {debug:0};
-  var h=BROKER.split(':');
-  return {host:h[0],port:parseInt(h[1]||'9000',10),path:'/peerserver',secure:false};
+// ============================== релей-транспорт (mini-MQTT) ==============================
+// WebRTC P2P из РФ не проходит (STUN/TURN заблокированы), поэтому кооп идёт
+// через публичный MQTT-брокер: он же сигналинг, он же релей — NAT перестаёт иметь значение.
+// Топики: RELAY_PRE+code/h — хост→гости, RELAY_PRE+code/g — гости→хост.
+var RELAY_PRE='brnt4/';
+var relay=null,guestPid=null;
+var hostHbIv=null,hostSweepIv=null,hostSnapIv=null,guestHbIv=null,guestInIv=null,guestWatchIv=null;
+function relayH(code){return RELAY_PRE+code+'/h';}
+function relayG(code){return RELAY_PRE+code+'/g';}
+function relayKill(){
+  if(hostHbIv){clearInterval(hostHbIv);hostHbIv=null;}
+  if(hostSweepIv){clearInterval(hostSweepIv);hostSweepIv=null;}
+  if(hostSnapIv){clearInterval(hostSnapIv);hostSnapIv=null;}
+  if(guestHbIv){clearInterval(guestHbIv);guestHbIv=null;}
+  if(guestInIv){clearInterval(guestInIv);guestInIv=null;}
+  if(guestWatchIv){clearInterval(guestWatchIv);guestWatchIv=null;}
+  if(relay){try{relay.cli.destroy();}catch(e){}relay=null;}
 }
 function lobbyRender(){
   var el;
@@ -66,36 +76,60 @@ function lobbyRender(){
   el.innerHTML=html; /*safe: строки только из CLS/PCOLORS*/
   document.getElementById('bstart').textContent='Начать спринт ('+LOBBY.length+'/4)';
 }
-function hostCreate(cb,tries){
-  tries=tries||0;
+// широковещательно хосту→всем (без адресации): снапшоты и статусные сообщения
+function relayBroadcast(d){
+  if(relay&&NET.mode==='host')relay.publish(relayH(NET.code),JSON.stringify({d:d}));
+}
+function hostCreate(cb){
   var code=genCode();
-  var p=new Peer('bo-'+code,peerOpts());
-  NET.peer=p;
-  var hDone=false;
-  var hTo=setTimeout(function(){if(!hDone){hDone=true;try{p.destroy();}catch(e){}cb('timeout');}},10000);
-  p.on('open',function(){
-    if(hDone)return; hDone=true; clearTimeout(hTo);
-    NET.code=code;NET.mode='host';
-    document.getElementById('roomCode').textContent=code;
-    LOBBY=[{id:'me',cls:NET.cls}];
-    lobbyRender();
-    cb(null,code);
+  var brokerName='…';
+  var cli=mqttClient({
+    clientId:'brnt-h-'+code+'-'+((R()*1e9)|0).toString(36),
+    sub:relayG(code),
+    onReady:function(name){
+      brokerName=name;
+      relay={cli:cli,publish:function(topic,str){cli.publish(topic,str);}};
+      NET.code=code;NET.mode='host';
+      NET.peer={destroy:function(){relayKill();}};
+      document.getElementById('roomCode').textContent=code;
+      LOBBY=[{id:'me',cls:NET.cls}];
+      lobbyRender();
+      // пульс комнаты: гости в лобби понимают, что хост жив
+      hostHbIv=setInterval(function(){relayBroadcast({t:'hb',n:LOBBY.length,st:NET.started});},2000);
+      // гости молчат дольше 9с (вышел, метро, экран погас) — убираем из комнаты
+      hostSweepIv=setInterval(hostSweep,3000);
+      // снапшоты по таймеру, а не в rAF: фон вкладки хоста не должен замораживать гостей
+      hostSnapIv=setInterval(function(){if(NET.mode==='host'&&NET.started&&G.state==='playing')sendSnapshot();},125);
+      cb(null,code);
+    },
+    onMsg:function(topic,str){
+      var o=null;try{o=JSON.parse(str);}catch(e){return;}
+      if(o&&o.pid&&o.d)hostOnRelay(o.pid,o.d);
+    },
+    onDown:function(reason){
+      if(relay){netLost('Связь с комнатой потеряна ('+brokerName+')');}
+      else cb(reason==='nobroker'?'nobroker':'broker-down');
+    }
   });
-  p.on('error',function(err){
-    if(hDone)return;
-    if(err.type==='unavailable-id'&&tries<5){try{p.destroy();}catch(e){}hostCreate(cb,tries+1);}
-    else{hDone=true;clearTimeout(hTo);try{p.destroy();}catch(e){}cb(err.type||'error');}
-  });
-  p.on('connection',function(c){
-    if(LOBBY.length>=4){c.on('open',function(){c.send({t:'full'});setTimeout(function(){c.close();},500);});return;}
-    c.on('data',function(d){hostOnMsg(c,d);});
-    c.on('open',function(){
-      // PeerJS may re-offer and open a second channel for the same peer: keep the first
-      for(var i=0;i<NET.conns.length;i++){var ex=NET.conns[i];if(ex!==c&&ex.peer===c.peer){try{c.close();}catch(e){}return;}}
-      NET.conns.push(c);
-    });
-    c.on('close',function(){hostDropConn(c);});
-  });
+}
+function hostOnRelay(pid,d){
+  var c=null,i;
+  for(i=0;i<NET.conns.length;i++)if(NET.conns[i].peer===pid)c=NET.conns[i];
+  if(d.t==='bye'){if(c)hostDropConn(c);return;}
+  if(!c){
+    if(LOBBY.length>=4)return; // полная комната: даже коннект-фасад не создаём
+    c={peer:pid,open:true,last:performance.now(),
+       send:function(m){if(relay)relay.publish(relayH(NET.code),JSON.stringify({to:pid,d:m}));},
+       close:function(){}};
+    NET.conns.push(c);
+  }
+  c.last=performance.now();
+  hostOnMsg(c,d);
+}
+function hostSweep(){
+  var now=performance.now();
+  for(var i=NET.conns.length-1;i>=0;i--)
+    if(now-NET.conns[i].last>13000)hostDropConn(NET.conns[i]);
 }
 function hostOnMsg(c,d){
   if(!d)return;
@@ -120,13 +154,14 @@ function hostOnMsg(c,d){
     for(i=0;i<G.players.length;i++)if(G.players[i].id===c.peer)pl=G.players[i];
     if(!pl)return;
     pl.ix=d.x;pl.iy=d.y;pl.aim=d.a;pl.f1=!!d.f1;pl.f2=!!d.f2;pl.sk=!!d.sk;pl.sk2=!!d.s2;pl.fk=!!d.fk;pl.cf=!!d.cf;
+    if(d.u)pl.ult=true; // ульта по тапу R
   }
   if(d.t==='coin'){
     var pc=null;
     for(i=0;i<G.players.length;i++)if(G.players[i].id===c.peer)pc=G.players[i];
     if(pc)pc.coins=(pc.coins||0)+1;
   }
-  if(d.t==='leave'){hostDropConn(c);try{c.close();}catch(e){}}
+  if(d.t==='leave'){hostDropConn(c);}
 }
 function hostDropConn(c){
   var i;
@@ -136,27 +171,49 @@ function hostDropConn(c){
   lobbyRender();
 }
 function guestJoin(code,cb){
-  var p=new Peer(peerOpts());
-  NET.peer=p;
-  var done=false,opened=false;
-  p.on('open',function(){
-    if(opened)return; opened=true;
-    var c=p.connect('bo-'+code,{reliable:true});
-    NET.hostConn=c;
-    c.on('open',function(){
+  var done=false;
+  guestPid='p'+((R()*1e9)|0).toString(36);
+  var cli=mqttClient({
+    clientId:'brnt-g-'+code+'-'+guestPid.slice(1),
+    sub:relayH(code),
+    onReady:function(){
+      relay={cli:cli,publish:function(topic,str){cli.publish(topic,str);}};
+      NET.peer={destroy:function(){relayKill();}};
+      NET.hostConn={open:true,
+        send:function(m){if(relay)relay.publish(relayG(code),JSON.stringify({pid:guestPid,d:m}));},
+        close:function(){}};
+      NET.lastRecv=performance.now();
+      NET.hostConn.send({t:'hi',cls:NET.cls});
+      // первые hi бывают теряются (подписка хоста ещё не раскварцована на кластере) — повторяем, пока не придёт лобби
+      setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},1500);
+      setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},3500);
+      // инпут гостя — по таймеру, а не в rAF: сетевой такт не зависит от видимости вкладки
+      guestInIv=setInterval(function(){
+        if(!NET.hostConn||NET.mode!=='guest')return;
+        NET.hostConn.send({t:'in',x:Math.round(INPUT.ix*100)/100,y:Math.round(INPUT.iy*100)/100,
+          a:Math.round(INPUT.aim*100)/100,f1:(INPUT.f1||INPUT.f1Tap)?1:0,f2:INPUT.f2?1:0,sk:INPUT.sk?1:0,s2:INPUT.sk2?1:0,fk:INPUT.fk?1:0,cf:INPUT.cf?1:0,u:(INPUT.ultTap?1:0)});
+        INPUT.f1Tap=false;INPUT.ultTap=false;
+      },100);
+      // в лобби (не в игре) гость подаёт голос каждые 2с, чтобы хост его не вымел
+      guestHbIv=setInterval(function(){if(NET.hostConn)NET.hostConn.send({t:'hb'});},2000);
+      // хост жив, пока идут его пульс/снапшоты/лобби: тишина 8с = потеря
+      guestWatchIv=setInterval(function(){
+        if(performance.now()-NET.lastRecv>8000)netLost('Хост не отвечает — проверьте код комнаты');
+      },2000);
       done=true;
-      c.send({t:'hi',cls:NET.cls});
       cb(null,'connected');
-    });
-    c.on('data',function(d){guestOnMsg(d);});
-    c.on('close',function(){
-      if(done)netLost('Хост отключился');
-      else cb('peer-unavailable');
-    });
-    setTimeout(function(){if(!done&&!c.open){done=true;try{p.destroy();}catch(e){}cb('timeout');}},8000);
-  });
-  p.on('error',function(err){
-    if(!done)cb(err.type||'error');
+    },
+    onMsg:function(topic,str){
+      var o=null;try{o=JSON.parse(str);}catch(e){return;}
+      if(!o)return;
+      if(o.to&&o.to!==guestPid)return; // адресовано не нам
+      NET.lastRecv=performance.now();
+      if(o.d)guestOnMsg(o.d);
+    },
+    onDown:function(reason){
+      if(done)netLost(reason==='nobroker'?'Брокеры недоступны':'Связь с комнатой потеряна');
+      else cb(reason==='nobroker'?'nobroker':'broker-down');
+    }
   });
 }
 function guestOnMsg(d){
@@ -173,7 +230,7 @@ function guestOnMsg(d){
     G.waveState='cleared';G.interT=d.d;G.nextTheme=d.th;G.interStats=d.st;
   }
   if(d.t==='lobby'){
-    LOBBY=d.list.map(function(l,i){return{id:l.me?NET.peer.id:'p'+i,cls:l.cls};});
+    LOBBY=d.list.map(function(l,i){return{id:l.me?guestPid:'p'+i,cls:l.cls};});
     document.getElementById('netStatus').textContent='В лобби. Ждём хоста…';
     lobbyRenderGuest();
   }
@@ -189,7 +246,7 @@ function lobbyRenderGuest(){
   var el=document.getElementById('lobbyList2');
   var html='';
   for(var i=0;i<LOBBY.length;i++){
-    html+='<div><span style="color:'+PCOLORS[i]+'">●</span> '+(CLS[LOBBY[i].cls]?CLS[LOBBY[i].cls].name:'???')+(LOBBY[i].id===NET.peer.id?' (вы)':'')+'</div>';
+    html+='<div><span style="color:'+PCOLORS[i]+'">●</span> '+(CLS[LOBBY[i].cls]?CLS[LOBBY[i].cls].name:'???')+(LOBBY[i].id===guestPid?' (вы)':'')+'</div>';
   }
   el.innerHTML=html; /*safe: строки только из CLS/PCOLORS*/
 }
@@ -200,7 +257,32 @@ function netLost(reason){
   showOv('bwait');
 }
 function destroyNet(){
-  try{if(NET.peer)NET.peer.destroy();}catch(e){}
+  relayKill();
   NET.peer=null;NET.conns=[];NET.hostConn=null;NET.started=false;NET.code='';
-  NET.mode='solo';NET.myId='me';
+  NET.mode='solo';NET.myId='me';guestPid=null;
+}
+// ============================== инвайт-ссылка ==============================
+function inviteLink(){
+  return location.origin+location.pathname+'?join='+(NET.code||'');
+}
+function shareInvite(btn){
+  if(!NET.code||!btn)return;
+  var url=inviteLink();
+  function ok(){btn.textContent='Ссылка скопирована ✓';setTimeout(function(){btn.textContent='Поделиться ссылкой';},2200);}
+  if(navigator.share){
+    navigator.share({title:'brnout: corporate hell',text:'Заходи в комнату '+NET.code,url:url}).then(ok,ok);
+    return;
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(ok,function(){fallbackCopy(url);ok();});
+    return;
+  }
+  fallbackCopy(url);ok();
+}
+function fallbackCopy(url){
+  var i=document.createElement('input');
+  i.value=url;i.style.position='fixed';i.style.opacity='0';
+  document.body.appendChild(i);i.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(i);
 }
