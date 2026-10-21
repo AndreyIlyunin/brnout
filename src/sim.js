@@ -17,9 +17,11 @@ function updatePlayer(p,dt){
   if(p.castT>0)p.castT-=dt;
   // адреналин: на пороге выгорания — быстрее и злее (самоирония: работает только на износ)
   p.adr=p.burnout>80;
-  p.dmgMult=(1+0.08*(G.grade-1))*(p.adr?1.25:1)*(1+0.04*(G.combo||0));
-  if(p.moving){
-    var spd=p.spd*p.spdMult*(p.haste>0?1.55:1)*(p.adr?1.2:1)*(inZone(p.x,p.y)?0.55:1)*Math.min(1,l);
+  p.dmgMult=(1+0.08*(G.grade-1))*(1+0.1*(G.level-1))*(G.plan>0?1.5:1)*(p.adr?1.25:1)*(1+0.04*(G.combo||0));
+  if(p.root>0)p.root-=dt;
+  if(p.cdU>0)p.cdU-=dt;
+  if(p.moving&&!(p.root>0)){
+    var spd=p.spd*p.spdMult*(p.haste>0?1.55:1)*(p.adr?1.2:1)*(G.plan>0?1.15:1)*(inZone(p.x,p.y)?0.55:1)*Math.min(1,l);
     collideMove(p,p.ix/l*spd*dt,p.iy/l*spd*dt);
     p.step+=dt*spd*0.012;
   }
@@ -54,6 +56,7 @@ function updatePlayer(p,dt){
   if(p.f2)trySecondary(p);
   if(p.sk)trySkill(p);
   if(p.sk2)trySkill2(p);
+  if(p.ult){p.ult=false;tryUlt(p);}
   for(i=0;i<COFFEES.length;i++){var cp=COFFEES[i];
     if(cp.charges>0&&dist(p,cp)<60&&(p.burnout>2||p.coffee<p.coffeeMax-2)&&p.cf){drinkCoffee(p,cp);p.cf=false;}
   }
@@ -263,7 +266,38 @@ function updateFx(dt){
   }
   for(i=0;i<G.texts.length;i++){var t=G.texts[i];t.t+=dt;t.y+=t.vy*dt;if(t.t>=t.life){G.texts.splice(i,1);i--;}}
   for(i=0;i<G.pickups.length;i++){var pk=G.pickups[i];pk.t+=dt;if(pk.t>=pk.life){G.pickups.splice(i,1);i--;}}
-  for(i=0;i<G.zones.length;i++){var z=G.zones[i];z.t+=dt;if(z.t>=z.life){G.zones.splice(i,1);i--;}}
+  for(i=0;i<G.zones.length;i++){var z=G.zones[i];z.t+=dt;
+    if(z.friendly){ // «3 сентября»: рябина жжёт мобов
+      z.tk=(z.tk||0)+dt;
+      if(z.tk>0.4){z.tk=0;
+        for(var zm=0;zm<G.mobs.length;zm++){var mzf=G.mobs[zm];
+          if(mzf.x>z.x&&mzf.x<z.x+z.w&&mzf.y>z.y&&mzf.y<z.y+z.h)damageMob(mzf,7,0,0,0.4);
+        }
+        if(G.boss&&G.boss.x>z.x&&G.boss.x<z.x+z.w&&G.boss.y>z.y&&G.boss.y<z.y+z.h)damageMob(G.boss,10,0,0,0);
+      }
+      if(R()<0.5)G.fx.push({type:'ember',x:z.x+R()*z.w,y:z.y+R()*z.h,vx:R()*30-15,vy:-20-R()*40,t:0,life:0.8});
+    }
+    if(z.t>=z.life){G.zones.splice(i,1);i--;}
+  }
+  if(G.plan>0)G.plan-=dt;
+  if(G.sepT>0)G.sepT-=dt;
+  if(G.demon){
+    var dm=G.demon;dm.t-=dt;dm.cd-=dt;dm.ph=(dm.ph||0)+dt*2.2;
+    var own=dm.owner;
+    if(own&&own.dead)dm.t=Math.min(dm.t,0.5);
+    if(own){var dx2=own.x+Math.cos(dm.ph)*54,dy2=own.y+Math.sin(dm.ph)*40-34;
+      dm.x+=(dx2-dm.x)*Math.min(1,dt*5);dm.y+=(dy2-dm.y)*Math.min(1,dt*5);}
+    if(dm.cd<=0&&NET.mode!=='guest'){
+      var tgt=null,bd2=1e9;
+      for(i=0;i<G.mobs.length;i++){var md=G.mobs[i];var ddd=(md.x-dm.x)*(md.x-dm.x)+(md.y-dm.y)*(md.y-dm.y);if(ddd<bd2){bd2=ddd;tgt=md;}}
+      if(G.boss){var db=(G.boss.x-dm.x)*(G.boss.x-dm.x)+(G.boss.y-dm.y)*(G.boss.y-dm.y);if(db<bd2){bd2=db;tgt=G.boss;}}
+      if(tgt){var da=Math.atan2(tgt.y-dm.y,tgt.x-dm.x);
+        G.projs.push({id:++G.pkSeq,kind:'comic',x:dm.x,y:dm.y,vx:Math.cos(da)*430,vy:Math.sin(da)*430,dmg:12*dm.owner.dmgMult,life:1.4,rot:da});
+        SFX.notif();}
+      dm.cd=0.5;
+    }
+    if(dm.t<=0)G.demon=null;
+  }
   for(i=0;i<COFFEES.length;i++){var cp=COFFEES[i];if(cp.charges<3){cp.t-=dt;if(cp.t<=0){cp.charges++;if(cp.charges<3)cp.t=45;}}}
   if(NET.mode==='solo')NET.events.length=0;
   G.shake=Math.max(0,G.shake-dt*30);
@@ -291,17 +325,17 @@ function updateWaves(dt){
     // осязаемая пауза между спринтами: итоги + следующая локация, скип любой клавишей
     G.interT-=dt;
     if(G.interT<=0){
-      G.waveState='calm';G.waveT=2.8;
+      G.waveState='calm';G.waveT=3.2;
       regenLocation(G.pendSeed);
-      G.fadeT=0.9;
-      msg('Спринт закрыт. Перерыв на кулер.');
+      G.fadeT=1.5;
+      msg('Новый офис. Обустраиваемся…',3);
     }
   }else{
     if(G.spawnQ.length>0){
       G.spawnT-=dt;
-      if(G.spawnT<=0){G.spawnT=0.35;spawnMob(G.spawnQ.shift());}
+      if(G.spawnT<=0){G.spawnT=0.18;spawnMob(G.spawnQ.shift());}
     }else if(G.mobs.length===0&&!G.boss){
-      G.waveState='cleared';G.interT=3.4;
+      G.waveState='cleared';G.interT=4.2;
       G.pendSeed=(R()*1e9)|0;
       G.nextTheme=themeNameFor(G.pendSeed);
       for(i=0;i<G.players.length;i++)G.players[i].burnout=Math.max(0,G.players[i].burnout-6);

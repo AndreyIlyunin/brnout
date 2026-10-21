@@ -19,6 +19,7 @@ var PCOLORS=['#e6edf3','#d29922','#7aa2c8','#3fb950'];
 var G={state:'menu',t:0,players:[],mobs:[],projs:[],fx:[],texts:[],pickups:[],zones:[],
   boss:null,wave:0,waveState:'calm',waveT:1.5,rushT:0,spawnQ:[],spawnT:0,okr:0,grade:1,
   interT:0,fadeT:0,pendSeed:0,nextTheme:'',interStats:null,
+  level:1,xp:0,xpN:40,plan:0,sepT:0,demon:null,ultAt:19,campaign:20,
   killsI:0,killsD:0,bossN:0,winShown:false,winT:0,shake:0,hitStop:0,msg:'',msgT:0,caption:'',capT:8,
   combo:0,comboT:0,
   camX:0,camY:0,zoom:1,mobSeq:0,pkSeq:0};
@@ -67,7 +68,7 @@ function newPlayer(id,cls){
   var lb=lobbySpawn();
   return{id:id,cls:cls,x:lb.x+lb.w/2+(R()*120-60),y:lb.y+lb.h/2+(R()*120-60),r:18,spd:210,spdMult:1,dmgMult:1,
     burnout:0,coffee:60,coffeeMax:100,face:0,coins:0,
-    cd1:0,cd2:0,cdQ:0,cdS:0,shield:0,qT:0,qPulse:0,haste:0,castT:0,inv:0,flash:0,heart:0,kx:0,ky:0,step:0,atkT:0,
+    cd1:0,cd2:0,cdQ:0,cdS:0,cdU:0,root:0,ult:false,shield:0,qT:0,qPulse:0,haste:0,castT:0,inv:0,flash:0,heart:0,kx:0,ky:0,step:0,atkT:0,
     dead:false,respT:0,
     ix:0,iy:0,aim:0,f1:false,f2:false,sk:false,sk2:false,cf:false,
     look:LOOKS[0],moving:false};

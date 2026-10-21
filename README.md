@@ -1,4 +1,4 @@
-# burnout: corporate evil 🔥💼
+# brnout: corporate hell 🔥💼
 
 > **Диабло-слэшер в опенспейсе после заката.** HR уже ушёл домой. Дедлайны — нет.
 > *A Diablo-like office slasher. It's 18:52. Everyone went home. Except the deadlines.*

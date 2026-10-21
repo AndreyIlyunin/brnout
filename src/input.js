@@ -1,6 +1,6 @@
 'use strict';
 // ============================== input ==============================
-var INPUT={ix:0,iy:0,aim:0,f1:false,f2:false,sk:false,sk2:false,cf:false};
+var INPUT={ix:0,iy:0,aim:0,f1:false,f2:false,sk:false,sk2:false,cf:false,f1Tap:false,ultTap:false};
 var keys={},mouse={x:0,y:0,down:false,rdown:false};
 var isTouch=false;
 function refreshAim(){
@@ -32,7 +32,7 @@ cv.addEventListener('mousedown',function(e){
   audioInit();
   if(isTouch)return;
   if(G.state==='playing'&&G.waveState==='cleared'&&G.interT>0.3)G.interT=0.3; // скип паузы
-  if(e.button===0){mouse.down=true;INPUT.f1=true;}
+  if(e.button===0){mouse.down=true;INPUT.f1=true;INPUT.f1Tap=true;} // автоатака выкл: клик = выстрел
   if(e.button===2){mouse.rdown=true;INPUT.f2=true;}
 });
 window.addEventListener('mouseup',function(e){
@@ -50,6 +50,7 @@ window.addEventListener('keydown',function(e){
   if(e.code==='Escape')togglePause();
   if(e.code==='Space'&&G.state==='playing')INPUT.sk=true;
   if(e.code==='KeyQ'&&G.state==='playing')INPUT.sk2=true;
+  if(e.code==='KeyR'&&G.state==='playing')INPUT.ultTap=true;
   if(e.code==='KeyE'&&G.state==='playing')INPUT.cf=true;
 });
 window.addEventListener('keyup',function(e){

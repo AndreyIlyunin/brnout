@@ -3,20 +3,22 @@
 function msg(t,d){G.msg=t;G.msgT=d||4.5;NET.events.push({k:'msg',t:t,d:d||4.5});}
 function floatText(x,y,text,color,size){if(G.texts.length>40)G.texts.shift();G.texts.push({x:x,y:y,text:text,color:color||'#dfe6ee',size:size||13,t:0,life:2.4,vy:-15});NET.events.push({k:'txt',x:Math.round(x),y:Math.round(y),t:text,c:color||'#dfe6ee',s:size||13});}
 function startWave(){
+  try{
   G.wave++;
   var w=G.wave;
   G.spawnQ.length=0;
   var sprintName=SPRINTNAMES[(R()*SPRINTNAMES.length)|0];
-  var ni=Math.min(3+2*w,20),nd=w>=2?Math.min(1+(w-2)*2,8):0;
+  var ni=Math.min(4+3*w,34),nd=w>=2?Math.min(2*(w-1),12):0;
   var bossWave=(w===5)||(w>5&&(w-5)%5===0);
   if(bossWave){ni=Math.min(ni,5);nd=Math.min(nd,2);spawnBoss();}
   for(var i=0;i<ni;i++)G.spawnQ.push('intern');
   for(i=0;i<nd;i++)G.spawnQ.push('deadline');
   for(i=G.spawnQ.length-1;i>0;i--){var j=(R()*(i+1))|0;var tmp=G.spawnQ[i];G.spawnQ[i]=G.spawnQ[j];G.spawnQ[j]=tmp;}
-  G.spawnT=0.22;
+  G.spawnT=0.14;
   if(bossWave)msg('СПРИНТ '+w+' · «'+MAPTHEME.name+'» · АУДИТ НАЧИНАЕТСЯ',4);
   else msg('Спринт '+w+' · «'+MAPTHEME.name+'» · '+sprintName+': '+ni+' стажёров'+(nd?', '+nd+' дедлайнов':'')+'. ДЕДЛАЙН УСКОРЯЕТСЯ!');
   G.rushT=4;
+  }catch(e){window.__swerr=(window.__swerr||[]).concat(e.message+' :: '+(e.stack||'').split('\n')[1]);console.error('startWave:',e);}
 }
 function spawnMob(type){
   var elite=type==='intern'&&R()<0.12;
@@ -65,11 +67,19 @@ function spawnMob(type){
   }
   var w=G.wave;
   if(type==='intern'){
-    G.mobs.push({id:++G.mobSeq,type:'intern',x:p0.x,y:p0.y,r:elite?19:15,hp:(16+2*w)*(elite?2.5:1),hpMax:(16+2*w)*(elite?2.5:1),spd:(55+R()*22+w*2)*(elite?0.92:1),elite:elite?1:0,
+    var lvMul=1+0.16*(G.level-1);
+    var mm={id:++G.mobSeq,type:'intern',x:p0.x,y:p0.y,r:elite?19:15,hp:(16+2*w)*(elite?2.5:1)*lvMul,hpMax:(16+2*w)*(elite?2.5:1)*lvMul,spd:(55+R()*22+w*2)*(elite?0.92:1),elite:elite?1:0,
       stun:0,kx:0,ky:0,cd:R(),wt:0,wx:0,wy:0,face:0,aggro:false,said:false,tint:(R()*4)|0,emb:0,tilt:R()*6,step:0,fade:0.5,
-      cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0});
+      cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0};
+    if(mm.elite){ // супер-мобы: три характера
+      mm.ev=(R()*3)|0;
+      if(mm.ev===0){mm.hp*=1.9;mm.hpMax*=1.9;mm.spd*=0.8;mm.r=23;mm.tint=2;}            // «стажёр года»: танк
+      else if(mm.ev===1){mm.hp*=0.65;mm.spd*=1.7;mm.tint=1;}                             // «на энергетиках»: бегун
+      else{mm.hp*=1.3;mm.r=17;mm.tint=3;mm.dmgMul=1.7;}                                  // «обиженный»: бьёт больнее
+    }
+    G.mobs.push(mm);
   }else{
-    G.mobs.push({id:++G.mobSeq,type:'deadline',x:p0.x,y:p0.y,r:13,hp:9+1.5*w,hpMax:9+1.5*w,spd:150+R()*30,
+    G.mobs.push({id:++G.mobSeq,type:'deadline',x:p0.x,y:p0.y,r:13,hp:(9+1.5*w)*(1+0.16*(G.level-1)),hpMax:(9+1.5*w)*(1+0.16*(G.level-1)),spd:150+R()*30,
       stun:0,kx:0,ky:0,cd:0,face:0,tint:(R()*3)|0,emb:0,tilt:R()*6,step:0,elite:0,
       cf:0,ch:0,chTick:0,chDmg:0,chSrc:-1,mk:0});
     if(R()<0.3)floatText(p0.x,p0.y-20,['ДО РЕЛИЗА 3 ЧАСА','ПРОД ПОЛЁГ','ГОРИТ','DEMO ЧЕРЕЗ 10 МИНУТ'][(R()*4)|0],'#e07050',12);
@@ -91,8 +101,18 @@ function spawnBoss(){
   if(!p)p=snapReachable({x:cx,y:cy});
   G.bossN++;
   bossStinger();
-  G.boss={type:'boss',x:p.x,y:p.y,r:44,hp:1100*(1+0.4*(G.bossN-1)),hpMax:1100*(1+0.4*(G.bossN-1)),spd:40,phase:1,
+  var bh=1100*(1+0.4*(G.bossN-1))*(1+0.25*(G.level-1));
+  G.boss={type:'boss',x:p.x,y:p.y,r:44,hp:bh,hpMax:bh,spd:40,phase:1,
     atkCd:2.5,summonCd:8,tapeCd:11,windup:0,wuT:0,tx:0,ty:0,face:0,cd:0,step:0};
+}
+function addXp(n,x,y){
+  G.xp+=n;
+  while(G.xp>=G.xpN){
+    G.xp-=G.xpN;G.level++;G.xpN=Math.round(G.xpN*1.35);
+    floatText(x,y-58,'УРОВЕНЬ '+G.level,'#ffcf5c',17);
+    G.fx.push({type:'ring',x:x,y:y,rad:14,radMax:130,t:0,life:0.55,gold:true});
+    SFX.levelUp();G.shake+=2;
+  }
 }
 function spendCoffee(p,n){
   if(p.coffee<n){floatText(p.x,p.y-30,'НЕ ХВАТАЕТ КОФЕ','#d29922',12);return false;}
@@ -213,6 +233,7 @@ function dramaOfDeath(x,y,tp,elite){
   spawnCoinBurst(x,y,2+((R()*3)|0)+(elite?2:0));
 }
 function killMob(m){
+  addXp((m.type==='deadline'?9:6)*(m.elite?2:1),m.x,m.y);
   NET.events.push({k:'die',x:Math.round(m.x),y:Math.round(m.y),tp:m.type,elite:m.elite?1:0});
   // комбо: серия убийств без получения урона
   G.combo=Math.min(9,(G.combo||0)+1);G.comboT=3;
@@ -241,7 +262,9 @@ function killMob(m){
     for(var i=0;i<3;i++)dropPickup(m.x+R()*60-30,m.y+R()*60-30,'coffee');
     dropPickup(m.x,m.y,['espresso','desk','cert'][(R()*3)|0]);
     dropPickup(m.x+20,m.y,['espresso','desk','cert'][(R()*3)|0]);
-    if(!G.winShown){G.winShown=true;G.winT=1.6;}
+    addXp(150,m.x,m.y);
+    if(G.wave>=G.campaign&&!G.winShown){G.winShown=true;G.winT=1.6;}
+    else if(G.wave<G.campaign)msg('Аудит пройден. Начальство довольно. Впереди ещё спринты.',4);
     G.boss=null;return;
   }
   for(var j=0;j<12;j++)G.fx.push({type:'paper',x:m.x,y:m.y,vx:R()*240-120,vy:R()*240-120,rot:R()*3,vr:R()*8-4,t:0,life:0.7+R()*0.5});

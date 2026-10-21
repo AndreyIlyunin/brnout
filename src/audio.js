@@ -43,6 +43,14 @@ function noiz(dur,vol,freq,q,delay){
 var SFX={
   stapler:function(){tone(1250,0.03,'square',0.2);tone(950,0.04,'square',0.16,0,0.045);noiz(0.04,0.14,2400,3);},
   thudFlesh:function(){tone(80,0.16,'sine',0.5,-35);noiz(0.1,0.22,240,0.8);},
+  levelUp:function(){tone(784,0.1,'triangle',0.16);tone(988,0.1,'triangle',0.16,0,0.09);tone(1319,0.16,'triangle',0.15,0,0.18);},
+  plan:function(){tone(523,0.1,'square',0.08);tone(659,0.1,'square',0.08,0,0.1);tone(784,0.1,'square',0.08,0,0.2);tone(1047,0.2,'triangle',0.14,0,0.3);},
+  demon:function(){tone(100,0.5,'sawtooth',0.3,-55);tone(160,0.4,'sawtooth',0.2,-80,0.1);tone(58,0.6,'sawtooth',0.26,-20,0.22);},
+  shufut:function(){ // шансонный аккорд «третьего сентября» (своя фраза, ля-минор)
+    tone(220,0.5,'sawtooth',0.07);tone(262,0.5,'sawtooth',0.06);tone(330,0.5,'triangle',0.12);
+    tone(208,0.5,'sawtooth',0.06,0,0.45);tone(247,0.5,'sawtooth',0.05,0,0.45);tone(311,0.5,'triangle',0.11,0,0.45);
+    tone(196,0.6,'sawtooth',0.07,0,0.9);tone(247,0.6,'sawtooth',0.06,0,0.9);tone(294,0.6,'triangle',0.12,0,0.9);
+  },
   notif:function(){ // звуки уведомлений телефона: случайно один из трёх
     var n=(R()*3)|0;
     if(n===0){tone(1319,0.09,'triangle',0.15);tone(1047,0.13,'triangle',0.13,0,0.08);}       // «ду-дин»

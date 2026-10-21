@@ -32,7 +32,7 @@ function guestApplySnapshot(s){
   var newPr=[];
   for(i=0;i<s.pr.length;i++){var spr=s.pr[i];var old=null;
     for(j=0;j<VIEW.projs.length;j++)if(VIEW.projs[j].id===spr[0]){old=VIEW.projs[j];break;}
-    var kname=spr[1]===0?'ticket':(spr[1]===2?'tg':(spr[1]===3?'ig':'tw'));
+    var kname=spr[1]===0?'ticket':(spr[1]===2?'tg':(spr[1]===3?'ig':(spr[1]===4?'key':(spr[1]===5?'comic':'tw'))));
     if(old){old.kind=kname;old.tgt={x:spr[2],y:spr[3]};old.vx=spr[4];old.vy=spr[5];newPr.push(old);}
     else newPr.push({id:spr[0],kind:kname,x:spr[2],y:spr[3],vx:spr[4],vy:spr[5],tgt:null,rot:R()*TAU});
   }
@@ -144,7 +144,7 @@ function guestUpdate(dt){
   if(now-NET.lastSent>33&&NET.hostConn&&NET.hostConn.open){
     NET.lastSent=now;
     NET.hostConn.send({t:'in',x:Math.round(INPUT.ix*100)/100,y:Math.round(INPUT.iy*100)/100,
-      a:Math.round(INPUT.aim*100)/100,f1:INPUT.f1?1:0,f2:INPUT.f2?1:0,sk:INPUT.sk?1:0,s2:INPUT.sk2?1:0,cf:INPUT.cf?1:0});
+      a:Math.round(INPUT.aim*100)/100,f1:(INPUT.f1||INPUT.f1Tap)?1:0,f2:INPUT.f2?1:0,sk:INPUT.sk?1:0,s2:INPUT.sk2?1:0,cf:INPUT.cf?1:0,u:(INPUT.ultTap?1:0)});
   }
   var me=localPlayer();
   if(me&&INPUT.cf&&G.state==='playing'){G.fx.push({type:'ring',x:me.x,y:me.y,rad:8,radMax:56,t:0,life:0.4,green:true});INPUT.cf=false;}
@@ -192,7 +192,7 @@ function sendSnapshot(){
   var b=null;
   if(G.boss)b={x:Math.round(G.boss.x),y:Math.round(G.boss.y),hp:Math.round(clamp(G.boss.hp/G.boss.hpMax,0,1)*100),ph:G.boss.phase,f:Math.round(G.boss.face*100)/100,
     wu:G.boss.windup>0?1:0,wt:Math.round(G.boss.wuT*100)/100,tx:Math.round(G.boss.tx),ty:Math.round(G.boss.ty)};
-  var KINDIDX={ticket:0,tw:1,tg:2,ig:3,plane:1};
+  var KINDIDX={ticket:0,tw:1,tg:2,ig:3,plane:1,key:4,comic:5};
   var pr=G.projs.map(function(q){return[q.id,KINDIDX[q.kind]===undefined?0:KINDIDX[q.kind],Math.round(q.x),Math.round(q.y),Math.round(q.vx),Math.round(q.vy)];});
   var pk=G.pickups.map(function(q){return[q.id,q.kind,Math.round(q.x),Math.round(q.y)];});
   var z=G.zones.map(function(zz){return[Math.round(zz.x),Math.round(zz.y),Math.round(zz.w),Math.round(zz.h),Math.round(zz.t*10)/10];});

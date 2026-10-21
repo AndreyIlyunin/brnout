@@ -11,7 +11,7 @@ function loop(ts){
     refreshAim();
     if(NET.mode!=='guest'){
       var me=localPlayer();
-      if(me){me.ix=INPUT.ix;me.iy=INPUT.iy;me.aim=INPUT.aim;me.f1=INPUT.f1;me.f2=INPUT.f2;me.sk=INPUT.sk;me.sk2=INPUT.sk2;me.cf=INPUT.cf;INPUT.cf=false;}
+      if(me){me.ix=INPUT.ix;me.iy=INPUT.iy;me.aim=INPUT.aim;me.f1=INPUT.f1||INPUT.f1Tap;INPUT.f1Tap=false;me.ult=INPUT.ultTap;INPUT.ultTap=false;me.f2=INPUT.f2;me.sk=INPUT.sk;me.sk2=INPUT.sk2;me.cf=INPUT.cf;INPUT.cf=false;}
     }else guestLocalAttackCosmetics();
     try{update(dt);updateCamera(dt,false);}
     catch(e){console.error('update:',e);}
@@ -177,7 +177,7 @@ window.__bo={G:G,NET:NET,VIEW:VIEW,INPUT:INPUT,startLocal:startLocal,hostStartGa
     for(var i=0;i<(n||1);i++){
       if(NET.mode!=='guest'){
         var me=localPlayer();
-        if(me){me.ix=INPUT.ix;me.iy=INPUT.iy;me.aim=INPUT.aim;me.f1=INPUT.f1;me.f2=INPUT.f2;me.sk=INPUT.sk;me.sk2=INPUT.sk2;me.cf=INPUT.cf;INPUT.cf=false;}
+        if(me){me.ix=INPUT.ix;me.iy=INPUT.iy;me.aim=INPUT.aim;me.f1=INPUT.f1||INPUT.f1Tap;INPUT.f1Tap=false;me.ult=INPUT.ultTap;INPUT.ultTap=false;me.f2=INPUT.f2;me.sk=INPUT.sk;me.sk2=INPUT.sk2;me.cf=INPUT.cf;INPUT.cf=false;}
       }
       update(1/60);
     }

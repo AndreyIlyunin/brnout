@@ -296,8 +296,9 @@ function furnishRoom(rm,fid){
     // сантехника — фиксированные позиции, рандом-ретраи здесь не нужны
     FURN.push({id:fid++,t:'sink',x:rm.x+10,y:rm.y+rm.h-26,w:48,h:20});
     FURN.push({id:fid++,t:'sink',x:rm.x+rm.w-58,y:rm.y+rm.h-26,w:48,h:20});
-    FURN.push({id:fid++,t:'stall',x:rm.x+8,y:rm.y+8,w:(rm.w-28)/2,h:34});
-    FURN.push({id:fid++,t:'stall',x:rm.x+rm.w/2+6,y:rm.y+8,w:(rm.w-28)/2,h:34});
+    var sh=Math.max(16,(rm.h-46)/2); // вертикальные кабинки: верхняя половина, раковины снизу свободны
+    FURN.push({id:fid++,t:'stall',x:rm.x+8,y:rm.y+8,w:34,h:sh});
+    FURN.push({id:fid++,t:'stall',x:rm.x+8,y:rm.y+16+sh,w:34,h:sh});
   }
   if(rm.type!=='wc'&&rnd()<0.6)fid=placeFurn(rm,fid,'plant',rm.x+24+rnd()*(rm.w-54),rm.y+24+rnd()*(rm.h-54),22,22,6);
   return fid;
@@ -690,6 +691,6 @@ function collideMove(e,dx,dy){
   }
 }
 function inZone(x,y){
-  for(var i=0;i<G.zones.length;i++){var z=G.zones[i];if(x>z.x&&x<z.x+z.w&&y>z.y&&y<z.y+z.h)return true;}
+  for(var i=0;i<G.zones.length;i++){var z=G.zones[i];if(z.friendly)continue;if(x>z.x&&x<z.x+z.w&&y>z.y&&y<z.y+z.h)return true;}
   return false;
 }

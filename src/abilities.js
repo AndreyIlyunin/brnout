@@ -112,6 +112,37 @@ function trySkill(p){ // ульта (ПРОБЕЛ)
     floatText(p.x,p.y-40,'мудборд!!','#d29922',16);
   }
 }
+function tryUlt(p){ // R — абсолютная ульта (с предпоследнего спринта)
+  if(p.dead)return;
+  if(G.wave<G.ultAt){floatText(p.x,p.y-48,'ульта откроется на '+G.ultAt+'-м спринте','#8b949e',13);return;}
+  if(p.cdU>0)return;
+  if(!spendCoffee(p,40))return;
+  p.cdU=25;p.castT=0.6;
+  if(p.cls==='mgr'){ // ПЛАНИРОВКА: усиление команды
+    G.plan=8;
+    for(var i=0;i<G.players.length;i++){var pl=G.players[i];
+      G.fx.push({type:'ring',x:pl.x,y:pl.y,rad:16,radMax:150,t:0,life:0.7,gold:true});
+      floatText(pl.x,pl.y-52,'+50% урона','#ffcf5c',14);
+    }
+    msg('ПЛАНИРОВКА: команда усилилась',3);SFX.plan();
+  }else if(p.cls==='dev'){ // ВЫГОРАНИЕ: клавиатура взрывается клавишами
+    p.root=1.3;G.shake+=9;
+    for(i=0;i<26;i++){var ka=(i/26)*TAU;
+      G.projs.push({id:++G.pkSeq,kind:'key',x:p.x,y:p.y,vx:Math.cos(ka)*300,vy:Math.sin(ka)*300,dmg:16*p.dmgMult,life:0.95,rot:R()*TAU,lt:(R()*26|0)});
+    }
+    SFX.clacks(10);SFX.slam();
+    floatText(p.x,p.y-52,'ВЫГОРАНИЕ!','#e5534b',18);
+  }else if(p.cls==='dsn'){ // КОМИК САНС: демон шрифта
+    G.demon={x:p.x,y:p.y-30,t:10,cd:0.8,owner:p,ph:0};
+    SFX.demon();
+    floatText(p.x,p.y-52,'Comic Sans призван','#e88ac8',16);
+  }else{ // mkt: «3 СЕНТЯБРЯ» — рекламная кампания с горящей рябиной
+    var zx=clamp(p.x+Math.cos(p.aim)*240-140,40,MAP_W-320),zy=clamp(p.y+Math.sin(p.aim)*240-140,40,MAP_H-320);
+    G.zones.push({id:++G.pkSeq,x:zx,y:zy,w:280,h:280,t:0,life:6,friendly:true});
+    G.sepT=2.8;SFX.shufut();
+    floatText(p.x,p.y-52,'РЕКЛАМНАЯ КАМПАНИЯ','#e8894a',16);
+  }
+}
 function trySkill2(p){ // Q-скил
   if(p.cdS>0)return;
   var C=CLS[p.cls];
