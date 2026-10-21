@@ -4,6 +4,8 @@ var OVERLAYS=['bmenu','bset','bcoop','bjoin','bhost','bwait','bpause','bdead','b
 function showOv(id){
   for(var i=0;i<OVERLAYS.length;i++){var el=document.getElementById(OVERLAYS[i]);if(el)el.classList.add('bghidden');}
   if(id)document.getElementById(id).classList.remove('bghidden');
+  var tui=document.getElementById('tui'); // оверлей гасит бой-слой, чтобы панель не спорила с кнопками
+  if(tui)tui.classList.toggle('hidden',!!(id&&id!=='bmenu'));
 }
 function showDeadStats(st){
   var meL=localPlayer();

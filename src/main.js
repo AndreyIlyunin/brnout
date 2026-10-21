@@ -16,7 +16,10 @@ function loop(ts){
     try{update(dt);updateCamera(dt,false);}
     catch(e){console.error('update:',e);}
   }
-  try{render();}catch(e){console.error('render:',e);}
+  try{render();
+    var fsB=document.getElementById('btnFS');
+    if(fsB)fsB.classList.toggle('hidden',G.state==='playing'); // случайный тап в бою исключён
+  }catch(e){console.error('render:',e);}
   requestAnimationFrame(loop);
 }
 
