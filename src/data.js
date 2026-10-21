@@ -4,7 +4,7 @@ var CLS={
   mgr:{name:'менеджер',weapon:'tickets',
     s1:{n:'тикет',cd:0.36,cost:0},s2:{n:'жир панч',cd:0.55,cost:6},
     ult:{n:'созвон',cd:8,cost:35},sk:{n:'АСАП',cd:10,cost:25}},
-  dev:{name:'сеньор-прогер',weapon:'keyboard',
+  dev:{name:'программист',weapon:'keyboard',
     s1:{n:'клава',cd:0.42,cost:0},s2:{n:'хоткей',cd:0.85,cost:10},
     ult:{n:'звук клавы',cd:7,cost:30},sk:{n:'легаси-код',cd:9,cost:25}},
   mkt:{name:'маркетолог',weapon:'plane',
@@ -68,7 +68,7 @@ function newPlayer(id,cls){
   var lb=lobbySpawn();
   return{id:id,cls:cls,x:lb.x+lb.w/2+(R()*120-60),y:lb.y+lb.h/2+(R()*120-60),r:18,spd:210,spdMult:1,dmgMult:1,
     burnout:0,coffee:60,coffeeMax:100,face:0,coins:0,
-    cd1:0,cd2:0,cdQ:0,cdS:0,cdU:0,root:0,ult:false,shield:0,qT:0,qPulse:0,haste:0,castT:0,inv:0,flash:0,heart:0,kx:0,ky:0,step:0,atkT:0,
+    cd1:0,cd2:0,cdQ:0,cdS:0,cdU:0,cdD:0,root:0,ult:false,fk:false,shield:0,qT:0,qPulse:0,haste:0,castT:0,inv:0,flash:0,heart:0,kx:0,ky:0,step:0,atkT:0,
     dead:false,respT:0,
     ix:0,iy:0,aim:0,f1:false,f2:false,sk:false,sk2:false,cf:false,
     look:LOOKS[0],moving:false};

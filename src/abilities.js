@@ -112,6 +112,17 @@ function trySkill(p){ // ульта (ПРОБЕЛ)
     floatText(p.x,p.y-40,'мудборд!!','#d29922',16);
   }
 }
+function tryDodge(p){ // ПРОБЕЛ: рывок-уворот с i-frames
+  if(p.cdD>0||p.dead)return;
+  p.cdD=2.6;
+  var l=Math.hypot(p.ix,p.iy);
+  var dx=l>0.01?p.ix/l:Math.cos(p.aim),dy=l>0.01?p.iy/l:Math.sin(p.aim);
+  p.kx+=dx*1150;p.ky+=dy*1150;
+  p.inv=Math.max(p.inv,0.45);
+  G.fx.push({type:'ring',x:p.x,y:p.y,rad:12,radMax:70,t:0,life:0.35,cyan:true});
+  NET.events.push({k:'ring',x:Math.round(p.x),y:Math.round(p.y),rm:70});
+  SFX.dodge();
+}
 function tryUlt(p){ // R — абсолютная ульта (с предпоследнего спринта)
   if(p.dead)return;
   if(G.wave<G.ultAt){floatText(p.x,p.y-48,'ульта откроется на '+G.ultAt+'-м спринте','#8b949e',13);return;}

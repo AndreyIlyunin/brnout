@@ -51,6 +51,7 @@ var SFX={
     tone(208,0.5,'sawtooth',0.06,0,0.45);tone(247,0.5,'sawtooth',0.05,0,0.45);tone(311,0.5,'triangle',0.11,0,0.45);
     tone(196,0.6,'sawtooth',0.07,0,0.9);tone(247,0.6,'sawtooth',0.06,0,0.9);tone(294,0.6,'triangle',0.12,0,0.9);
   },
+  dodge:function(){noiz(0.14,0.2,1400,1.4);tone(300,0.12,'sine',0.14,260);},
   notif:function(){ // звуки уведомлений телефона: случайно один из трёх
     var n=(R()*3)|0;
     if(n===0){tone(1319,0.09,'triangle',0.15);tone(1047,0.13,'triangle',0.13,0,0.08);}       // «ду-дин»

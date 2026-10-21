@@ -54,9 +54,11 @@ function updatePlayer(p,dt){
   if(p.burnout>70){p.heart-=dt;if(p.heart<=0){p.heart=0.9;SFX.heart();}}
   if(p.f1)tryPrimary(p);
   if(p.f2)trySecondary(p);
-  if(p.sk)trySkill(p);
+  if(p.sk)tryDodge(p);          // ПРОБЕЛ: уворот от всего
+  if(p.fk)trySkill(p);          // F: класс-ульта
   if(p.sk2)trySkill2(p);
   if(p.ult){p.ult=false;tryUlt(p);}
+  if(p.cdD>0)p.cdD-=dt;
   for(i=0;i<COFFEES.length;i++){var cp=COFFEES[i];
     if(cp.charges>0&&dist(p,cp)<60&&(p.burnout>2||p.coffee<p.coffeeMax-2)&&p.cf){drinkCoffee(p,cp);p.cf=false;}
   }
@@ -335,7 +337,7 @@ function updateWaves(dt){
       G.spawnT-=dt;
       if(G.spawnT<=0){G.spawnT=0.18;spawnMob(G.spawnQ.shift());}
     }else if(G.mobs.length===0&&!G.boss){
-      G.waveState='cleared';G.interT=4.2;
+      G.waveState='cleared';G.interT=20;
       G.pendSeed=(R()*1e9)|0;
       G.nextTheme=themeNameFor(G.pendSeed);
       for(i=0;i<G.players.length;i++)G.players[i].burnout=Math.max(0,G.players[i].burnout-6);

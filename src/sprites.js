@@ -683,7 +683,7 @@ function renderClassPreviews(){
     SPRC.save();
     SPRC.translate(80,80);
     SPRC.scale(SPR_SCALE*5.2,SPR_SCALE*5.2);
-    drawHumanoidBody(SPRC,{x:0,y:0,cls:cls,look:classLook(cls,0),face:-Math.PI/2,step:0,scale:1,moving:false,haste:0,castT:0,casting:null});
+    drawHumanoidBody(SPRC,{x:0,y:0,cls:cls,look:classLook(cls,0),face:Math.PI/2,step:0,scale:1,moving:false,haste:0,castT:0,casting:null});
     SPRC.restore();
     // блит 1:1 по центру карточки (пиксели остаются чёткими)
     c.imageSmoothingEnabled=false;

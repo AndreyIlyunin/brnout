@@ -190,17 +190,14 @@ function drawWorld(){
       ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(4.2,-4.2,0.9,0,TAU);ctx.fill();
       }
     }else{
-      // билет с жирафом: летит вдоль движения, слегка покачиваясь
+      // JIRA-тикет: крупный читаемый логотип
       var fa2=Math.atan2(pj.vy,pj.vx);
-      ctx.rotate(fa2-pj.rot+Math.sin((pj.rot||0)*3+G.t*8)*0.18);
-      ctx.fillStyle='#f2e6c8';rr(ctx,-11,-6.5,22,13,2);ctx.fill();
-      ctx.strokeStyle='#b9a86f';ctx.lineWidth=1;rr(ctx,-11,-6.5,22,13,2);ctx.stroke();
-      ctx.fillStyle='#c23b32';ctx.fillRect(-11,-6.5,22,3.2);
-      ctx.strokeStyle='rgba(0,0,0,0.28)';ctx.setLineDash([1.5,1.5]);
-      ctx.beginPath();ctx.moveTo(6.6,-3.3);ctx.lineTo(6.6,6.5);ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.save();ctx.translate(-2,0.5);
-      drawJiraIcon(ctx,1.05);
+      ctx.rotate(fa2-pj.rot+Math.sin((pj.rot||0)*3+G.t*8)*0.15);
+      ctx.fillStyle='#fbfcfe';rr(ctx,-13,-8,26,16,3);ctx.fill();
+      ctx.strokeStyle='#2684FF';ctx.lineWidth=2;rr(ctx,-13,-8,26,16,3);ctx.stroke();
+      ctx.fillStyle='#2684FF';ctx.fillRect(-13,-8,26,4);
+      ctx.save();ctx.translate(0,1.5);
+      drawJiraIcon(ctx,2.1);
       ctx.restore();
     }
     ctx.restore();
@@ -353,7 +350,8 @@ function drawGlows(){
   // уютные лампы: тёплые и холодные
   for(gi=0;gi<LIGHTS.length;gi++){var L2=LIGHTS[gi];
     if(L2.dead)continue;
-    if(gi%2)glow(L2.x,L2.y,84,'rgba(255,190,110,A)',0.045);
+    if(L2.warm)glow(L2.x,L2.y,L2.lamp?60:84,'rgba(255,190,110,A)',L2.lamp?0.06:0.045);
+    else if(gi%2)glow(L2.x,L2.y,84,'rgba(255,190,110,A)',0.045);
     else glow(L2.x,L2.y,92,'rgba(110,212,224,A)',0.035);
   }
   for(gi=0;gi<G.fx.length;gi++){var f=G.fx[gi];
@@ -474,18 +472,19 @@ function drawHUD(){
   var slots=[
     {n:C.s1.n,cd:p.cd1||0,cdm:C.s1.cd,cost:C.s1.cost},
     {n:C.s2.n,cd:p.cd2||0,cdm:C.s2.cd,cost:C.s2.cost},
+    {n:'уворот',cd:p.cdD||0,cdm:2.6,cost:0},
     {n:C.ult.n,cd:Math.max(p.cdQ||0,p.qT||0),cdm:C.ult.cd,cost:C.ult.cost},
     {n:C.sk.n,cd:p.cdS||0,cdm:C.sk.cd,cost:C.sk.cost},
-    {n:'УЛЬТА',cd:G.wave<G.ultAt?-1:Math.max(p.cdU||0,0),cdm:25,cost:40}
+    {n:'АБСОЛЮТ',cd:G.wave<G.ultAt?-1:Math.max(p.cdU||0,0),cdm:25,cost:40}
   ];
-  var slotW=isTouch?58:74,gap=isTouch?6:8;
+  var slotW=isTouch?48:66,gap=isTouch?5:7;
   var sx0=isTouch?12:W/2-((slots.length*(slotW+gap)-8)/2);
   for(var i=0;i<slots.length;i++){var s=slots[i],x=sx0+i*(slotW+gap);
     hctx.fillStyle='rgba(10,13,18,0.75)';rr(ctx,x,sy,slotW,52,6);hctx.fill();
     hctx.strokeStyle='#333b47';rr(ctx,x,sy,slotW,52,6);hctx.stroke();
     if(s.cd>0){hctx.fillStyle='rgba(0,0,0,0.6)';hctx.fillRect(x,sy,slotW,52*Math.min(1,s.cd/s.cdm));}
     hctx.font=pixFont(11,true);hctx.fillStyle='#d29922';hctx.textAlign='center';
-    var KL=['ЛКМ','ПКМ','ПРОБЕЛ','Q','R'];
+    var KL=['ЛКМ','ПКМ','ПРОБЕЛ','F','Q','R'];
     hctx.fillText('['+KL[i]+']',x+slotW/2,sy+16);
     hctx.font=pixFont(11);
     if(s.cd===-1){ // ульта ещё закрыта
@@ -604,28 +603,36 @@ function drawHUD(){
     hctx.fillStyle='#e8894a';hctx.fillText('3 сентября',W/2,H*0.4);
     hctx.restore();hctx.textAlign='left';
   }
-  // === межспринтовая пауза: итоги + анонс новой локации ===
+  // === межспринтовая пауза: НЕ блокирует — собирайте лут; старт кнопкой/Enter/таймером ===
   if(G.waveState==='cleared'&&G.state==='playing'){
     var st=G.interStats||{w:G.wave,ki:0,kd:0,okr:G.okr,co:(p.coins||0)};
-    hctx.fillStyle='rgba(5,3,10,0.74)';hctx.fillRect(0,0,W,H);
-    var pw=430,px0=W/2-pw/2,py0=H/2-118;
-    hctx.fillStyle='rgba(13,10,24,0.94)';rr(ctx,px0,py0,pw,236,10);hctx.fill();
-    hctx.strokeStyle='rgba(232,58,156,0.7)';hctx.lineWidth=2;rr(ctx,px0,py0,pw,236,10);hctx.stroke();
+    var pw=470,px0=W/2-pw/2,py0=14;
+    hctx.fillStyle='rgba(13,10,24,0.92)';rr(ctx,px0,py0,pw,96,10);hctx.fill();
+    hctx.strokeStyle='rgba(232,58,156,0.7)';hctx.lineWidth=2;rr(ctx,px0,py0,pw,96,10);hctx.stroke();
     hctx.textAlign='center';
-    hctx.font=pixFont(26,true);hctx.fillStyle='#e6edf3';
-    hctx.fillText('СПРИНТ '+st.w+' ЗАКРЫТ',W/2,py0+44);
-    hctx.font=pixFont(13);hctx.fillStyle='#8b949e';
-    hctx.fillText('стажёров уволено: '+st.ki+'    дедлайнов сгорело: '+st.kd,W/2,py0+74);
-    hctx.fillText('OKR: '+st.okr+'    ✦ '+st.co,W/2,py0+96);
-    hctx.font=pixFont(14,true);hctx.fillStyle='#1fc4ae';
-    hctx.fillText('→ новая локация: «'+(G.nextTheme||'офис')+'»',W/2,py0+132);
+    hctx.font=pixFont(19,true);hctx.fillStyle='#e6edf3';
+    hctx.fillText('СПРИНТ '+st.w+' ЗАКРЫТ — соберите лут',W/2,py0+26);
+    hctx.font=pixFont(12);hctx.fillStyle='#8b949e';
+    hctx.fillText('стажёров: '+st.ki+' · дедлайнов: '+st.kd+' · OKR: '+st.okr+' · ✦ '+st.co,W/2,py0+46);
+    hctx.font=pixFont(12,true);hctx.fillStyle='#1fc4ae';
+    hctx.fillText('→ «'+(G.nextTheme||'офис')+'»',W/2,py0+64);
     var left=Math.max(0,Math.ceil(G.interT));
-    hctx.font=pixFont(13);hctx.fillStyle='#c9d1d9';
-    hctx.fillText('переезд через '+left+'…  (любая клавиша — быстрее)',W/2,py0+164);
-    // полоса прогресса паузы
-    hctx.fillStyle='#12161c';rr(ctx,W/2-130,py0+182,260,8,3);hctx.fill();
-    hctx.fillStyle='#e83a9c';hctx.fillRect(W/2-130,py0+182,260*clamp(1-G.interT/3.4,0,1),8);
+    // кнопка «запустить следующий спринт»
+    var bw=300,bx0=W/2-bw/2,by0=py0+72;
+    var hov=(mouse.x/DPR)>=bx0&&(mouse.x/DPR)<=bx0+bw&&(mouse.y/DPR)>=by0&&(mouse.y/DPR)<=by0+22;
+    hctx.fillStyle=hov?'rgba(63,185,80,0.9)':'rgba(26,58,42,0.9)';
+    rr(ctx,bx0,by0,bw,22,5);hctx.fill();
+    hctx.strokeStyle='#42e0aa';hctx.lineWidth=1.5;rr(ctx,bx0,by0,bw,22,5);hctx.stroke();
+    hctx.font=pixFont(12,true);hctx.fillStyle='#d8ffe8';
+    hctx.fillText('▶ ЗАПУСТИТЬ СЛЕДУЮЩИЙ СПРИНТ  [ENTER] · авто '+left+'с',W/2,by0+16);
     hctx.textAlign='left';
+    // тач/мышь клики по кнопке
+    if(hov&&mouse.down)G.interT=Math.min(G.interT,0.05);
+    var nb=document.getElementById('btnNext');
+    if(nb)nb.classList.toggle('hidden',!isTouch);
+  }else{
+    var nb2=document.getElementById('btnNext');
+    if(nb2&&!nb2.classList.contains('hidden'))nb2.classList.add('hidden');
   }
   if(p.dead){
     hctx.fillStyle='rgba(10,13,18,0.8)';rr(ctx,W/2-130,H/2-20,260,44,6);hctx.fill();

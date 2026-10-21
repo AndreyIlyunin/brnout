@@ -9,14 +9,14 @@ var ROOMS=[];       // {x,y,w,h,type} px
 var WALLS=[];       // merged wall rects (collide + minimap)
 var FURN=[];        // furniture rects (collide)
 var OBST=[];        // WALLS + FURN
-var LIGHTS=[],COFFEES=[],SPAWNS=[];
+var LIGHTS=[],COFFEES=[],SPAWNS=[],RUGS=[]; // RUGS — ковры: только визуал, не мебель
 var floorCv=null,mmCv=null;
 
 function buildMap(seed){
   MAPSEED=seed>>>0;if(!MAPSEED)MAPSEED=1;
   _seed=MAPSEED;
   MAPTHEME=THEMES[(rnd()*THEMES.length)|0]; // тема детерминирована сидом
-  grid=[];ROOMS=[];WALLS=[];FURN=[];OBST=[];LIGHTS=[];COFFEES=[];SPAWNS=[];
+  grid=[];ROOMS=[];WALLS=[];FURN=[];OBST=[];LIGHTS=[];COFFEES=[];SPAWNS=[];RUGS=[];
   var i,j,x,y;
   for(j=0;j<GH;j++){grid[j]=[];for(i=0;i<GW;i++)grid[j][i]=0;}
   // --- place rooms (plus two small WC rooms)
@@ -243,6 +243,7 @@ function roomAtTile(i,j){
 var FPROPS={
   desk:{solid:1,hp:40},rtable:{solid:1,hp:60},cabinet:{solid:1,hp:30},stall:{solid:1,hp:50},
   printer:{solid:1,hp:30},cooler:{solid:0,hp:25},
+  couch:{solid:1,hp:45},lamp:{solid:1,hp:20},box:{solid:1,hp:15},
   cstand:{solid:0,hp:0},sink:{solid:0,hp:0},rstand:{solid:0,hp:0},plant:{solid:0,hp:0}
 };
 function furnRoom(rm,type){return rm.type===type;}
@@ -264,9 +265,11 @@ function placeFurn(rm,fid,t,x,y,w,h,margin){
 function furnishRoom(rm,fid){
   var i,j;
   // ceiling lights in room
+  var warmRoom=(rm.type==='pantry'||rm.type==='meeting')?1:0;
   for(j=rm.ty;j<rm.ty+rm.th;j+=3)for(i=rm.tx;i<rm.tx+rm.tw;i+=3){
     var dead=rnd()<0.22,dim=dead?0:(rnd()<0.3?0.5:1);
-    LIGHTS.push({x:i*TILE+TILE*1.5,y:j*TILE+TILE*1.5,dead:dead,dim:dim,ph:rnd()*10,sd:rnd()*100,sput:0});
+    LIGHTS.push({x:i*TILE+TILE*1.5,y:j*TILE+TILE*1.5,dead:dead,dim:dim,ph:rnd()*10,sd:rnd()*100,sput:0,
+      warm:warmRoom||rnd()<0.3});
   }
   if(furnRoom(rm,'openspace')){
     for(j=rm.y+80;j<rm.y+rm.h-60;j+=130){
@@ -277,6 +280,8 @@ function furnishRoom(rm,fid){
     }
     var np2=1+((rnd()*2)|0);
     for(i=0;i<np2;i++)fid=placeFurn(rm,fid,'printer',rm.x+20+rnd()*(rm.w-80),rm.y+14+rnd()*(rm.h-62),44,38);
+    fid=placeFurn(rm,fid,'box',rm.x+18,rm.y+rm.h-44,26,22);
+    fid=placeFurn(rm,fid,'plant',rm.x+rm.w-44,rm.y+18,22,22);
   }else if(furnRoom(rm,'office')){
     var n=1+((rnd()*2)|0);
     for(i=0;i<n;i++){
@@ -285,13 +290,35 @@ function furnishRoom(rm,fid){
     }
     if(rnd()<0.6)fid=placeFurn(rm,fid,'printer',rm.x+16+rnd()*(rm.w-80),rm.y+16+rnd()*(rm.h-62),44,38);
     if(rnd()<0.5)fid=placeFurn(rm,fid,'cabinet',rm.x+20,rm.y+rm.h-56,64,28);
+    if(rnd()<0.6)fid=placeFurn(rm,fid,'plant',rm.x+rm.w-42,rm.y+18,22,22);
+    if(rnd()<0.4)fid=placeFurn(rm,fid,'box',rm.x+18,rm.y+18,26,22);
   }else if(furnRoom(rm,'meeting')){
-    fid=placeFurn(rm,fid,'rtable',rm.x+rm.w/2-45,rm.y+rm.h/2-28,90,56,14);
+    if(!ROOMS.some(function(r){return r.lounge;})&&rm.w*rm.h<40000&&rnd()<0.75){
+      // ЛАУНЖ: биофильный уголок — ковёр, диван, торшер, низкий столик, растения
+      rm.lounge=true;
+      RUGS.push({x:rm.x+30,y:rm.y+30,w:rm.w-60,h:rm.h-60,c:'#5a3a44',c2:'#6b4652'});
+      fid=placeFurn(rm,fid,'couch',rm.x+rm.w/2-55,rm.y+34,110,36);
+      fid=placeFurn(rm,fid,'rtable',rm.x+rm.w/2-38,rm.y+rm.h/2-6,76,44,10);
+      fid=placeFurn(rm,fid,'lamp',rm.x+18,rm.y+18,18,18);
+      fid=placeFurn(rm,fid,'plant',rm.x+rm.w-44,rm.y+24,24,24);
+      fid=placeFurn(rm,fid,'plant',rm.x+rm.w-44,rm.y+rm.h-48,24,24);
+      LIGHTS.push({x:rm.x+27,y:rm.y+27,dead:false,dim:0,warm:true,ph:rnd()*10,sd:rnd()*100,sput:0,lamp:1});
+    }else{
+      RUGS.push({x:rm.x+rm.w/2-70,y:rm.y+rm.h/2-40,w:140,h:80,c:'#44384a',c2:'#52445a'});
+      fid=placeFurn(rm,fid,'rtable',rm.x+rm.w/2-45,rm.y+rm.h/2-28,90,56,14);
+      fid=placeFurn(rm,fid,'plant',rm.x+16,rm.y+16,22,22);
+      fid=placeFurn(rm,fid,'plant',rm.x+rm.w-38,rm.y+rm.h-38,22,22);
+    }
   }else if(furnRoom(rm,'pantry')){
     fid=placeFurn(rm,fid,'cstand',rm.x+rm.w/2-25,rm.y+16,50,38);
     fid=placeFurn(rm,fid,'cooler',rm.x+rm.w-46,rm.y+rm.h-50,26,26);
   }else if(furnRoom(rm,'lobby')){
+    RUGS.push({x:rm.x+rm.w/2-90,y:rm.y+70,w:180,h:110,c:'#463a50',c2:'#554762'});
     fid=placeFurn(rm,fid,'rstand',rm.x+rm.w/2-36,rm.y+30,72,32);
+    fid=placeFurn(rm,fid,'couch',rm.x+16,rm.y+rm.h-64,96,34);
+    fid=placeFurn(rm,fid,'plant',rm.x+rm.w-46,rm.y+20,24,24);
+    fid=placeFurn(rm,fid,'plant',rm.x+rm.w-46,rm.y+rm.h-50,24,24);
+    fid=placeFurn(rm,fid,'box',rm.x+rm.w/2+50,rm.y+36,26,22);
   }else if(furnRoom(rm,'wc')){
     // сантехника — фиксированные позиции, рандом-ретраи здесь не нужны
     FURN.push({id:fid++,t:'sink',x:rm.x+10,y:rm.y+rm.h-26,w:48,h:20});
@@ -386,8 +413,27 @@ function prerenderFloor(){
       c.beginPath();c.ellipse(sx+dx3,sy+dy3,1.5+rnd()*3,1.5+rnd()*3,rnd()*3,0,TAU);c.fill();
     }
   }
+  // ковры: тёплые островки зонирования (под мебелью)
+  for(i=0;i<RUGS.length;i++){var rg=RUGS[i];
+    c.fillStyle=rg.c;rr(c,rg.x,rg.y,rg.w,rg.h,14);c.fill();
+    c.strokeStyle=rg.c2;c.lineWidth=3;rr(c,rg.x+5,rg.y+5,rg.w-10,rg.h-10,10);c.stroke();
+    c.fillStyle='rgba(0,0,0,0.12)';rr(c,rg.x+3,rg.y+3,rg.w-6,rg.h-6,12);c.fill();
+  }
   // furniture decals
   for(i=0;i<FURN.length;i++)drawFurnDecal(c,FURN[i]);
+  // тёплые постеры на стенах (биофилия/мотивация — следы жизни)
+  for(i=0;i<ROOMS.length;i++){
+    rm=ROOMS[i];
+    if((rm.type==='office'||rm.type==='openspace')&&rnd()<0.65){
+      var px2=rm.x+24+rnd()*(rm.w-90),py2=rm.y+3;
+      var pg=c.createLinearGradient(px2,py2,px2+54,py2+40);
+      pg.addColorStop(0,rnd()<0.5?'#c4703a':'#8a5aa0');pg.addColorStop(1,'#3a2a4a');
+      c.fillStyle='#d8c9b8';c.fillRect(px2-3,py2-2,60,46);
+      c.fillStyle=pg;c.fillRect(px2,py2+1,54,40);
+      c.fillStyle='rgba(255,235,200,0.8)';c.beginPath();c.arc(px2+42,py2+10,5,0,TAU);c.fill(); // «закат»
+      c.fillStyle='rgba(20,12,26,0.6)';c.fillRect(px2+6,py2+26,30,3);c.fillRect(px2+6,py2+32,20,3);
+    }
+  }
   // wall decals: whiteboards/posters on room top walls
   for(i=0;i<ROOMS.length;i++){
     rm=ROOMS[i];
@@ -477,6 +523,22 @@ function drawFurnDecal(c,f){
     c.strokeStyle='#22262e';c.lineWidth=2;c.strokeRect(f.x,f.y,f.w,f.h);
     c.fillStyle='#2a3038';c.fillRect(f.x+f.w-9,f.y+6,4,f.h-12);
     c.fillStyle='#c9d1d9';c.fillRect(f.x+f.w/2-2,f.y+f.h/2-2,4,4);
+  }else if(f.t==='couch'){
+    c.fillStyle='rgba(0,0,0,0.3)';c.fillRect(f.x+4,f.y+6,f.w,f.h);
+    c.fillStyle='#5a4a56';rr(c,f.x,f.y,f.w,f.h,9);c.fill();
+    c.fillStyle='#6b5a66';rr(c,f.x+4,f.y+4,f.w-8,12,6);c.fill();
+    c.strokeStyle='#3a2f3c';c.lineWidth=2;rr(c,f.x,f.y,f.w,f.h,9);c.stroke();
+    c.fillStyle='#7a6876';c.beginPath();c.arc(f.x+16,f.y-6,7,0,TAU);c.arc(f.x+f.w-16,f.y-6,7,0,TAU);c.fill(); // подушки
+  }else if(f.t==='lamp'){ // торшер: тёплый свет
+    c.fillStyle='rgba(255,190,110,0.13)';c.beginPath();c.arc(f.x+9,f.y+2,26,0,TAU);c.fill();
+    c.fillStyle='#3a3340';c.fillRect(f.x+7,f.y+8,4,12);
+    c.fillStyle='#ffcf7a';c.beginPath();c.moveTo(f.x+1,f.y+8);c.lineTo(f.x+17,f.y+8);c.lineTo(f.x+13,f.y-4);c.lineTo(f.x+5,f.y-4);c.closePath();c.fill();
+  }else if(f.t==='box'){
+    c.fillStyle='rgba(0,0,0,0.28)';c.fillRect(f.x+3,f.y+4,f.w,f.h);
+    c.fillStyle='#8a6f4d';c.fillRect(f.x,f.y,f.w,f.h);
+    c.strokeStyle='#5d4a32';c.lineWidth=2;c.strokeRect(f.x,f.y,f.w,f.h);
+    c.strokeStyle='rgba(255,255,255,0.25)';c.lineWidth=1.5;
+    c.beginPath();c.moveTo(f.x,f.y);c.lineTo(f.x+f.w,f.y+f.h);c.moveTo(f.x+f.w,f.y);c.lineTo(f.x,f.y+f.h);c.stroke();
   }else if(f.t==='sink'){
     c.fillStyle='#454c56';c.fillRect(f.x,f.y,f.w,f.h);
     c.strokeStyle='#22262e';c.lineWidth=2;c.strokeRect(f.x,f.y,f.w,f.h);

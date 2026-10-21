@@ -115,7 +115,7 @@ function hostOnMsg(c,d){
     var pl=null;
     for(i=0;i<G.players.length;i++)if(G.players[i].id===c.peer)pl=G.players[i];
     if(!pl)return;
-    pl.ix=d.x;pl.iy=d.y;pl.aim=d.a;pl.f1=!!d.f1;pl.f2=!!d.f2;pl.sk=!!d.sk;pl.sk2=!!d.s2;pl.cf=!!d.cf;
+    pl.ix=d.x;pl.iy=d.y;pl.aim=d.a;pl.f1=!!d.f1;pl.f2=!!d.f2;pl.sk=!!d.sk;pl.sk2=!!d.s2;pl.fk=!!d.fk;pl.cf=!!d.cf;
   }
   if(d.t==='coin'){
     var pc=null;
