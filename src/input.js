@@ -61,6 +61,7 @@ window.addEventListener('keyup',function(e){
   if(e.code==='KeyE')INPUT.cf=false;
 });
 function keysToInput(){
+  if(isTouch&&joyId!==null)return; // джойстик активен — не стирать его ввод клавиатурным опросом
   INPUT.ix=0;INPUT.iy=0;
   if(keys.KeyW||keys.ArrowUp)INPUT.iy-=1;
   if(keys.KeyS||keys.ArrowDown)INPUT.iy+=1;
@@ -143,5 +144,19 @@ bindBtn('btnSkill2',function(){INPUT.sk2=true;},function(){INPUT.sk2=false;});  
 bindBtn('btnFU',function(){INPUT.fk=true;},function(){INPUT.fk=false;});        // F: класс-ульта
 bindBtn('btnNext',function(){if(G.state==='playing'&&G.waveState==='cleared')G.interT=0.05;},function(){});
 bindBtn('btnCoffee',function(){INPUT.cf=true;},function(){INPUT.cf=false;});
+bindBtn('btnR',function(){INPUT.ultTap=true;},function(){});
+(function(){
+  var fs=document.getElementById('btnFS');
+  fs.addEventListener('click',function(){
+    var d=document.documentElement;
+    if(document.fullscreenElement||document.webkitFullscreenElement){
+      (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+    }else{
+      var el=root;
+      (el.requestFullscreen||el.webkitRequestFullscreen).call(el);
+      if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){});
+    }
+  });
+})();
 document.getElementById('btnPauseM').addEventListener('touchstart',function(e){e.preventDefault();togglePause();},{passive:false});
 document.getElementById('btnPauseM').addEventListener('mousedown',function(e){e.preventDefault();togglePause();});
