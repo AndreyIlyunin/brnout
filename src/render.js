@@ -640,7 +640,8 @@ function drawHUD(){
     rr(hctx,bx0,by0,bw,34,8);hctx.fill();
     hctx.strokeStyle='#42e0aa';hctx.lineWidth=2;rr(hctx,bx0,by0,bw,34,8);hctx.stroke();
     hctx.font=pixFont(16,true);hctx.fillStyle='#d8ffe8';
-    hctx.fillText('▶ ЗАПУСТИТЬ СЛЕДУЮЩИЙ СПРИНТ [ENTER] · авто '+left+'с',W/2,by0+23);
+    hctx.fillText('СТАРТ: СЛЕДУЮЩИЙ СПРИНТ [ENTER] · авто '+left+'с',W/2,by0+23); // без ▶-глифа: на iOS он тофу
+    window.__nextBtnRect={x:bx0,y:by0,w:bw,h:34}; // хит-зона для тача
     hctx.textAlign='left';
     if(hov&&mouse.down)G.interT=Math.min(G.interT,0.05);
     var nb=document.getElementById('btnNext');
