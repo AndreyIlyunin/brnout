@@ -71,7 +71,10 @@ function hostCreate(cb,tries){
   var code=genCode();
   var p=new Peer('bo-'+code,peerOpts());
   NET.peer=p;
+  var hDone=false;
+  var hTo=setTimeout(function(){if(!hDone){hDone=true;try{p.destroy();}catch(e){}cb('timeout');}},10000);
   p.on('open',function(){
+    if(hDone)return; hDone=true; clearTimeout(hTo);
     NET.code=code;NET.mode='host';
     document.getElementById('roomCode').textContent=code;
     LOBBY=[{id:'me',cls:NET.cls}];
@@ -79,8 +82,9 @@ function hostCreate(cb,tries){
     cb(null,code);
   });
   p.on('error',function(err){
-    if(err.type==='unavailable-id'&&tries<5){p.destroy();hostCreate(cb,tries+1);}
-    else if(!NET.code){cb(err.type||'error');}
+    if(hDone)return;
+    if(err.type==='unavailable-id'&&tries<5){try{p.destroy();}catch(e){}hostCreate(cb,tries+1);}
+    else{hDone=true;clearTimeout(hTo);try{p.destroy();}catch(e){}cb(err.type||'error');}
   });
   p.on('connection',function(c){
     if(LOBBY.length>=4){c.on('open',function(){c.send({t:'full'});setTimeout(function(){c.close();},500);});return;}
@@ -149,7 +153,7 @@ function guestJoin(code,cb){
       if(done)netLost('Хост отключился');
       else cb('peer-unavailable');
     });
-    setTimeout(function(){if(!done&&!c.open)cb('timeout');},8000);
+    setTimeout(function(){if(!done&&!c.open){done=true;try{p.destroy();}catch(e){}cb('timeout');}},8000);
   });
   p.on('error',function(err){
     if(!done)cb(err.type||'error');
