@@ -93,6 +93,7 @@ root.addEventListener('touchstart',function(e){
     if(t.target.closest&&t.target.closest('.tbtn'))continue;
     if(t.target.closest&&t.target.closest('.bgov'))continue;
     if(t.target.closest&&t.target.closest('#btnPauseM'))continue;
+    if(t.target.closest&&t.target.closest('#btnFS'))continue;
     if(joyId===null){
       joyId=t.identifier;
       var r=root.getBoundingClientRect();
@@ -147,16 +148,22 @@ bindBtn('btnCoffee',function(){INPUT.cf=true;},function(){INPUT.cf=false;});
 bindBtn('btnR',function(){INPUT.ultTap=true;},function(){});
 (function(){
   var fs=document.getElementById('btnFS');
-  fs.addEventListener('click',function(){
-    var d=document.documentElement;
+  var fakeOK=true; // iOS Safari не даёт fullscreen элементам — используем псевдофуллскрин
+  function toggle(){
     if(document.fullscreenElement||document.webkitFullscreenElement){
       (document.exitFullscreen||document.webkitExitFullscreen).call(document);
-    }else{
-      var el=root;
-      (el.requestFullscreen||el.webkitRequestFullscreen).call(el);
-      if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){});
+      return;
     }
-  });
+    if(root.requestFullscreen||root.webkitRequestFullscreen){
+      var pr=(root.requestFullscreen||root.webkitRequestFullscreen).call(root);
+      if(pr&&pr.catch)pr.catch(function(){root.classList.add('zfsfake');});
+      if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){});
+    }else if(fakeOK){
+      root.classList.toggle('zfsfake'); // CSS-фуллскрин
+    }
+  }
+  fs.addEventListener('click',function(e){e.preventDefault();toggle();});
+  fs.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();toggle();},{passive:false});
 })();
 document.getElementById('btnPauseM').addEventListener('touchstart',function(e){e.preventDefault();togglePause();},{passive:false});
 document.getElementById('btnPauseM').addEventListener('mousedown',function(e){e.preventDefault();togglePause();});

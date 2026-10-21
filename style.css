@@ -54,13 +54,16 @@
 #burnout #btnSkill2{right:196px;bottom:36px;width:56px;height:56px;border-color:rgba(122,162,200,.85);font-size:11px;}
 #burnout #btnCoffee{right:30px;bottom:170px;width:62px;height:62px;border-color:rgba(63,185,80,.9);}
 #burnout .tbtn:active{background:rgba(229,83,75,.55);}
-#burnout .tsk{right:170px;bottom:26px;width:62px;height:62px;font-size:10px;}
-#burnout .tsk2{right:96px;bottom:96px;width:62px;height:62px;font-size:10px;}
-#burnout .tsk3{right:24px;bottom:170px;width:56px;height:56px;font-size:9px;}
-#burnout .tsk4{right:96px;bottom:180px;width:56px;height:56px;font-size:9px;border-color:rgba(232,138,200,.8);}
-#burnout .tsk5{right:24px;bottom:250px;width:56px;height:56px;font-size:8px;border-color:rgba(255,207,92,.85);color:#ffcf5c;}
+#burnout .tb{width:66px;height:66px;font-size:11px;white-space:nowrap;}
+#burnout .tb-alt{right:104px;bottom:96px;border-color:rgba(66,224,255,.85);}
+#burnout .tb-dodge{right:104px;bottom:170px;border-color:rgba(31,196,174,.85);}
+#burnout .tb-skill{right:104px;bottom:244px;border-color:rgba(200,162,224,.85);}
+#burnout .tb-ult{right:22px;bottom:170px;border-color:rgba(232,58,156,.85);}
+#burnout .tb-abs{right:22px;bottom:244px;border-color:rgba(255,207,92,.9);color:#ffcf5c;font-size:14px;}
+#burnout .tcf{right:22px;bottom:96px;width:66px;height:66px;font-size:22px;border-color:rgba(139,209,124,.9);}
 #burnout #btnFS{position:absolute;top:10px;right:56px;z-index:6;width:36px;height:36px;border-radius:8px;background:rgba(33,38,45,.72);border:1px solid rgba(110,118,129,.8);color:#e6edf3;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;touch-action:none;}
 #burnout #btnFS:hover{background:rgba(63,185,80,.4);}
+#burnout.zfsfake{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;z-index:9999;border-radius:0;}
 #burnout #btnPauseM{position:absolute;top:10px;right:10px;z-index:4;width:40px;height:40px;border-radius:8px;background:rgba(33,38,45,.7);border:1px solid #30363d;color:#e6edf3;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:auto;}
 
 /* ===== неоновое главное меню ===== */
