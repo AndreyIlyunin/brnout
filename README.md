@@ -3,8 +3,6 @@
 > **Диабло-слэшер в опенспейсе после заката.** HR уже ушёл домой. Дедлайны — нет.
 > *A Diablo-like office slasher. It's 18:52. Everyone went home. Except the deadlines.*
 
-![demo](docs/demo.gif)
-
 **[▶ Играть прямо сейчас](#запуск)** · без сборки, без аккаунтов, один HTML + браузер
 
 ---

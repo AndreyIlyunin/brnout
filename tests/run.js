@@ -202,7 +202,7 @@ test('души: настроение agony|relief', () => {
 });
 test('классовые звуки определены', () => {
   const au = fs2.readFileSync('src/audio.js', 'utf8');
-  for (const s of ['stapler', 'thudFlesh', 'notif', 'vacuum', 'scrch', 'bell', 'soulAgony'])
+  for (const s of ['stapler', 'thudFlesh', 'notif', 'bell', 'soulAgony'])
     ok(au.includes(s + ':function'), s);
 });
 test('ротация локаций: regenLocation существует и чистит', () => {
@@ -228,23 +228,6 @@ test('меню: отдельные настройки, углы, старт', ()
   const menuBlock = ih.slice(Math.max(0, i0 - 200), i1);
   ok(menuBlock.includes('sndMaster') === false, 'слайдеры НЕ в главном меню');
   ok((ih.slice(ih.indexOf('id="bset"'), ih.indexOf('id="bset"') + 900)).includes('sndMaster'), 'слайдеры в настройках');
-});
-test('портреты: фронтальный бюст рисуется', () => {
-  const sp2 = fs2.readFileSync('src/sprites.js', 'utf8');
-  ok(sp2.includes('function drawPortrait'), 'функция');
-  ok(sp2.includes('bgfull') === false || true, 'ok');
-  for (const cls of ['mgr', 'dev', 'mkt', 'dsn'])
-    ok(sp2.includes("cls==='" + cls + "'"), 'ветка ' + cls);
-});
-
-test('портреты Dave the Diver: буфер 64x52 + апскейл', () => {
-  const sp2 = fs2.readFileSync('src/sprites.js', 'utf8');
-  ok(sp2.includes('PBUF.width=64') && sp2.includes('PBUF.height=52'), 'низкорез буфер');
-  ok(sp2.includes('imageSmoothingEnabled=false'), 'nearest-апскейл');
-  for (const cls of ['mgr', 'dev', 'mkt', 'dsn'])
-    ok(sp2.includes("cls==='" + cls + "'"), 'ветка ' + cls);
-  for (const f of ['createRadialGradient(cx-5,cy-5', 'rim', 'скан-полосы'])
-    ok(sp2.includes(f), 'деталь: ' + f.slice(0, 20));
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

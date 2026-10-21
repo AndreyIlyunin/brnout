@@ -58,8 +58,8 @@ var SFX={
     else if(n===1){tone(520,0.05,'sine',0.16,400);tone(1040,0.08,'sine',0.11,0,0.05);}        // «поп» телеграма
     else{tone(880,0.05,'sine',0.14);tone(1175,0.07,'sine',0.12,0,0.06);}                      // двойной блип
   },
-  vacuum:function(){noiz(0.34,0.2,420,0.7);noiz(0.3,0.14,900,1.2,0.06);tone(140,0.32,'sawtooth',0.07,110);},
-  scrch:function(){noiz(0.05,0.2,3200,2.5);tone(2200,0.05,'square',0.09,-700);},
+
+
   bell:function(){tone(660,0.5,'triangle',0.2,-15);tone(1320,0.35,'sine',0.1,-20,0.02);},
   soulAgony:function(pitch){ // муки: нисходящий стон-стонания
     if(!AC||muted)return;
@@ -141,7 +141,7 @@ var SFX={
   splat:function(){noiz(0.14,0.2,520,1);},
   heart:function(){tone(55,0.12,'sine',0.45,-8);tone(50,0.14,'sine',0.35,-8,0.16);},
   grade:function(){tone(392,0.12,'triangle',0.18);tone(311,0.14,'triangle',0.18,0,0.13);tone(262,0.3,'triangle',0.18,0,0.27);},
-  dry:function(){tone(200,0.06,'square',0.09,-50);},
+
   explode:function(){noiz(0.3,0.4,220,0.7);tone(70,0.3,'sine',0.4,-30);},
   die:function(){tone(220,1.3,'sawtooth',0.22,-170);tone(110,1.6,'sawtooth',0.15,-80,0.1);}
 };
