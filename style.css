@@ -1,5 +1,8 @@
 #burnout{position:relative;width:100%;aspect-ratio:16/9;min-height:420px;height:auto;background:#05070a;overflow:hidden;border-radius:6px;font-family:'Segoe UI',Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
-@media(max-width:720px){#burnout{aspect-ratio:4/3;min-height:360px;}}
+@media(max-width:720px), (orientation:portrait){
+  html,body{overflow:hidden;height:100%;margin:0;}
+  #burnout{aspect-ratio:auto;height:100dvh;min-height:0;border-radius:0;}
+}
 #burnout #bcv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;}
 #burnout #bhud{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;}
 #burnout .bgov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,5,9,.8);z-index:5;overflow-y:auto;}
@@ -48,16 +51,16 @@
 #burnout #joy{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(230,237,243,.25);background:rgba(20,24,30,.25);display:none;}
 #burnout #joyk{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(230,237,243,.35);}
 #burnout .tbtn{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(33,38,45,.72);border:2px solid rgba(110,118,129,.8);color:#e6edf3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;letter-spacing:.5px;touch-action:none;}
-#burnout .tbtn:active{background:rgba(229,83,75,.55);}
+#burnout .tbtn:active{transform:scale(0.92);filter:brightness(1.5);}
 #burnout .tbtn svg{width:46%;height:46%;pointer-events:none;}
-#burnout .tbtn .tlbl{font-size:8px;font-weight:700;letter-spacing:.4px;pointer-events:none;opacity:.9;margin-top:1px;}
+#burnout .tbtn .tlbl{font-size:10px;font-weight:800;letter-spacing:.5px;pointer-events:none;color:#f0f3f7;margin-top:2px;}
 #burnout .tbig svg{width:40%;height:40%;}
 #burnout .tbig .tlbl{font-size:9px;}
 #burnout .tbtn.oncd{opacity:.35;filter:saturate(.2);}
 #burnout .tb-abs.nochg{opacity:.45;filter:grayscale(.8);}
 /* сетка: фиксированные cell-позиции, между любыми кнопками >= 8px при любом экране */
-#burnout .tb,#burnout .tbig{--cell:min(19vw,72px);width:var(--cell);height:var(--cell);right:calc(8px + var(--col,0)*(var(--cell) + 8px));bottom:calc(8px + var(--row,0)*(var(--cell) + 8px));}
-#burnout .tbig{--col:0;--row:0;}
+#burnout .tb,#burnout .tbig{--cell:min(17vw,64px);width:var(--cell);height:var(--cell);right:calc(12px + env(safe-area-inset-right,0px) + var(--col,0)*(var(--cell) + 10px));bottom:calc(12px + env(safe-area-inset-bottom,0px) + var(--row,0)*(var(--cell) + 10px));}
+#burnout .tbig{--col:0;--row:0;--cell:min(24vw,92px);}
 /* Brawl Stars канон: атака и СУПЕР — жёлтые (#ffce00), гаджеты — серые мелкие */
 #burnout .tbig{border-color:#ffce00;background:radial-gradient(circle at 35% 30%,rgba(255,206,0,.34),rgba(60,50,10,.8));color:#ffe566;box-shadow:0 0 12px rgba(255,206,0,.28);}
 #burnout .tb-abs{--col:0;--row:1;--cell:min(15vw,58px);border-color:#ffce00;color:#ffe566;box-shadow:0 0 8px rgba(255,206,0,.25);}
@@ -66,7 +69,7 @@
 #burnout .tb-dodge{--col:1;--row:2;}
 #burnout .tb-skill{--col:1;--row:3;}
 #burnout .tb-ult{--col:1;--row:4;}
-#burnout .tbtn:active{background:rgba(229,83,75,.55);}
+#burnout .tbtn:active{transform:scale(0.92);filter:brightness(1.5);}
 #burnout .tb{width:66px;height:66px;font-size:11px;white-space:nowrap;}
 #burnout .tb-alt{right:104px;bottom:96px;border-color:rgba(66,224,255,.85);}
 #burnout .tb-dodge{right:104px;bottom:170px;border-color:rgba(31,196,174,.85);}
@@ -74,11 +77,11 @@
 #burnout .tb-ult{right:22px;bottom:170px;border-color:rgba(232,58,156,.85);}
 #burnout .tb-abs{right:22px;bottom:244px;border-color:rgba(255,207,92,.9);color:#ffcf5c;font-size:14px;}
 #burnout .tcf{right:104px;bottom:22px;width:66px;height:66px;font-size:22px;border-color:rgba(139,209,124,.9);}
-#burnout #btnFS{position:absolute;top:10px;right:56px;z-index:6;width:36px;height:36px;border-radius:8px;background:rgba(33,38,45,.72);border:1px solid rgba(110,118,129,.8);color:#e6edf3;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;touch-action:none;}
+#burnout #btnFS{position:absolute;top:14px;right:66px;z-index:6;width:36px;height:36px;border-radius:8px;background:rgba(33,38,45,.72);border:1px solid rgba(110,118,129,.8);color:#e6edf3;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;touch-action:none;}
 #burnout #btnFS:hover{background:rgba(63,185,80,.4);}
 #burnout.zfsfake{position:fixed;inset:0;width:100vw;height:100dvh;aspect-ratio:auto;min-height:0;max-width:none;max-height:none;z-index:9999;border-radius:0;}
 #burnout:fullscreen,#burnout:-webkit-full-screen{aspect-ratio:auto;inset:0;width:100vw;height:100dvh;min-height:0;border-radius:0;}
-#burnout #btnPauseM{position:absolute;top:10px;right:10px;z-index:4;width:40px;height:40px;border-radius:8px;background:rgba(33,38,45,.7);border:1px solid #30363d;color:#e6edf3;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:auto;}
+#burnout #btnPauseM{position:absolute;top:10px;right:10px;z-index:4;width:46px;height:46px;border-radius:8px;background:rgba(33,38,45,.7);border:1px solid #30363d;color:#e6edf3;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:auto;}
 
 /* ===== неоновое главное меню ===== */
 #burnout .bgtitle{font-family:'Pixelify Sans',Arial,sans-serif;font-weight:700;font-size:clamp(24px,5.4cqw,46px);letter-spacing:2px;color:#eaf6ff;
@@ -109,3 +112,10 @@
 #burnout .bgcard.sel{border-color:#42e0ff;box-shadow:0 0 18px rgba(66,224,255,0.35),inset 0 0 12px rgba(21,112,127,0.12);}
 #burnout .bgcard.sel h2{color:#42e0ff;}
 #burnout .bgset{max-width:420px;}
+
+/* пауза: Продолжить — primary */
+#burnout #bresume{background:linear-gradient(180deg,#ffd633,#d9a800)!important;border-color:#ffd633!important;color:#1c1600!important;font-weight:800;}
+#burnout #bresume:active{transform:scale(0.96);}
+/* джойстик: видимая база-подсказка до первого касания */
+#burnout #joyHint{position:absolute;left:26px;bottom:calc(30px + env(safe-area-inset-bottom,0px));width:110px;height:110px;border-radius:50%;border:2px dashed rgba(200,210,225,.3);pointer-events:none;z-index:3;}
+#burnout #joyHint::after{content:'движение';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:rgba(200,210,225,.45);font-size:11px;font-weight:700;}

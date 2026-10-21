@@ -70,11 +70,14 @@ function keysToInput(){
 }
 var joy=document.getElementById('joy'),joyk=document.getElementById('joyk');
 var joyId=null,joyCx=0,joyCy=0;
+var joyHinted=false;
 function enableTouch(){
   if(isTouch)return;
   isTouch=true;
   document.getElementById('tui').classList.remove('hidden');
   document.getElementById('btnPauseM').classList.remove('hidden');
+  var jh=document.getElementById('joyHint');
+  if(jh&&!joyHinted)jh.classList.remove('hidden'); // подсказка джойстика до первого касания
 }
 // PC has no joystick: real mouse activity switches touch mode off on hybrid devices
 root.addEventListener('pointermove',function(e){
@@ -106,6 +109,7 @@ root.addEventListener('touchstart',function(e){
     }
     if(joyId===null){
       joyId=t.identifier;
+      if(!joyHinted){joyHinted=true;var jh2=document.getElementById('joyHint');if(jh2)jh2.classList.add('hidden');}
       var r=root.getBoundingClientRect();
       // clamp spawn point away from screen edges, minimap and the button cluster
       joyCx=clamp(t.clientX-r.left,90,r.width*0.5);
