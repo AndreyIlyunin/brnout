@@ -81,7 +81,6 @@ function spawnMob(type){
 }
 function spawnBoss(){
   var arena=bossArena();
-  var p0=nearestAlivePlayer()||{x:MAP_W/2,y:MAP_H/2};
   var p=freeSpotNear(arena.x+arena.w/2,arena.y+arena.h/2,300,900,50);
   G.bossN++;
   bossStinger();

@@ -13,10 +13,10 @@ function loop(ts){
       var me=localPlayer();
       if(me){me.ix=INPUT.ix;me.iy=INPUT.iy;me.aim=INPUT.aim;me.f1=INPUT.f1;me.f2=INPUT.f2;me.sk=INPUT.sk;me.sk2=INPUT.sk2;me.cf=INPUT.cf;INPUT.cf=false;}
     }else guestLocalAttackCosmetics();
-    update(dt);
-    updateCamera(dt,false);
+    try{update(dt);updateCamera(dt,false);}
+    catch(e){console.error('update:',e);}
   }
-  render();
+  try{render();}catch(e){console.error('render:',e);}
   requestAnimationFrame(loop);
 }
 
