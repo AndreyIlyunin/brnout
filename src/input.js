@@ -94,6 +94,16 @@ root.addEventListener('touchstart',function(e){
     if(t.target.closest&&t.target.closest('.bgov'))continue;
     if(t.target.closest&&t.target.closest('#btnPauseM'))continue;
     if(t.target.closest&&t.target.closest('#btnFS'))continue;
+    // тап по канвасной кнопке «следующий спринт» (координаты HUD)
+    if(window.__nextBtnRect&&G.state==='playing'&&G.waveState==='cleared'){
+      var rr2=root.getBoundingClientRect();
+      var tx2=t.clientX-rr2.left,ty2=t.clientY-rr2.top;
+      var R2=window.__nextBtnRect;
+      if(tx2>=R2.x&&tx2<=R2.x+R2.w&&ty2>=R2.y&&ty2<=R2.y+R2.h){
+        G.interT=0.05;
+        continue;
+      }
+    }
     if(joyId===null){
       joyId=t.identifier;
       var r=root.getBoundingClientRect();
