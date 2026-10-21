@@ -44,9 +44,9 @@ function drawHumanoidBody(c,o){
   if(frenzy)c.rotate(Math.sin(G.t*26)*0.04);
   // ===== НОГИ (GTA2): стоят — стопы выглядывают назад из-под торса; шаг — вынос вдоль оси движения =====
   var sexy=o.cls==='dsn';
-  var stride=Math.sin(ph)*13*mv;
+  var stride=Math.sin(ph)*15*mv;
   var footLx=-4.6*s,footRx=4.6*s;
-  var footLy=9*s-stride,footRy=9*s+stride;
+  var footLy=-9*s-stride,footRy=-9*s+stride;
   var PANTS={dev:'#3d5a80',mgr:'#2f3542',mkt:'#7a6848',dsn:'#241d2e',intern:'#43506b'}[o.cls]||'#43506b';
   function leg(footX,footY){
     c.strokeStyle=PANTS;c.lineWidth=5.5*s;c.lineCap='round';

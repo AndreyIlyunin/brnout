@@ -81,7 +81,14 @@ function spawnMob(type){
 }
 function spawnBoss(){
   var arena=bossArena();
-  var p=freeSpotNear(arena.x+arena.w/2,arena.y+arena.h/2,300,900,50);
+  var cx=arena.x+arena.w/2,cy=arena.y+arena.h/2,p=null,bd=1e18;
+  // досягаемый свободный тайл внутри арены, ближайший к её центру — никакой пустоты между комнатами
+  for(var bi=0;bi<REACH_LIST.length;bi++){var t=REACH_LIST[bi];
+    if(t.x<arena.x||t.x>arena.x+arena.w||t.y<arena.y||t.y>arena.y+arena.h)continue;
+    var dd=(t.x-cx)*(t.x-cx)+(t.y-cy)*(t.y-cy);
+    if(dd<bd){bd=dd;p=t;}
+  }
+  if(!p)p=snapReachable({x:cx,y:cy});
   G.bossN++;
   bossStinger();
   G.boss={type:'boss',x:p.x,y:p.y,r:44,hp:1100*(1+0.4*(G.bossN-1)),hpMax:1100*(1+0.4*(G.bossN-1)),spd:40,phase:1,
