@@ -470,7 +470,8 @@ function drawHUD(){
   drawCup(bx+bw+(narrow?42:58),by+10,narrow?0.85:1.05,p.coffee/(p.coffeeMax||100));
   hctx.font=pixFont(13,true);hctx.fillStyle='#8b949e';
   hctx.fillText(narrow?('☕'+Math.round(p.coffee)):('КОФЕ '+Math.round(p.coffee)),bx+bw+(narrow?64:80),by+38);
-  var sy=isTouch?100:H-70;
+  if(isTouch){drawHudTouch(p,W);return;} // тач: без панели слотов — всё на кнопках
+  var sy=H-70;
   var C=CLS[p.cls]||CLS.mgr;
   var slots=[
     {n:C.s1.n,cd:p.cd1||0,cdm:C.s1.cd,cost:C.s1.cost},
@@ -581,7 +582,21 @@ function drawHUD(){
       hctx.fillStyle='#8bd17c';hctx.fillRect(x0+18,16,80*clamp(tp.coffee/(tp.coffeeMax||100),0,1),3);
     }
   }
-  if(isTouch){ // КД-затемнение и заряд СУПЕРа на тач-кнопках
+  // === тач-HUD: только жизненно важное, без дублирования кнопок ===
+  function drawHudTouch(p,W){
+    var H2=bhud.height/DPR;
+    // выгорание: тонкая дуга-полоса сверху слева
+    hctx.fillStyle='rgba(10,13,18,0.7)';rr(hctx,10,64,150,12,6);hctx.fill();
+    var jit=p.burnout>70?R()*3-1.5:0;
+    hctx.fillStyle=p.burnout>70?'#dc2626':'#b45309';
+    hctx.fillRect(12+jit,66,146*clamp(p.burnout/100,0,1),8);
+    hctx.font=pixFont(10,true);hctx.fillStyle=p.burnout>70?'#e5534b':'#8b949e';
+    hctx.fillText(Math.round(p.burnout)+'%',163,73);
+    // кофе: маленькая чашка+полоска
+    drawCup(12,86,0.8,p.coffee/(p.coffeeMax||100));
+    hctx.fillStyle='rgba(10,13,18,0.7)';rr(hctx,26,80,100,7,3);hctx.fill();
+    hctx.fillStyle='#3fb950';hctx.fillRect(27,81,98*clamp(p.coffee/(p.coffeeMax||100),0,1),5);
+    // КД-состояние тач-кнопок (затемнение) и заряд СУПЕРа
     var tb={btnAlt:p.cd2||0,btnSkill:p.cdD||0,btnSkill2:p.cdS||0,btnFU:Math.max(p.cdQ||0,p.qT||0),btnR:p.cdU||0};
     for(var tk in tb){var el=document.getElementById(tk);if(el)el.classList.toggle('oncd',tb[tk]>0.05);}
     var rBtn=document.getElementById('btnR');
@@ -719,13 +734,6 @@ function drawMinimap(){
   var mobs=worldPool('mobs');
   hctx.fillStyle='#c23b32';
   for(i=0;i<mobs.length;i++)if(tileVis(mobs[i].x,mobs[i].y))hctx.fillRect(mx+mobs[i].x*sc-1,my+mobs[i].y*sc-1,2.5,2.5);
-  if(isTouch){ // КД-затемнение и заряд СУПЕРа на тач-кнопках
-    var tb={btnAlt:p.cd2||0,btnSkill:p.cdD||0,btnSkill2:p.cdS||0,btnFU:Math.max(p.cdQ||0,p.qT||0),btnR:p.cdU||0};
-    for(var tk in tb){var el=document.getElementById(tk);if(el)el.classList.toggle('oncd',tb[tk]>0.05);}
-    var rBtn=document.getElementById('btnR');
-    if(rBtn){rBtn.classList.toggle('nochg',(p.superC||0)<1||G.wave<G.ultAt);
-      rBtn.style.background='radial-gradient(circle at 50% 120%,rgba(255,206,0,'+(0.15+0.5*clamp(p.superC||0,0,1)).toFixed(2)+'),rgba(60,50,10,.8))';}
-  }
   var boss=(NET.mode==='guest')?VIEW.boss:G.boss;
   if(boss){hctx.fillStyle='#e5534b';hctx.beginPath();hctx.arc(mx+boss.x*sc,my+boss.y*sc,4,0,TAU);hctx.fill();}
   var players=worldPool('players');
