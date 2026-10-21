@@ -80,7 +80,7 @@ var MOBNAMES={
   deadline:['дедлайн: релиз','дедлайн: демо','дедлайн: аудит']
 };
 function mobName(m){
-  if(m.type==='boss')return'РЕГЛЯТОРКА / АУДИТ';
+  if(m.type==='boss')return'АУДИТ';
   var list=MOBNAMES[m.type]||MOBNAMES.intern;
   return list[(m.tint||0)%list.length];
 }
