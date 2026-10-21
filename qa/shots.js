@@ -30,7 +30,7 @@ const ok = msg => console.log('  ✓ ' + msg);
     const pageErrors = [];
     page.on('pageerror', e => pageErrors.push(String(e).slice(0, 120)));
 
-    await page.goto(BASE + '/', { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await new Promise(r => setTimeout(r, 1200));
     await page.screenshot({ path: OUT + '/' + vp.name + '-menu.png' });
 
