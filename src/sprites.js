@@ -42,73 +42,33 @@ function drawHumanoidBody(c,o){
   var sw=Math.sin(ph)*3*mv,sway=Math.sin(ph)*0.07*mv;
   c.rotate(sway);
   if(frenzy)c.rotate(Math.sin(G.t*26)*0.04);
-  // ноги + обувь: стопы шагают ВДОЛЬ направления движения (−y = вперёд)
+  // ===== НОГИ (GTA2): стоят — стопы выглядывают назад из-под торса; шаг — вынос вдоль оси движения =====
   var sexy=o.cls==='dsn';
-  var stepF=Math.sin(ph)*3.5*mv;
+  var stride=Math.sin(ph)*13*mv;
+  var footLx=-4.6*s,footRx=4.6*s;
+  var footLy=9*s-stride,footRy=9*s+stride;
+  var PANTS={dev:'#3d5a80',mgr:'#2f3542',mkt:'#7a6848',dsn:'#241d2e',intern:'#43506b'}[o.cls]||'#43506b';
+  function leg(footX,footY){
+    c.strokeStyle=PANTS;c.lineWidth=5.5*s;c.lineCap='round';
+    c.beginPath();c.moveTo(footX,4.5*s);c.quadraticCurveTo(footX*1.05,(footY+4.5*s)/2,footX,footY-2.5*s);c.stroke();
+  }
+  function shoe(footX,footY,main,sole,accent,heel){
+    c.fillStyle=main;rr(c,footX-3.3*s,footY-4.5*s,6.6*s,9*s,2.6*s);c.fill();
+    c.fillStyle=sole;c.fillRect(footX-3.3*s,footY+2.2*s,6.6*s,2.2*s);
+    if(accent){c.fillStyle=accent;c.fillRect(footX-3.3*s,footY-0.8*s,6.6*s,1.5*s);}
+    if(heel){c.fillStyle=sole;c.fillRect(footX-2.7*s,footY+3.4*s,2.3*s,2.6*s);}
+  }
+  leg(footLx,footLy);leg(footRx,footRy);
   if(o.cls==='dev'){
-    // джинсы
-    c.fillStyle='#3d5a80';
-    rr(c,-7*s,2*s,5.6*s,8*s,2*s);c.fill();
-    rr(c,1.4*s,2*s,5.6*s,8*s,2*s);c.fill();
-    c.fillStyle='rgba(255,255,255,0.12)';
-    c.fillRect(-5.6*s,4*s,1.6*s,4*s);c.fillRect(3.2*s,4*s,1.6*s,4*s);
-    // белые кросы с тёмной подошвой
-    c.fillStyle='#e8e8ee';
-    rr(c,-7.6*s,9*s+stepF*s,6.8*s,4.6*s,2.2*s);c.fill();
-    rr(c,0.8*s,9*s-stepF*s,6.8*s,4.6*s,2.2*s);c.fill();
-    c.fillStyle='#23262e';
-    c.fillRect(-7.6*s,12.2*s+stepF*s,6.8*s,1.4*s);c.fillRect(0.8*s,12.2*s-stepF*s,6.8*s,1.4*s);
-    c.fillStyle=L.accent;
-    c.fillRect(-6.2*s,10*s+stepF*s,4.4*s,1.2*s);c.fillRect(2.2*s,10*s-stepF*s,4.4*s,1.2*s);
+    shoe(footLx,footLy,'#e8e8ee','#23262e',L.accent);shoe(footRx,footRy,'#e8e8ee','#23262e',L.accent);
   }else if(o.cls==='mgr'){
-    // брюки со стрелками
-    c.fillStyle='#2f3542';
-    rr(c,-6.9*s,2*s,5.2*s,8.6*s,2*s);c.fill();
-    rr(c,1.7*s,2*s,5.2*s,8.6*s,2*s);c.fill();
-    c.strokeStyle='rgba(255,255,255,0.16)';c.lineWidth=1;
-    c.beginPath();c.moveTo(-4.3*s,3*s);c.lineTo(-4.3*s,9.6*s);c.moveTo(4.3*s,3*s);c.lineTo(4.3*s,9.6*s);c.stroke();
-    // остроносые туфли с бликом и пряжкой
-    c.fillStyle='#3a2a1a';
-    c.beginPath();
-    c.moveTo(-6.9*s,9.4*s+stepF*s);c.lineTo(-1.1*s,9.4*s+stepF*s);
-    c.lineTo(-0.2*s,11.6*s+stepF*s);c.lineTo(-7.8*s,11.6*s+stepF*s);c.closePath();c.fill();
-    c.beginPath();
-    c.moveTo(1.1*s,9.4*s-stepF*s);c.lineTo(6.9*s,9.4*s-stepF*s);
-    c.lineTo(7.8*s,11.6*s-stepF*s);c.lineTo(0.2*s,11.6*s-stepF*s);c.closePath();c.fill();
-    c.fillStyle='rgba(255,255,255,0.18)';
-    c.fillRect(-6*s,9.9*s+stepF*s,3.4*s,1*s);c.fillRect(2.6*s,9.9*s-stepF*s,3.4*s,1*s);
-    c.fillStyle='#ffcf5c';
-    c.fillRect(-4.4*s,10.4*s+stepF*s,1.2*s,1*s);c.fillRect(3.2*s,10.4*s-stepF*s,1.2*s,1*s);
+    shoe(footLx,footLy,'#3a2a1a','#241a10','#ffcf5c');shoe(footRx,footRy,'#3a2a1a','#241a10','#ffcf5c');
   }else if(o.cls==='mkt'){
-    // чиносы + замшевые броги с перфорацией
-    c.fillStyle='#7a6848';
-    rr(c,-6.9*s,2*s,5.2*s,8.6*s,2*s);c.fill();
-    rr(c,1.7*s,2*s,5.2*s,8.6*s,2*s);c.fill();
-    c.fillStyle='#5d4f36';
-    c.fillRect(-6.9*s,8*s,5.2*s,2.6*s);c.fillRect(1.7*s,8*s,5.2*s,2.6*s);
-    c.fillStyle='#8a5a2a';
-    c.beginPath();c.moveTo(-6.9*s,9.4*s+stepF*s);c.lineTo(-1.3*s,9.4*s+stepF*s);c.lineTo(-0.4*s,11.5*s+stepF*s);c.lineTo(-7.6*s,11.5*s+stepF*s);c.closePath();c.fill();
-    c.beginPath();c.moveTo(1.3*s,9.4*s-stepF*s);c.lineTo(6.9*s,9.4*s-stepF*s);c.lineTo(7.6*s,11.5*s-stepF*s);c.lineTo(0.4*s,11.5*s-stepF*s);c.closePath();c.fill();
-    c.fillStyle='rgba(0,0,0,0.35)';
-    c.fillRect(-5.6*s,10.2*s+stepF*s,0.9*s,0.9*s);c.fillRect(-4*s,10.2*s+stepF*s,0.9*s,0.9*s);
-    c.fillRect(3.2*s,10.2*s-stepF*s,0.9*s,0.9*s);c.fillRect(4.8*s,10.2*s-stepF*s,0.9*s,0.9*s);
+    shoe(footLx,footLy,'#8a5a2a','#4a3018','rgba(255,255,255,0.3)');shoe(footRx,footRy,'#8a5a2a','#4a3018','rgba(255,255,255,0.3)');
   }else if(sexy){
-    // сапожки на каблучке
-    c.fillStyle='#241d2e';
-    rr(c,-7*s,5*s+stepF*s,6*s,7*s,2*s);c.fill();
-    rr(c,1*s,5*s-stepF*s,6*s,7*s,2*s);c.fill();
-    c.fillRect(-7*s,11*s+stepF*s,1.5*s,2.6*s);
-    c.fillRect(5.5*s,11*s-stepF*s,1.5*s,2.6*s);
+    shoe(footLx,footLy,'#241d2e','#171221',L.accent,true);shoe(footRx,footRy,'#241d2e','#171221',L.accent,true);
   }else{
-    // остальные (интерны): джинсы + простые кросы
-    c.fillStyle='#43506b';
-    rr(c,-7*s,2*s,5.6*s,8*s,2*s);c.fill();
-    rr(c,1.4*s,2*s,5.6*s,8*s,2*s);c.fill();
-    c.fillStyle='#d8d8de';
-    rr(c,-7.4*s,9*s+stepF*s,6.6*s,4.4*s,2*s);c.fill();
-    rr(c,0.8*s,9*s-stepF*s,6.6*s,4.4*s,2*s);c.fill();
-    c.fillStyle='#2a2d34';
-    c.fillRect(-7.4*s,12*s+stepF*s,6.6*s,1.4*s);c.fillRect(0.8*s,12*s-stepF*s,6.6*s,1.4*s);
+    shoe(footLx,footLy,'#d8d8de','#2a2d34');shoe(footRx,footRy,'#d8d8de','#2a2d34');
   }
   // torso — дизайнер: цельное платье А-силуэта
   if(sexy){
@@ -181,17 +141,19 @@ function drawHumanoidBody(c,o){
     c.strokeStyle=L.accent;c.lineWidth=1.6;c.lineCap='round';
     c.beginPath();c.moveTo(-2*s,-8*s);c.lineTo(-2.4*s,-3*s);c.moveTo(2*s,-8*s);c.lineTo(2.4*s,-3*s);c.stroke();
   }
-  // руки: плечо -> кисть у бедра СБОКУ (голова спереди, руки её не перекрывают)
+  // ===== РУКИ (GTA2): покой — вдоль тела; ходьба — махи; атака/созвон — две руки вперёд =====
+  var atkP=(o.atkT||0)>0;
   function arm(sx,side){
-    var hx1=sx*0.9, hy2=1.4*s;
-    if(mv)hy2=1.4*s+Math.sin(ph+(side?Math.PI:0))*3.2*s;   // махи при ходьбе
-    if(cast){hx1=sx*0.34;hy2=-7.2*s;}                       // созвон: руки к подбородку
-    if(frenzy){hx1=sx*0.8;hy2=-2*s+Math.sin(G.t*30+side*Math.PI)*4*s;}
-    c.strokeStyle=shade(L.shirt,-10);c.lineWidth=5*s;c.lineCap='round';
-    c.beginPath();c.moveTo(sx,-5.5*s);c.quadraticCurveTo(sx*1.18,(hy2-5.5*s)/2,hx1,hy2);c.stroke();
-    c.fillStyle=L.skin;c.beginPath();c.arc(hx1,hy2,2.6*s,0,TAU);c.fill();
+    var hx1=sx, hy2=2.5*s;
+    if(mv)hy2=3.5*s+Math.sin(ph+(side?Math.PI:0))*3.5*s;    // махи в противофазе ногам
+    if(cast){hx1=sx*0.34;hy2=-8.5*s;}                        // созвон: руки к лицу
+    if(atkP){hx1=sx*0.22;hy2=-11.5*s;}                       // атака: хват двумя перед головой
+    if(frenzy&&!atkP){hx1=sx*0.8;hy2=-3*s+Math.sin(G.t*30+side*Math.PI)*4*s;}
+    c.strokeStyle=shade(L.shirt,-12);c.lineWidth=5*s;c.lineCap='round';
+    c.beginPath();c.moveTo(sx,-6.5*s);c.quadraticCurveTo(sx*1.22,(hy2-6.5*s)/2,hx1,hy2);c.stroke();
+    c.fillStyle=L.skin;c.beginPath();c.arc(hx1,hy2,2.5*s,0,TAU);c.fill();
   }
-  arm(sexy?-8.5*s:-11*s,0);arm(sexy?8.5*s:11*s,1);
+  arm(sexy?-9.5*s:-11.5*s,0);arm(sexy?9.5*s:11.5*s,1);
   // head
   c.fillStyle=L.skin;c.beginPath();c.arc(0,-3*s,7.5*s,0,TAU);c.fill();
   c.strokeStyle='rgba(0,0,0,0.25)';c.lineWidth=1;c.stroke();
@@ -201,8 +163,7 @@ function drawHumanoidBody(c,o){
     // чёлка-полумесяц спереди + высокий хвост НАЗАД
     c.fillStyle=L.hair;
     c.beginPath();
-    c.arc(0,-3.2*s,7.4*s,Math.PI,TAU,false);
-    c.arc(0,-3.2*s,4.4*s,TAU,Math.PI,true);
+    c.arc(0,-3.2*s,7.5*s,-Math.PI/2+0.72,-Math.PI/2-0.72+TAU,false);
     c.closePath();c.fill();
     c.beginPath();c.arc(0,1.4*s,3.6*s,0,TAU);c.fill();
     c.beginPath();
@@ -216,7 +177,7 @@ function drawHumanoidBody(c,o){
   {c.fillStyle=L.hair;
   // шапка волос с клином лица СПЕРЕДИ (-y = направление движения):
   // дуга от -PI/2+fw через затылок до -PI/2-fw, лоб/лицо открыты клином вперёд
-  var fw=1.02;
+  var fw=0.72;
   if(L.hs===0){
     c.beginPath();c.arc(0,-3*s,7.6*s,-Math.PI/2+fw,-Math.PI/2-fw+TAU,false);c.closePath();c.fill();
     // мыски-пряди по краям клина
@@ -241,8 +202,6 @@ function drawHumanoidBody(c,o){
     c.beginPath();c.moveTo(2*s,3*s);c.lineTo(4.6*s,7*s);c.lineTo(1.2*s,5.4*s);c.closePath();c.fill();
   }
   }
-  // нос-точка на переднем крае головы: однозначно читается направление лица (все классы)
-  c.fillStyle=shade(L.skin,-14);c.beginPath();c.arc(0,-10.2*s,1*s,0,TAU);c.fill();
   if(o.cls==='dsn'){ // дизайнер: чокер на шее, визор на лице, серьга, румянец на щеках
     c.fillStyle='#241d2e';
     c.fillRect(-3.4*s,-8.4*s,6.8*s,1.6*s);
@@ -295,9 +254,9 @@ function drawJiraIcon(c,sc){
 }
 function drawWeapon(c,o,s){
   var f=o.face||0;
-  // точка хвата: вперёд на 11 и вбок на 6.5 (правая рука), не по центру перед лицом
-  var fx=Math.cos(f),fy=Math.sin(f);
-  var hx=o.x+(fx*11-fy*6.5)*s,hy=o.y+(fy*11+fx*6.5)*s;
+  var fx=Math.cos(f),fy=Math.sin(f),hx,hy;
+  if((o.atkT||0)>0){hx=o.x+fx*13*s;hy=o.y+fy*13*s;}                 // атака: оружие перед головой
+  else{hx=o.x+(fx*10-fy*7)*s;hy=o.y+(fy*10+fx*7)*s;}                // покой: у правого бедра
   var frenzy=o.casting==='type';
   var swing=(o.atkT||0)>0?(o.atkT/0.2)*1.1:0;
   var cast=o.castT>0;
