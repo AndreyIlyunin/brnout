@@ -68,11 +68,19 @@ const ok = msg => console.log('  ✓ ' + msg);
       });
       if (overlap) fail('кнопки пересекаются: ' + overlap);
       else ok('тач-кнопки не пересекаются');
-      const low = vp.height < 600 || vp.width < 500;
-      const zlow = await page.evaluate(() => document.getElementById('burnout').classList.contains('zlow'));
-      if (low && !zlow) fail('компакт-режим zlow не включился на низком экране');
-      if (!low && zlow) fail('zlow ошибочно включён на большом экране');
-      if (low && zlow) ok('компакт-режим zlow включён');
+      const inside = await page.evaluate(() => {
+        const r = document.getElementById('burnout').getBoundingClientRect();
+        const out = [];
+        for (const b of document.querySelectorAll('.tbtn')) {
+          if (b.classList.contains('hidden')) continue;
+          const t = b.getBoundingClientRect();
+          if (t.top < r.top || t.bottom > r.bottom || t.left < r.left || t.right > r.right)
+            out.push(b.id + ' вылезает за экран');
+        }
+        return out;
+      });
+      if (inside.length) fail(inside.join(', '));
+      else ok('все тач-кнопки внутри экрана');
     }
 
     // интерстишл
