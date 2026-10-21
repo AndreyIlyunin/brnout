@@ -3,7 +3,7 @@
 > **Диабло-слэшер в опенспейсе после заката.** HR уже ушёл домой. Дедлайны — нет.
 > *A Diablo-like office slasher. It's 18:52. Everyone went home. Except the deadlines.*
 
-**[▶ Играть прямо сейчас](#запуск)** · без сборки, без аккаунтов, один HTML + браузер
+**[▶ Играть прямо сейчас](https://andreyilyunin.github.io/brnout/)** · без сборки, без аккаунтов, один HTML + браузер
 
 ---
 
