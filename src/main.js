@@ -20,7 +20,16 @@ function loop(ts){
     var fsB=document.getElementById('btnFS');
     if(fsB)fsB.classList.toggle('hidden',G.state==='playing'); // случайный тап в бою исключён
   }catch(e){console.error('render:',e);}
-  requestAnimationFrame(loop);
+  // вход по инвайт-ссылке: ?join=code — сразу открываем форму с подставленным кодом
+try{
+  var _jc=new URL(location.href).searchParams.get('join');
+  if(_jc&&/^[a-z0-9]{5}$/i.test(_jc)){
+    showOv('bjoin');
+    document.getElementById('joinCode').value=_jc.toLowerCase();
+    document.getElementById('joinErr').textContent='код из ссылки подставлен — выберите класс (меню ← Назад) и жмите «Подключиться»';
+  }
+}catch(e){}
+requestAnimationFrame(loop);
 }
 
 // ============================== menu wiring ==============================
@@ -60,12 +69,18 @@ renderClassPreviews();
 $('cHost').addEventListener('click',function(){
   showOv('bhost');
   $('roomCode').textContent='…';
-  destroyNet();LOBBY=[]; // повторный клик не должен течь прошлым peer
+  $('shareHint').textContent='соединяемся с брокером…';
+  destroyNet();LOBBY=[]; // повторный клик не должен течь прошлой комнатой
   hostCreate(function(err){
-    if(err){$('roomCode').textContent='ошибка: '+err+' (проверьте сеть)';return;}
+    if(err){$('roomCode').textContent='-----';
+      $('shareHint').textContent=(err==='nobroker'?'ни один брокер недоступен — проверьте интернет':'брокер недоступен, попробуйте ещё раз');
+      return;}
     audioInit();startAmbient();
+    $('shareHint').textContent='ссылка сама введёт код другу · или продиктуйте код';
   });
 });
+$('bshare').addEventListener('click',function(){shareInvite($('bshare'));});
+$('pauseShare').addEventListener('click',function(){shareInvite($('pauseShare'));});
 $('bBack2').addEventListener('click',function(){showOv('bmenu');});   // кооп -> меню
 $('bBack3').addEventListener('click',function(){showOv('bcoop');});   // ввод кода -> кооп
 $('bBack4').addEventListener('click',function(){                       // выход из лобби хоста
@@ -76,14 +91,14 @@ $('joinCode').addEventListener('keydown',function(e){if(e.code==='Enter')$('bjoi
 $('cJoin').addEventListener('click',function(){showOv('bjoin');$('joinErr').textContent='';});
 $('bjoinGo').addEventListener('click',function(){
   var code=$('joinCode').value.trim().toLowerCase();
-  if(code.length!==5){$('joinErr').textContent='Код из 5 символов';return;}
+  if(code.length!==5||!/^[a-z0-9]{5}$/.test(code)){$('joinErr').textContent='Код из 5 символов (латиница)';return;}
   showOv('bwait');
   $('netStatus').textContent='Подключение…';
   guestJoin(code,function(err){
     if(err){
       $('netStatus').textContent='';
       showOv('bjoin');
-      $('joinErr').textContent=err==='peer-unavailable'?'Комната не найдена':(err==='timeout'?'Таймаут подключения':'Ошибка: '+err);
+      $('joinErr').textContent=err==='nobroker'?'Брокеры недоступны — проверьте интернет':'Нет такой комнаты. Хост ещё собирает её?';
       destroyNet();
     }else{
       audioInit();startAmbient();
@@ -154,7 +169,6 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 if(window.ResizeObserver){new ResizeObserver(resize).observe(root);}
-makeGrain();
 buildMap(20261020);
 for(var mi=0;mi<GW*GH;mi++)FOG.explored[mi]=1; // фон меню: офис виден до старта
 resize();
@@ -193,4 +207,13 @@ window.__bo={G:G,NET:NET,VIEW:VIEW,INPUT:INPUT,startLocal:startLocal,hostStartGa
       update(1/60);
     }
   }};
+// вход по инвайт-ссылке: ?join=code — сразу открываем форму с подставленным кодом
+try{
+  var _jc=new URL(location.href).searchParams.get('join');
+  if(_jc&&/^[a-z0-9]{5}$/i.test(_jc)){
+    showOv('bjoin');
+    document.getElementById('joinCode').value=_jc.toLowerCase();
+    document.getElementById('joinErr').textContent='код из ссылки подставлен — выберите класс (меню ← Назад) и жмите «Подключиться»';
+  }
+}catch(e){}
 requestAnimationFrame(loop);

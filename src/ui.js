@@ -1,11 +1,22 @@
 'use strict';
 // ============================== overlays ==============================
 var OVERLAYS=['bmenu','bset','bcoop','bjoin','bhost','bwait','bpause','bdead','bwin'];
+var OV_OPEN=null;
 function showOv(id){
   for(var i=0;i<OVERLAYS.length;i++){var el=document.getElementById(OVERLAYS[i]);if(el)el.classList.add('bghidden');}
   if(id)document.getElementById(id).classList.remove('bghidden');
-  var tui=document.getElementById('tui'); // оверлей гасит бой-слой, чтобы панель не спорила с кнопками
-  if(tui)tui.classList.toggle('hidden',!!(id&&id!=='bmenu'));
+  OV_OPEN=id||null;
+  tuiSync();
+}
+// единый владелец видимости бой-слоя: тач + нет оверлея = кнопки; всё остальное гасит
+function tuiSync(){
+  var show=isTouch&&!OV_OPEN;
+  var tui=document.getElementById('tui');
+  if(tui)tui.classList.toggle('hidden',!show);
+  var pm=document.getElementById('btnPauseM');
+  if(pm)pm.classList.toggle('hidden',!show);
+  var jh=document.getElementById('joyHint');
+  if(jh)jh.classList.toggle('hidden',!(show&&!joyHinted));
 }
 function showDeadStats(st){
   var meL=localPlayer();
@@ -48,4 +59,10 @@ function togglePause(){
     if(!document.getElementById('bpause').classList.contains('bghidden'))showOv(null);
     else showOv('bpause');
   }
+  // хосту в паузе показываем комнату: удобно позвать друга посреди игры
+  var pn=document.getElementById('pauseNet'),pc=document.getElementById('pauseCode'),ps=document.getElementById('pauseShare');
+  var isHost=NET.mode==='host'&&!!NET.code;
+  if(pn)pn.classList.toggle('hidden',!isHost);
+  if(ps)ps.classList.toggle('hidden',!isHost);
+  if(isHost&&pc)pc.textContent=NET.code;
 }

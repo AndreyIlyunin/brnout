@@ -757,7 +757,7 @@ function themeNameFor(seed){
 }
 
 // ---- туман войны (герои-3 стиль): терра инкогнита + затемнённая обстановка + обзор ----
-var FOG={explored:new Uint8Array(GW*GH),vis:new Uint8Array(GW*GH),t:0};
+var FOG={explored:new Uint8Array(GW*GH),vis:new Uint8Array(GW*GH),t:0,dirty:true};
 var SIGHT_TILES=5.5; // радиус обзора в тайлах
 function segHitsRect(x1,y1,x2,y2,r){
   var dx=x2-x1,dy=y2-y1,t0=0,t1=1;
@@ -779,6 +779,7 @@ function losClear(x1,y1,x2,y2){
 }
 function resetFog(){
   for(var i=0;i<GW*GH;i++){FOG.explored[i]=0;FOG.vis[i]=0;}
+  FOG.dirty=true;
 }
 function computeVis(px,py){
   for(var i=0;i<GW*GH;i++)FOG.vis[i]=0;
@@ -797,6 +798,7 @@ function computeVis(px,py){
       FOG.vis[ti]=1;FOG.explored[ti]=1;
     }
   }
+  FOG.dirty=true;
 }
 function tileVis(x,y){
   var tx=(x/TILE)|0,ty=(y/TILE)|0;
