@@ -57,11 +57,19 @@ renderClassPreviews();
 $('cHost').addEventListener('click',function(){
   showOv('bhost');
   $('roomCode').textContent='…';
+  destroyNet();LOBBY=[]; // повторный клик не должен течь прошлым peer
   hostCreate(function(err){
-    if(err){$('roomCode').textContent='ошибка: '+err;return;}
+    if(err){$('roomCode').textContent='ошибка: '+err+' (проверьте сеть)';return;}
     audioInit();startAmbient();
   });
 });
+$('bBack2').addEventListener('click',function(){showOv('bmenu');});   // кооп -> меню
+$('bBack3').addEventListener('click',function(){showOv('bcoop');});   // ввод кода -> кооп
+$('bBack4').addEventListener('click',function(){                       // выход из лобби хоста
+  try{broadcast({t:'stt',s:'paused'});}catch(e){}
+  destroyNet();LOBBY=[];showOv('bmenu');
+});
+$('joinCode').addEventListener('keydown',function(e){if(e.code==='Enter')$('bjoinGo').click();});
 $('cJoin').addEventListener('click',function(){showOv('bjoin');$('joinErr').textContent='';});
 $('bjoinGo').addEventListener('click',function(){
   var code=$('joinCode').value.trim().toLowerCase();
