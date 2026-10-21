@@ -9,14 +9,14 @@ var ROOMS=[];       // {x,y,w,h,type} px
 var WALLS=[];       // merged wall rects (collide + minimap)
 var FURN=[];        // furniture rects (collide)
 var OBST=[];        // WALLS + FURN
-var LIGHTS=[],COFFEES=[],SPAWNS=[],RUGS=[]; // RUGS — ковры: только визуал, не мебель
+var LIGHTS=[],COFFEES=[],SPAWNS=[],RUGS=[],DOORS=[]; // RUGS — ковры (визуал), DOORS — зоны дверей без мебели
 var floorCv=null,mmCv=null;
 
 function buildMap(seed){
   MAPSEED=seed>>>0;if(!MAPSEED)MAPSEED=1;
   _seed=MAPSEED;
   MAPTHEME=THEMES[(rnd()*THEMES.length)|0]; // тема детерминирована сидом
-  grid=[];ROOMS=[];WALLS=[];FURN=[];OBST=[];LIGHTS=[];COFFEES=[];SPAWNS=[];RUGS=[];
+  grid=[];ROOMS=[];WALLS=[];FURN=[];OBST=[];LIGHTS=[];COFFEES=[];SPAWNS=[];RUGS=[];DOORS=[];
   var i,j,x,y;
   for(j=0;j<GH;j++){grid[j]=[];for(i=0;i<GW;i++)grid[j][i]=0;}
   // --- place rooms (plus two small WC rooms)
@@ -116,9 +116,30 @@ function buildMap(seed){
     else if(assigned===1||assigned===4){rr2.type='pantry';} // кладовки рано: кофе гарантирован
     assigned++;
   }
+  // --- зоны дверей: мебель не имеет права запечатать вход в комнату ---
+  DOORS.length=0;
+  for(i=0;i<ROOMS.length;i++){var rmD=ROOMS[i];
+    for(j=Math.max(0,rmD.ty);j<Math.min(GH,rmD.ty+rmD.th);j++)
+      for(var iD=Math.max(0,rmD.tx);iD<Math.min(GW,rmD.tx+rmD.tw);iD++){
+        if(!grid[j][iD])continue;
+        var edge=(iD===rmD.tx)||(iD===rmD.tx+rmD.tw-1)||(j===rmD.ty)||(j===rmD.ty+rmD.th-1);
+        if(!edge)continue;
+        var nb=[[iD+1,j],[iD-1,j],[iD,j+1],[iD,j-1]];
+        for(var nbk=0;nbk<4;nbk++){var nx2=nb[nbk][0],ny2=nb[nbk][1];
+          if(nx2<0||ny2<0||nx2>=GW||ny2>=GH||!grid[ny2][nx2])continue;
+          if(roomAtTile(nx2,ny2)===rmD)continue; // граница с коридором ИЛИ чужой комнатой = проход
+          DOORS.push({x:iD*TILE-14,y:j*TILE-14,w:TILE+28,h:TILE+28});
+          break;
+        }
+      }
+  }
   // --- furniture + coffee + lights + spawn points
   var fid=1;
   for(i=0;i<ROOMS.length;i++)fid=furnishRoom(ROOMS[i],fid);
+  for(var guard3=0;guard3<24&&FURN.length;guard3++){
+    if(roomPathOK(null))break;
+    FURN.pop(); // пара предметов вместе запечатала — убираем с конца, пока не отпустит
+  }
   for(i=0;i<FURN.length;i++)FURN[i].hp=FPROPS[FURN[i].t].hp;
   // страховка: кладовок не оказалось — крупнейшая комната становится кладовкой
   var hasPantry=false;
@@ -154,8 +175,33 @@ function buildMap(seed){
       }
     }
   }
-  // --- thin walls: strips on the void side of every floor tile edge
+  // --- раскрытие щелей: одно-тайловый проход даёт 4px между кромками — расширяем
   var WT=26;
+  for(var pass2=0;pass2<4;pass2++){
+    var opened2=0;
+    for(j=1;j<GH-1;j++)for(i=1;i<GW-1;i++){
+      if(!grid[j][i])continue;
+      var cxx=i*TILE+TILE/2,cyy=j*TILE+TILE/2;
+      var edges2=[];
+      if(!grid[j][i-1])edges2.push([i*TILE-WT,j*TILE,WT,TILE]);
+      if(!grid[j][i+1])edges2.push([(i+1)*TILE,j*TILE,WT,TILE]);
+      if(!grid[j-1][i])edges2.push([i*TILE,j*TILE-WT,TILE,WT]);
+      if(!grid[j+1][i])edges2.push([i*TILE,(j+1)*TILE,TILE,WT]);
+      var bl2=false;
+      for(var e2=0;e2<edges2.length&&!bl2;e2++){var er=edges2[e2];
+        var qx=clamp(cxx,er[0],er[0]+er[2]),qy=clamp(cyy,er[1],er[1]+er[3]);
+        if((cxx-qx)*(cxx-qx)+(cyy-qy)*(cyy-qy)<18*18)bl2=true; // тело игрока r18
+      }
+      if(bl2){
+        if(!grid[j][i-1]){grid[j][i-1]=1;opened2++;}
+        if(!grid[j][i+1]){grid[j][i+1]=1;opened2++;}
+        if(!grid[j-1][i]){grid[j-1][i]=1;opened2++;}
+        if(!grid[j+1][i]){grid[j+1][i]=1;opened2++;}
+      }
+    }
+    if(!opened2)break;
+  }
+  // --- thin walls: strips on the void side of every floor tile edge
   for(j=0;j<GH;j++)for(i=0;i<GW;i++){
     if(!grid[j][i])continue;
     var L=(i>0?grid[j][i-1]:0),Rr=(i<GW-1?grid[j][i+1]:0),U=(j>0?grid[j-1][i]:0),D=(j<GH-1?grid[j+1][i]:0);
@@ -248,14 +294,64 @@ var FPROPS={
 };
 function furnRoom(rm,type){return rm.type===type;}
 // placement with overlap protection: мебель не налезает друг на друга
+// свободен ли тайл для тела r16: кромки стен + вся мебель (+ виртуальная extra [x,y,w,h])
+function tileFreeV(tx,ty,ex){
+  if(!grid[ty]||!grid[ty][tx])return false;
+  var cx=tx*TILE+TILE/2,cy=ty*TILE+TILE/2,r=16,e=[];
+  if(!grid[ty][tx-1])e.push([tx*TILE-26,ty*TILE,26,TILE]);
+  if(!grid[ty][tx+1])e.push([(tx+1)*TILE,ty*TILE,26,TILE]);
+  if(!grid[ty-1]||!grid[ty-1][tx])e.push([tx*TILE,ty*TILE-26,TILE,26]);
+  if(!grid[ty+1]||!grid[ty+1][tx])e.push([tx*TILE,(ty+1)*TILE,TILE,26]);
+  var i2,er,qx,qy;
+  for(i2=0;i2<e.length;i2++){er=e[i2];
+    qx=Math.max(er[0],Math.min(cx,er[0]+er[2]));qy=Math.max(er[1],Math.min(cy,er[1]+er[3]));
+    if((cx-qx)*(cx-qx)+(cy-qy)*(cy-qy)<r*r)return false;
+  }
+  var obs=FURN.concat(ex?[ex]:[]);
+  for(i2=0;i2<obs.length;i2++){var o2=obs[i2];
+    qx=Math.max(o2.x,Math.min(cx,o2.x+o2.w));qy=Math.max(o2.y,Math.min(cy,o2.y+o2.h));
+    if((cx-qx)*(cx-qx)+(cy-qy)*(cy-qy)<r*r)return false;
+  }
+  return true;
+}
+// все ли комнаты достижимы (хотя бы один тайл) при гипотетической мебели ex
+function roomPathOK(ex){
+  var start=null,lb=lobbyRoom();
+  for(var ty=lb.ty;ty<lb.ty+lb.th&&!start;ty++)
+    for(var tx=lb.tx;tx<lb.tx+lb.tw;tx++)
+      if(tileFreeV(tx,ty,ex)){start=[tx,ty];break;}
+  if(!start)return false;
+  var seen=new Uint8Array(GW*GH),q=[start[0]+start[1]*GW];
+  seen[q[0]]=1;
+  for(var h=0;h<q.length;h++){
+    var c=q[h],cx2=c%GW,cy2=(c/GW)|0;
+    var nb=[[cx2+1,cy2],[cx2-1,cy2],[cx2,cy2+1],[cx2,cy2-1]];
+    for(var n2=0;n2<4;n2++){var nx=nb[n2][0],ny=nb[n2][1];
+      if(nx<0||ny<0||nx>=GW||ny>=GH||seen[nx+ny*GW]||!tileFreeV(nx,ny,ex))continue;
+      seen[nx+ny*GW]=1;q.push(nx+ny*GW);
+    }
+  }
+  var cov=0;
+  for(var rI=0;rI<ROOMS.length;rI++){var rD2=ROOMS[rI],got=0;
+    for(ty=rD2.ty;ty<rD2.ty+rD2.th&&!got;ty++)
+      for(tx=rD2.tx;tx<rD2.tx+rD2.tw;tx++)
+        if(seen[tx+ty*GW]){got=1;break;}
+    if(got)cov++;
+  }
+  return cov===ROOMS.length;
+}
 function placeFurn(rm,fid,t,x,y,w,h,margin){
   margin=margin||10;
-  for(var k=0;k<8;k++){
+  for(var k=0;k<16;k++){
     var ok=true;
     if(x<rm.x+8||x+w>rm.x+rm.w-8||y<rm.y+8||y+h>rm.y+rm.h-8)ok=false;
     if(ok)for(var f=0;f<FURN.length;f++){var o=FURN[f];
       if(x<o.x+o.w+margin&&x+w+margin>o.x&&y<o.y+o.h+margin&&y+h+margin>o.y){ok=false;break;}
     }
+    if(ok)for(var dI=0;dI<DOORS.length;dI++){var dr=DOORS[dI];
+      if(x<dr.x+dr.w-4&&x+w+4>dr.x&&y<dr.y+dr.h-4&&y+h+4>dr.y){ok=false;break;}
+    }
+    if(ok&&!roomPathOK([x,y,w,h]))ok=false; // мебель не запечатывает ни одну комнату
     if(ok){FURN.push({id:fid++,t:t,x:x,y:y,w:w,h:h});return fid;}
     x=rm.x+12+((rnd()*(rm.w-w-24))|0);
     y=rm.y+12+((rnd()*(rm.h-h-24))|0);
@@ -320,12 +416,12 @@ function furnishRoom(rm,fid){
     fid=placeFurn(rm,fid,'plant',rm.x+rm.w-46,rm.y+rm.h-50,24,24);
     fid=placeFurn(rm,fid,'box',rm.x+rm.w/2+50,rm.y+36,26,22);
   }else if(furnRoom(rm,'wc')){
-    // сантехника — фиксированные позиции, рандом-ретраи здесь не нужны
-    FURN.push({id:fid++,t:'sink',x:rm.x+10,y:rm.y+rm.h-26,w:48,h:20});
-    FURN.push({id:fid++,t:'sink',x:rm.x+rm.w-58,y:rm.y+rm.h-26,w:48,h:20});
-    var sh=Math.max(16,(rm.h-46)/2); // вертикальные кабинки: верхняя половина, раковины снизу свободны
-    FURN.push({id:fid++,t:'stall',x:rm.x+8,y:rm.y+8,w:34,h:sh});
-    FURN.push({id:fid++,t:'stall',x:rm.x+8,y:rm.y+16+sh,w:34,h:sh});
+    // сантехника через placeFurn: не запечатывает дверь (зоны DOORS)
+    var sh=Math.max(16,(rm.h-46)/2); // вертикальные кабинки вдоль стены
+    fid=placeFurn(rm,fid,'stall',rm.x+8,rm.y+8,34,sh,6);
+    fid=placeFurn(rm,fid,'stall',rm.x+8,rm.y+16+sh,34,sh,6);
+    fid=placeFurn(rm,fid,'sink',rm.x+10,rm.y+rm.h-26,48,20,6);
+    fid=placeFurn(rm,fid,'sink',rm.x+rm.w-58,rm.y+rm.h-26,48,20,6);
   }
   if(rm.type!=='wc'&&rnd()<0.6)fid=placeFurn(rm,fid,'plant',rm.x+24+rnd()*(rm.w-54),rm.y+24+rnd()*(rm.h-54),22,22,6);
   return fid;

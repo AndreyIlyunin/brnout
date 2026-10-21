@@ -85,6 +85,20 @@ test('спавны и кофе досягаемы на 100 сидах', () => {
   }
   eq(bad, 0);
 });
+test('мебель не запечатывает комнаты (двери свободны) на 100 сидах', () => {
+  let sealed = 0;
+  for (let s = 1; s <= 100; s++) {
+    buildMap(s * 7919 + 13);
+    for (const rm of ROOMS) {
+      let free = 0;
+      for (let ty = rm.ty; ty < rm.ty + rm.th && !free; ty++)
+        for (let tx = rm.tx; tx < rm.tx + rm.tw; tx++)
+          if (REACH[tx + ty * GW]) { free = 1; break; }
+      if (!free) sealed++;
+    }
+  }
+  eq(sealed, 0);
+});
 test('связность: 0 изолированных комнат на 300 сидах', () => {
   let bad = 0;
   for (let s = 1; s <= 300; s++) {
