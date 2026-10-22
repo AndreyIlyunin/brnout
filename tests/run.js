@@ -267,6 +267,19 @@ test('контейнер вписывается в высоту экрана (л
   const qa = fsL.readFileSync('qa/shots.js', 'utf8');
   ok(qa.indexOf('844, height: 390') > 0, 'QA проверяет реальный ландшафт телефона');
 });
+test('кооп-конфетка: реконнект, heartbeat-детект, индикатор связи', () => {
+  const nj = fsL.readFileSync('src/net.js', 'utf8');
+  ok(nj.indexOf('bye-host') > 0, 'хост явно прощается при выходе');
+  ok(nj.indexOf('Хост завершил игру') > 0, 'гость выходит по bye-host');
+  ok(nj.indexOf('},1500);') > 0, 'heartbeat 1.5с: смерть хоста видна за секунды');
+  ok(nj.indexOf('deadChk') > 0, 'watchdog с двойной проверкой — переживает сворачивание приложения');
+  ok(nj.indexOf('NET.reconnectTries<3') > 0, 'до 3 автопереподключений');
+  ok(nj.indexOf('hostRetries<3') > 0, 'хост тоже восстанавливает комнату');
+  ok(nj.indexOf('Связь восстановлена') > 0, 'успешный возврат отмечается');
+  const rj = fsL.readFileSync('src/render.js', 'utf8');
+  ok(rj.indexOf('ПЕРЕПОДКЛЮЧЕНИЕ') > 0, 'баннер переподключения в HUD');
+  ok(rj.indexOf('связь') > 0 && rj.indexOf('#3fb950') > 0, 'индикатор связи зелёный-жёлтый-красный');
+});
 test('гость сканирует брокеры, пока не услышит комнату', () => {
   const nj = require('fs').readFileSync('src/net.js', 'utf8');
   ok(nj.indexOf('urls:[br]') > 0, 'guestJoin пробует брокеров по одному');

@@ -80,8 +80,14 @@ function lobbyRender(){
 function relayBroadcast(d){
   if(relay&&NET.mode==='host')relay.publish(relayH(NET.code),JSON.stringify({d:d}));
 }
+var hostRetries=0;
 function hostCreate(cb){
   var code=genCode();
+  hostConnect(code,cb,true);
+}
+// хост может пережить обрыв WS: пересоздаём подключение на том же коде комнаты,
+// интервалы и слоты игроков живут — гости просто продолжают писать в топик
+function hostConnect(code,cb,first){
   var brokerName='…';
   var cli=mqttClient({
     clientId:'brnt-h-'+code+'-'+((R()*1e9)|0).toString(36),
@@ -91,24 +97,33 @@ function hostCreate(cb){
       relay={cli:cli,publish:function(topic,str){cli.publish(topic,str);}};
       NET.code=code;NET.mode='host';
       NET.peer={destroy:function(){relayKill();}};
-      document.getElementById('roomCode').textContent=code;
-      LOBBY=[{id:'me',cls:NET.cls}];
-      lobbyRender();
-      // пульс комнаты: гости в лобби понимают, что хост жив
-      hostHbIv=setInterval(function(){relayBroadcast({t:'hb',n:LOBBY.length,st:NET.started});},2000);
-      // гости молчат дольше 9с (вышел, метро, экран погас) — убираем из комнаты
-      hostSweepIv=setInterval(hostSweep,3000);
-      // снапшоты по таймеру, а не в rAF: фон вкладки хоста не должен замораживать гостей
-      hostSnapIv=setInterval(function(){if(NET.mode==='host'&&NET.started&&G.state==='playing')sendSnapshot();},125);
-      cb(null,code);
+      hostRetries=0;
+      if(first){
+        document.getElementById('roomCode').textContent=code;
+        LOBBY=[{id:'me',cls:NET.cls}];
+        lobbyRender();
+        hostHbIv=setInterval(function(){relayBroadcast({t:'hb',n:LOBBY.length,st:NET.started});},1500);
+        hostSweepIv=setInterval(hostSweep,3000);
+        hostSnapIv=setInterval(function(){if(NET.mode==='host'&&NET.started&&G.state==='playing')sendSnapshot();},125);
+        cb(null,code);
+      }else{
+        msg('Связь восстановлена',2);
+        relayBroadcast({t:'hb',n:LOBBY.length,st:NET.started});
+        if(NET.started)relayBroadcast({t:'start',seed:MAPSEED}); // отставший гость достроит карту
+      }
     },
     onMsg:function(topic,str){
       var o=null;try{o=JSON.parse(str);}catch(e){return;}
       if(o&&o.pid&&o.d)hostOnRelay(o.pid,o.d);
     },
     onDown:function(reason){
-      if(relay){netLost('Связь с комнатой потеряна ('+brokerName+')');}
-      else cb(reason==='nobroker'?'nobroker':'broker-down');
+      if(!relay){cb(reason==='nobroker'?'nobroker':'broker-down');return;}
+      if(NET.mode==='host'&&hostRetries<3){
+        hostRetries++;
+        setTimeout(function(){hostConnect(code,cb,false);},1000);
+        return;
+      }
+      netLost('Связь с комнатой потеряна ('+brokerName+')');
     }
   });
 }
@@ -129,7 +144,7 @@ function hostOnRelay(pid,d){
 function hostSweep(){
   var now=performance.now();
   for(var i=NET.conns.length-1;i>=0;i--)
-    if(now-NET.conns[i].last>13000)hostDropConn(NET.conns[i]);
+    if(now-NET.conns[i].last>20000)hostDropConn(NET.conns[i]);
 }
 function hostOnMsg(c,d){
   if(!d)return;
@@ -171,40 +186,45 @@ function hostDropConn(c){
   lobbyRender();
 }
 function guestJoin(code,cb){
-  // хост сидит на одном брокере из списка; гость сканирует по порядку и остаётся там,
-  // где услышал пульс комнаты (hb/лобби/старт). Иначе «подключено, но тишина» навсегда.
+  gCode=code;NET.reconnectTries=0;NET.reconnecting=false;
+  guestConnect(code,cb);
+}
+var gCode=null;
+function guestConnect(code,cb){
   var list=mqttBrokerList();
-  var idx=0,done=false,cleanup=null;
-  function finish(err){
-    if(done)return;
-    done=true;
-    if(cleanup){cleanup();cleanup=null;}
-    if(err)cb(err);
-  }
+  var idx=0,done=false,cbCalled=false,timer=null,cli=null;
+  function finish(err){if(done)return;done=true;if(timer)clearTimeout(timer);if(err)cb(err);}
   function tryBroker(){
     if(done)return;
-    if(idx>=list.length){finish('nobroker');return;}
+    if(idx>=list.length){
+      if(NET.started&&NET.mode==='guest'&&NET.reconnectTries<3){
+        NET.reconnectTries++;idx=0;
+        setTimeout(tryBroker,900);
+        return;
+      }
+      finish('nobroker');return;
+    }
     var br=list[idx];idx++;
     var st=document.getElementById('netStatus');
-    if(st)st.textContent='Подключение ('+br.name+')…';
-    var heard=false,opened=false,timer=null;
-    var cli=mqttClient({
+    if(st)st.textContent=(NET.reconnecting?('Переподключение '+NET.reconnectTries+'/3 · '):'')+('поиск комнаты ('+br.name+')…');
+    var heard=false,opened=false;
+    cli=mqttClient({
       clientId:'brnt-g-'+code+'-'+guestPid.slice(1),
       sub:relayH(code),
       urls:[br],
       onReady:function(){
         if(done)return;
-        opened=true;
-        NET.broker=br.name;
+        opened=true;NET.broker=br.name;
         relay={cli:cli,publish:function(topic,str){cli.publish(topic,str);}};
         NET.peer={destroy:function(){relayKill();}};
         NET.hostConn={open:true,
           send:function(m){if(relay)relay.publish(relayG(code),JSON.stringify({pid:guestPid,d:m}));},
           close:function(){}};
         NET.lastRecv=performance.now();
+        var wc=document.getElementById('waitCode');
+        if(wc){wc.textContent='комната '+code.toUpperCase();wc.classList.remove('hidden');}
         NET.hostConn.send({t:'hi',cls:NET.cls});
-        // пульс всегда (хост не выметает из лобби), инпут — сетевой такт вне rAF
-        if(!guestHbIv)guestHbIv=setInterval(function(){if(NET.hostConn)NET.hostConn.send({t:'hb'});},2000);
+        if(!guestHbIv)guestHbIv=setInterval(function(){if(NET.hostConn)NET.hostConn.send({t:'hb'});},1500);
         if(!guestInIv)guestInIv=setInterval(function(){
           if(!NET.hostConn||NET.mode!=='guest')return;
           NET.hostConn.send({t:'in',x:Math.round(INPUT.ix*100)/100,y:Math.round(INPUT.iy*100)/100,
@@ -213,8 +233,7 @@ function guestJoin(code,cb){
         },125);
         setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},1200);
         setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},2800);
-        if(!done&&!cbCalled){cbCalled=true;cb(null,'connected');}
-        // 4.5с тишины на этом брокере = комнаты здесь нет: следующий
+        if(!cbCalled){cbCalled=true;cb(null,'connected');}
         timer=setTimeout(function(){
           if(done||heard||NET.started)return;
           try{cli.destroy();}catch(e){}
@@ -225,36 +244,48 @@ function guestJoin(code,cb){
       onMsg:function(topic,str){
         var o=null;try{o=JSON.parse(str);}catch(e){return;}
         if(!o)return;
-        if(o.to&&o.to!==guestPid)return; // адресовано не нам
-        heard=true;NET.lastRecv=performance.now();
-        clearTimeout(timer);
-        if(!guestWatchIv){ // связь с комнатой установлена — дальше сторожим тишину
-          guestWatchIv=setInterval(function(){
-            if(performance.now()-NET.lastRecv>9000)netLost('Хост не отвечает — проверьте код комнаты');
-          },2000);
-        }
+        if(o.to&&o.to!==guestPid)return;
+        heard=true;NET.lastRecv=performance.now();clearTimeout(timer);
+        if(NET.reconnecting){NET.reconnecting=false;NET.reconnectTries=0;msg('Связь восстановлена',2);}
+        if(!guestWatchIv)guestWatchIv=setInterval(function(){
+          // после сворачивания приложения очередь сообщений обрабатывается не мгновенно:
+          // констатируем смерть только со второй проверкой подряд
+          if(performance.now()-NET.lastRecv>6000){
+            if(!NET.deadChk)NET.deadChk=setTimeout(function(){
+              NET.deadChk=null;
+              if(performance.now()-NET.lastRecv>6000)netLost('Хост не отвечает — проверьте код комнаты');
+            },1600);
+          }
+        },2000);
         if(o.d)guestOnMsg(o.d);
       },
       onDown:function(reason){
         if(done)return;
         clearTimeout(timer);
-        if(opened&&heard){netLost(reason==='nobroker'?'Брокеры недоступны':'Связь с комнатой потеряна');done=true;return;}
+        if(opened&&heard){
+          if(NET.started&&NET.mode==='guest'&&NET.reconnectTries<3){
+            NET.reconnectTries++;NET.reconnecting=true;
+            try{cli.destroy();}catch(e){}
+            relay=null;NET.hostConn=null;NET.peer=null;
+            setTimeout(function(){if(!done){idx=0;tryBroker();}},800);
+            return;
+          }
+          done=true;netLost('Связь с комнатой потеряна');return;
+        }
         try{cli.destroy();}catch(e){}
         relay=null;NET.hostConn=null;NET.peer=null;
-        if(opened&&!heard){tryBroker();return;} // коннект был, комнату не слышали — другой брокер
         if(reason==='nobroker'){finish('nobroker');return;}
         tryBroker();
       }
     });
   }
-  var cbCalled=false;
-  guestPid='p'+((R()*1e9)|0).toString(36);
-  cleanup=function(){clearTimeout(timer);clearInterval(guestWatchIv);guestWatchIv=null;};
+  if(!guestPid)guestPid='p'+((R()*1e9)|0).toString(36);
   tryBroker();
 }
 function guestOnMsg(d){
   if(!d)return;
   if(d.t==='full'){netLost('Комната заполнена');return;}
+  if(d.t==='bye-host'){netLost('Хост завершил игру');return;}
   if(d.t==='map'){
     buildMap(d.seed);
     VIEW.mobs.length=0;VIEW.projs.length=0;VIEW.pickups.length=0;VIEW.zones.length=0;
@@ -293,6 +324,7 @@ function netLost(reason){
   showOv('bwait');
 }
 function destroyNet(){
+  if(NET.mode==='host'&&relay)relayBroadcast({t:'bye-host'});
   relayKill();
   NET.peer=null;NET.conns=[];NET.hostConn=null;NET.started=false;NET.code='';
   NET.mode='solo';NET.myId='me';guestPid=null;
