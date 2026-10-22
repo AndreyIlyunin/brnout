@@ -429,6 +429,81 @@ function drawCup(x,y,s,fill){
   }
   hctx.restore();
 }
+  // === тач-HUD: одна верхняя строка, всё остальное — кнопки ===
+  function drawHudTouch(p,W){
+    var H2=bhud.height/DPR;
+    var topY=H2<480?34:64; // ландшафт (низкий экран): строка сразу под кнопками
+    // выгорание
+    hctx.fillStyle='rgba(10,13,18,0.7)';rr(hctx,10,topY,132,12,6);hctx.fill();
+    var jit=p.burnout>70?R()*3-1.5:0;
+    hctx.fillStyle=p.burnout>70?'#dc2626':'#b45309';
+    hctx.fillRect(12+jit,topY+2,128*clamp(p.burnout/100,0,1),8);
+    hctx.font=pixFont(12,true);hctx.fillStyle=p.burnout>70?'#e5534b':'#c9d1d9';
+    hctx.fillText(Math.round(p.burnout)+'%',146,topY+10);
+    // кофе в той же строке
+    drawCup(176,topY+5,0.75,p.coffee/(p.coffeeMax||100));
+    hctx.fillStyle='rgba(10,13,18,0.7)';rr(hctx,190,topY+2,92,8,3);hctx.fill();
+    hctx.fillStyle='#3fb950';hctx.fillRect(191,topY+3,90*clamp(p.coffee/(p.coffeeMax||100),0,1),6);
+    // спринт и враги — вторая строка слева: статистика боя обязательна и на телефоне
+    var hi=window.__hudInfo;
+    if(hi){
+      hctx.font=pixFont(12,true);hctx.fillStyle='#8b949e';
+      hctx.fillText('СПРИНТ '+hi.wave+' · ур.'+G.level+' · закрыто '+Math.max(0,hi.wave-1),12,topY+30);
+      hctx.fillStyle='#12161c';hctx.fillRect(12,topY+35,110,3);
+      hctx.fillStyle='#d29922';hctx.fillRect(12,topY+35,110*clamp(G.xp/G.xpN,0,1),3);
+      hctx.font=pixFont(16,true);
+      if(hi.cleared){hctx.fillStyle='#8bd17c';hctx.fillText('ВСЕ ЗАДАЧИ ЗАКРЫТЫ ✓',12,topY+57);}
+      else if(hi.boss){hctx.fillStyle='#e5534b';hctx.fillText('АУДИТ ИДЁТ',12,topY+57);}
+      else{
+        var hot=hi.remain<=3;
+        hctx.fillStyle=hi.remain===0?'#8bd17c':(hot?'#e5534b':'#e6edf3');
+        hctx.fillText('ВРАГОВ: '+hi.remain+(hot&&hi.remain>0?' — зачистка!':''),12,topY+57);
+      }
+    }
+    // КД-состояние тач-кнопок (затемнение) и заряд СУПЕРа
+    // DOM трогаем только при изменении: запись стиля каждый кадр гоняет пересчёт layout и жжёт батарею
+    var tb={btnAlt:[p.cd2||0,CLS[p.cls].s2.cd],btnSkill:[p.cdD||0,2.6],btnSkill2:[p.cdS||0,CLS[p.cls].sk.cd],btnFU:[Math.max(p.cdQ||0,p.qT||0),CLS[p.cls].ult.cd],btnR:[p.cdU||0,25]};
+    for(var tk in tb){var el=document.getElementById(tk);if(!el)continue;
+      var cd=tb[tk][0],cdm=tb[tk][1]||1;
+      var pct=clamp(cd/cdm,0,1);
+      var step=(pct*50)|0; // квант 2%: глазу неотличимо, DOM спит 50 из 51 кадра
+      if(el._cd!==step){el._cd=step;el.style.background='conic-gradient(rgba(6,8,12,.82) '+(step*2)+'%, rgba(33,38,45,.72) 0)';}
+      var onc=cd>0.05;
+      if(el._onc!==onc){el._onc=onc;el.classList.toggle('oncd',onc);}
+    }
+    var rBtn=document.getElementById('btnR');
+    if(rBtn){
+      var nch=(p.superC||0)<1||G.wave<G.ultAt;
+      if(rBtn._nochg!==nch){rBtn._nochg=nch;rBtn.classList.toggle('nochg',nch);}
+      var chg=(0.15+0.5*clamp(p.superC||0,0,1));
+      var chq=Math.round(chg*25); // квант 4%
+      if(rBtn._chg!==chq){rBtn._chg=chq;rBtn.style.background='radial-gradient(circle at 50% 120%,rgba(255,206,0,'+chg.toFixed(2)+'),rgba(60,50,10,.8))';}
+    }
+    // итоги спринта + кнопка дальше: карточка компактная, телефон в высоту узкий
+    if(G.waveState==='cleared'&&G.state==='playing'){
+      var st=G.interStats||{w:G.wave,ki:0,kd:0,okr:G.okr,co:(p.coins||0)};
+      var left=Math.max(0,Math.ceil(G.interT));
+      var cw=Math.min(370,W-24),cx=W/2-cw/2,cy=topY+66;
+      hctx.fillStyle='rgba(13,10,24,0.93)';rr(hctx,cx,cy,cw,64,10);hctx.fill();
+      hctx.strokeStyle='rgba(232,58,156,0.8)';hctx.lineWidth=2;rr(hctx,cx,cy,cw,64,10);hctx.stroke();
+      hctx.textAlign='center';
+      hctx.font=pixFont(15,true);hctx.fillStyle='#e6edf3';
+      hctx.fillText('СПРИНТ '+st.w+' ЗАКРЫТ',W/2,cy+18);
+      hctx.font=pixFont(11);hctx.fillStyle='#dfe6ee';
+      hctx.fillText('уволено '+st.ki+' · дедлайны '+st.kd+' · OKR '+st.okr+' · ✦ '+st.co+' · ур.'+G.level,W/2,cy+37);
+      hctx.font=pixFont(11,true);hctx.fillStyle='#1fc4ae';
+      hctx.fillText('→ «'+(G.nextTheme||'офис')+'» · соберите лут',W/2,cy+54);
+      hctx.textAlign='left';
+      window.__interRect={x:cx,y:cy,w:cw,h:64}; // тесты следят за итогами и на таче
+      var bw=Math.min(340,W-40),bx=W/2-bw/2,by=cy+72;
+      root.classList.add('noatk'); // боевые кнопки гаснут — главный герой «ДАЛЬШЕ»
+      hctx.fillStyle='rgba(63,185,80,0.95)';rr(hctx,bx,by,bw,44,10);hctx.fill();
+      hctx.strokeStyle='#8effc0';hctx.lineWidth=2.5;rr(hctx,bx,by,bw,44,10);hctx.stroke();
+      hctx.font=pixFont(15,true);hctx.fillStyle='#eafff2';hctx.textAlign='center';
+      hctx.fillText('ДАЛЬШЕ ▶ СПРИНТ · авто '+left+'с',W/2,by+28);hctx.textAlign='left';
+      window.__nextBtnRect={x:bx,y:by,w:bw,h:44};
+    }else{root.classList.remove('noatk');window.__nextBtnRect=null;window.__interRect=null;}
+  }
 function drawHUD(){
   hctx.setTransform(DPR,0,0,DPR,0,0);
   var W=bhud.width/DPR,H=bhud.height/DPR,p=localPlayer();
@@ -436,6 +511,7 @@ function drawHUD(){
   hctx.textAlign='left';
   var narrow=W<640;
   var bx=16,by=H-58,bw=narrow?130:210,bh=18;
+  if(!isTouch){ // PC-панель выгорания внизу: на таче вместо неё верхняя строка
   hctx.fillStyle='rgba(10,13,18,0.75)';rr(hctx,bx-8,by-26,narrow?bw+96:bw+120,bh+40,6);hctx.fill();
   var jit=p.burnout>70?R()*3-1.5:0;
   hctx.font=pixFont(13,true);hctx.fillStyle=p.burnout>70?'#e5534b':'#8b949e';
@@ -454,8 +530,14 @@ function drawHUD(){
   drawCup(bx+bw+(narrow?42:58),by+10,narrow?0.85:1.05,p.coffee/(p.coffeeMax||100));
   hctx.font=pixFont(13,true);hctx.fillStyle='#8b949e';
   hctx.fillText(narrow?('☕'+Math.round(p.coffee)):('КОФЕ '+Math.round(p.coffee)),bx+bw+(narrow?64:80),by+38);
+  }
   drawMinimap(); // до тач-return: миникарта обязательна на любой платформе
-  if(isTouch){drawHudTouch(p,W);return;} // тач: без панели слотов — всё на кнопки
+  // спринт-счётчик нужен всем платформам (и тестам): считаем до раскладки панелей
+  var remG=(NET.mode==='guest')?VIEW.mobs.length:(G.spawnQ.length+G.mobs.length);
+  var cleared=G.waveState==='cleared';
+  window.__hudInfo={wave:Math.max(1,G.wave),remain:remG,cleared:cleared,boss:!!(G.boss||((NET.mode==='guest')&&VIEW.boss))};
+  if(!cleared)window.__interRect=null; // панель итогов живёт только в cleared — и на ПК, и на таче
+  if(!isTouch){ // слоты, панели и счётчики ПК-раскладки
   var sy=H-70;
   var C=CLS[p.cls]||CLS.mgr;
   var slots=[
@@ -497,8 +579,6 @@ function drawHUD(){
     hctx.fillText('АСАП! +55%',bx+bw+(narrow?64:80),by-6);
   }
   // === спринт + враги: явный счётчик, чтобы смена локации не была внезапной ===
-  var remG=(NET.mode==='guest')?VIEW.mobs.length:(G.spawnQ.length+G.mobs.length);
-  var cleared=G.waveState==='cleared';
   hctx.fillStyle='rgba(10,13,18,0.8)';rr(hctx,12,12,196,66,6);hctx.fill();
   hctx.strokeStyle=cleared?'rgba(139,209,124,0.8)':'rgba(232,58,156,0.35)';hctx.lineWidth=1;
   rr(hctx,12,12,196,66,6);hctx.stroke();
@@ -567,52 +647,8 @@ function drawHUD(){
       hctx.fillStyle='#8bd17c';hctx.fillRect(x0+18,16,80*clamp(tp.coffee/(tp.coffeeMax||100),0,1),3);
     }
   }
-  // === тач-HUD: одна верхняя строка, всё остальное — кнопки ===
-  function drawHudTouch(p,W){
-    var H2=bhud.height/DPR;
-    var topY=H2<480?34:64; // ландшафт (низкий экран): строка сразу под кнопками
-    // выгорание
-    hctx.fillStyle='rgba(10,13,18,0.7)';rr(hctx,10,topY,132,12,6);hctx.fill();
-    var jit=p.burnout>70?R()*3-1.5:0;
-    hctx.fillStyle=p.burnout>70?'#dc2626':'#b45309';
-    hctx.fillRect(12+jit,topY+2,128*clamp(p.burnout/100,0,1),8);
-    hctx.font=pixFont(12,true);hctx.fillStyle=p.burnout>70?'#e5534b':'#c9d1d9';
-    hctx.fillText(Math.round(p.burnout)+'%',146,topY+10);
-    // кофе в той же строке
-    drawCup(176,topY+5,0.75,p.coffee/(p.coffeeMax||100));
-    hctx.fillStyle='rgba(10,13,18,0.7)';rr(hctx,190,topY+2,92,8,3);hctx.fill();
-    hctx.fillStyle='#3fb950';hctx.fillRect(191,topY+3,90*clamp(p.coffee/(p.coffeeMax||100),0,1),6);
-    // КД-состояние тач-кнопок (затемнение) и заряд СУПЕРа
-    // DOM трогаем только при изменении: запись стиля каждый кадр гоняет пересчёт layout и жжёт батарею
-    var tb={btnAlt:[p.cd2||0,CLS[p.cls].s2.cd],btnSkill:[p.cdD||0,2.6],btnSkill2:[p.cdS||0,CLS[p.cls].sk.cd],btnFU:[Math.max(p.cdQ||0,p.qT||0),CLS[p.cls].ult.cd],btnR:[p.cdU||0,25]};
-    for(var tk in tb){var el=document.getElementById(tk);if(!el)continue;
-      var cd=tb[tk][0],cdm=tb[tk][1]||1;
-      var pct=clamp(cd/cdm,0,1);
-      var step=(pct*50)|0; // квант 2%: глазу неотличимо, DOM спит 50 из 51 кадра
-      if(el._cd!==step){el._cd=step;el.style.background='conic-gradient(rgba(6,8,12,.82) '+(step*2)+'%, rgba(33,38,45,.72) 0)';}
-      var onc=cd>0.05;
-      if(el._onc!==onc){el._onc=onc;el.classList.toggle('oncd',onc);}
-    }
-    var rBtn=document.getElementById('btnR');
-    if(rBtn){
-      var nch=(p.superC||0)<1||G.wave<G.ultAt;
-      if(rBtn._nochg!==nch){rBtn._nochg=nch;rBtn.classList.toggle('nochg',nch);}
-      var chg=(0.15+0.5*clamp(p.superC||0,0,1));
-      var chq=Math.round(chg*25); // квант 4%
-      if(rBtn._chg!==chq){rBtn._chg=chq;rBtn.style.background='radial-gradient(circle at 50% 120%,rgba(255,206,0,'+chg.toFixed(2)+'),rgba(60,50,10,.8))';}
-    }
-    // кнопка следующего спринта в cleared (панель сверху уже есть — кнопка в ней)
-    if(G.waveState==='cleared'&&G.state==='playing'){
-      var left=Math.max(0,Math.ceil(G.interT));
-      var bw=Math.min(340,W-40),bx=W/2-bw/2,by=(H2<480?96:168);
-      root.classList.add('noatk'); // боевые кнопки гаснут — главный герой «ДАЛЬШЕ»
-      hctx.fillStyle='rgba(63,185,80,0.95)';rr(hctx,bx,by,bw,44,10);hctx.fill();
-      hctx.strokeStyle='#8effc0';hctx.lineWidth=2.5;rr(hctx,bx,by,bw,44,10);hctx.stroke();
-      hctx.font=pixFont(15,true);hctx.fillStyle='#eafff2';hctx.textAlign='center';
-      hctx.fillText('ДАЛЬШЕ ▶ СПРИНТ · авто '+left+'с',W/2,by+28);hctx.textAlign='left';
-      window.__nextBtnRect={x:bx,y:by,w:bw,h:44};
-    }else{root.classList.remove('noatk');window.__nextBtnRect=null;}
-  }
+
+  } // конец ПК-раскладки
   var boss=(NET.mode==='guest')?VIEW.boss:G.boss;
   if(boss){
     var hpF=(NET.mode==='guest')?(boss.hpF||0):clamp(boss.hp/boss.hpMax,0,1);
@@ -651,7 +687,28 @@ function drawHUD(){
     hctx.fillStyle='#e8894a';hctx.fillText('3 сентября',W/2,H*0.4);
     hctx.restore();hctx.textAlign='left';
   }
-  // === межспринтовая пауза: НЕ блокирует — собирайте лут; старт кнопкой/Enter/таймером ===
+  if(p.dead){
+    hctx.fillStyle='rgba(10,13,18,0.8)';rr(hctx,W/2-130,H/2-20,260,44,6);hctx.fill();
+    hctx.fillStyle='#e5534b';hctx.font='bold 14px Arial';hctx.textAlign='center';
+    hctx.fillText('ВЫ СГОРЕЛИ. Возрождение после спринта.',W/2,H/2+6);hctx.textAlign='left';
+  }
+  if(G.caption){
+    hctx.globalAlpha=Math.min(0.8,G.capT*0.3);hctx.font=pixFont(12);hctx.fillStyle='#7d8590';
+    if(isTouch){hctx.textAlign='left';hctx.fillText(G.caption,16,H-96);}
+    else{hctx.textAlign='center';hctx.fillText(G.caption,W/2,H-12);}
+    hctx.textAlign='left';hctx.globalAlpha=1;
+  }
+  if(NET.mode!=='solo'){
+    hctx.fillStyle='rgba(139,148,158,0.8)';hctx.font='10px Arial';
+    hctx.fillText(NET.mode==='host'?'P2P-ХОСТ · код '+NET.code:'P2P-КЛИЕНТ',W-160,74);
+  }
+  if(VIEW.paused&&NET.mode==='guest'){
+    hctx.fillStyle='rgba(5,7,10,0.6)';hctx.fillRect(0,0,W,H);
+    hctx.fillStyle='#d29922';hctx.font='bold 20px Arial';hctx.textAlign='center';
+    hctx.fillText('ХОСТ НА ПАУЗЕ',W/2,H/2);hctx.textAlign='left';
+  }
+  if(isTouch){drawHudTouch(p,W);return;} // тач: компактный HUD со счётчиком врагов и итогами спринта
+  // === межспринтовая пауза (ПК): НЕ блокирует — собирайте лут; старт кнопкой/Enter/таймером ===
   if(G.waveState==='cleared'&&G.state==='playing'){
     var st=G.interStats||{w:G.wave,ki:0,kd:0,okr:G.okr,co:(p.coins||0)};
     var pw=Math.min(620,W-40),px0=W/2-pw/2,py0=10; // сверху: центр свободен для боя и лута
@@ -682,26 +739,7 @@ function drawHUD(){
     window.__nextBtnRect={x:bx0,y:by0,w:bw,h:34}; // хит-зона для тача
     hctx.textAlign='left';
     if(hov&&mouse.down)G.interT=Math.min(G.interT,0.05);
-  }
-  if(p.dead){
-    hctx.fillStyle='rgba(10,13,18,0.8)';rr(hctx,W/2-130,H/2-20,260,44,6);hctx.fill();
-    hctx.fillStyle='#e5534b';hctx.font='bold 14px Arial';hctx.textAlign='center';
-    hctx.fillText('ВЫ СГОРЕЛИ. Возрождение после спринта.',W/2,H/2+6);hctx.textAlign='left';
-  }
-  if(G.caption){
-    hctx.globalAlpha=Math.min(0.8,G.capT*0.3);hctx.font=pixFont(12);hctx.fillStyle='#7d8590';
-    if(isTouch){hctx.textAlign='left';hctx.fillText(G.caption,16,H-96);}
-    else{hctx.textAlign='center';hctx.fillText(G.caption,W/2,H-12);}
-    hctx.textAlign='left';hctx.globalAlpha=1;
-  }
-  if(NET.mode!=='solo'){
-    hctx.fillStyle='rgba(139,148,158,0.8)';hctx.font='10px Arial';
-    hctx.fillText(NET.mode==='host'?'P2P-ХОСТ · код '+NET.code:'P2P-КЛИЕНТ',W-160,74);
-  }
-  if(VIEW.paused&&NET.mode==='guest'){
-    hctx.fillStyle='rgba(5,7,10,0.6)';hctx.fillRect(0,0,W,H);
-    hctx.fillStyle='#d29922';hctx.font='bold 20px Arial';hctx.textAlign='center';
-    hctx.fillText('ХОСТ НА ПАУЗЕ',W/2,H/2);hctx.textAlign='left';
+    window.__interRect={x:px0,y:py0,w:pw,h:218}; // тесты следят за итоговой панелью
   }
 }
 function localNearCoffee(){

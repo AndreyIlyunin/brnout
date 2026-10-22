@@ -110,6 +110,10 @@ async function auditLayout(page, scene, need) {
     await new Promise(r => setTimeout(r, 2500));
     await page.screenshot({ path: OUT + '/' + vp.name + '-wave.png' });
     await auditLayout(page, 'wave', 'mm');
+    const hudInfo = await page.evaluate(() => window.__hudInfo);
+    if (!hudInfo || hudInfo.wave < 1) fail('счётчик спринта не экспортирован (__hudInfo)');
+    else if (!(hudInfo.remain > 0)) fail('счётчик врагов пуст в бою: remain=' + hudInfo.remain);
+    else ok('счётчик спринт/врагов на месте: спринт ' + hudInfo.wave + ', врагов ' + hudInfo.remain);
 
     // layout тач-кнопок (только с touch)
     if (vp.mobile) {
@@ -157,6 +161,9 @@ async function auditLayout(page, scene, need) {
     const btnRect = await page.evaluate(() => window.__nextBtnRect ? 1 : 0);
     if (!btnRect) fail('хит-зона кнопки следующего спринта не создана');
     else ok('кнопка следующего спринта отрисована');
+    const interRect = await page.evaluate(() => window.__interRect);
+    if (!interRect) fail('итоговая статистика спринта не отрисована (__interRect)');
+    else ok('итоги спринта на месте (' + Math.round(interRect.w) + 'x' + Math.round(interRect.h) + ')');
 
     // пауза
     await page.evaluate(() => { G.waveState = 'calm'; G.waveT = 9; togglePause(); });
