@@ -87,7 +87,7 @@ function hostCreate(cb){
     clientId:'brnt-h-'+code+'-'+((R()*1e9)|0).toString(36),
     sub:relayG(code),
     onReady:function(name){
-      brokerName=name;
+      brokerName=name;NET.broker=name;
       relay={cli:cli,publish:function(topic,str){cli.publish(topic,str);}};
       NET.code=code;NET.mode='host';
       NET.peer={destroy:function(){relayKill();}};
@@ -171,50 +171,86 @@ function hostDropConn(c){
   lobbyRender();
 }
 function guestJoin(code,cb){
-  var done=false;
+  // хост сидит на одном брокере из списка; гость сканирует по порядку и остаётся там,
+  // где услышал пульс комнаты (hb/лобби/старт). Иначе «подключено, но тишина» навсегда.
+  var list=mqttBrokerList();
+  var idx=0,done=false,cleanup=null;
+  function finish(err){
+    if(done)return;
+    done=true;
+    if(cleanup){cleanup();cleanup=null;}
+    if(err)cb(err);
+  }
+  function tryBroker(){
+    if(done)return;
+    if(idx>=list.length){finish('nobroker');return;}
+    var br=list[idx];idx++;
+    var st=document.getElementById('netStatus');
+    if(st)st.textContent='Подключение ('+br.name+')…';
+    var heard=false,opened=false,timer=null;
+    var cli=mqttClient({
+      clientId:'brnt-g-'+code+'-'+guestPid.slice(1),
+      sub:relayH(code),
+      urls:[br],
+      onReady:function(){
+        if(done)return;
+        opened=true;
+        NET.broker=br.name;
+        relay={cli:cli,publish:function(topic,str){cli.publish(topic,str);}};
+        NET.peer={destroy:function(){relayKill();}};
+        NET.hostConn={open:true,
+          send:function(m){if(relay)relay.publish(relayG(code),JSON.stringify({pid:guestPid,d:m}));},
+          close:function(){}};
+        NET.lastRecv=performance.now();
+        NET.hostConn.send({t:'hi',cls:NET.cls});
+        // пульс всегда (хост не выметает из лобби), инпут — сетевой такт вне rAF
+        if(!guestHbIv)guestHbIv=setInterval(function(){if(NET.hostConn)NET.hostConn.send({t:'hb'});},2000);
+        if(!guestInIv)guestInIv=setInterval(function(){
+          if(!NET.hostConn||NET.mode!=='guest')return;
+          NET.hostConn.send({t:'in',x:Math.round(INPUT.ix*100)/100,y:Math.round(INPUT.iy*100)/100,
+            a:Math.round(INPUT.aim*100)/100,f1:(INPUT.f1||INPUT.f1Tap)?1:0,f2:INPUT.f2?1:0,sk:INPUT.sk?1:0,s2:INPUT.sk2?1:0,fk:INPUT.fk?1:0,cf:INPUT.cf?1:0,u:(INPUT.ultTap?1:0)});
+          INPUT.f1Tap=false;INPUT.ultTap=false;
+        },125);
+        setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},1200);
+        setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},2800);
+        if(!done&&!cbCalled){cbCalled=true;cb(null,'connected');}
+        // 4.5с тишины на этом брокере = комнаты здесь нет: следующий
+        timer=setTimeout(function(){
+          if(done||heard||NET.started)return;
+          try{cli.destroy();}catch(e){}
+          relay=null;NET.hostConn=null;NET.peer=null;
+          tryBroker();
+        },4500);
+      },
+      onMsg:function(topic,str){
+        var o=null;try{o=JSON.parse(str);}catch(e){return;}
+        if(!o)return;
+        if(o.to&&o.to!==guestPid)return; // адресовано не нам
+        heard=true;NET.lastRecv=performance.now();
+        clearTimeout(timer);
+        if(!guestWatchIv){ // связь с комнатой установлена — дальше сторожим тишину
+          guestWatchIv=setInterval(function(){
+            if(performance.now()-NET.lastRecv>9000)netLost('Хост не отвечает — проверьте код комнаты');
+          },2000);
+        }
+        if(o.d)guestOnMsg(o.d);
+      },
+      onDown:function(reason){
+        if(done)return;
+        clearTimeout(timer);
+        if(opened&&heard){netLost(reason==='nobroker'?'Брокеры недоступны':'Связь с комнатой потеряна');done=true;return;}
+        try{cli.destroy();}catch(e){}
+        relay=null;NET.hostConn=null;NET.peer=null;
+        if(opened&&!heard){tryBroker();return;} // коннект был, комнату не слышали — другой брокер
+        if(reason==='nobroker'){finish('nobroker');return;}
+        tryBroker();
+      }
+    });
+  }
+  var cbCalled=false;
   guestPid='p'+((R()*1e9)|0).toString(36);
-  var cli=mqttClient({
-    clientId:'brnt-g-'+code+'-'+guestPid.slice(1),
-    sub:relayH(code),
-    onReady:function(){
-      relay={cli:cli,publish:function(topic,str){cli.publish(topic,str);}};
-      NET.peer={destroy:function(){relayKill();}};
-      NET.hostConn={open:true,
-        send:function(m){if(relay)relay.publish(relayG(code),JSON.stringify({pid:guestPid,d:m}));},
-        close:function(){}};
-      NET.lastRecv=performance.now();
-      NET.hostConn.send({t:'hi',cls:NET.cls});
-      // первые hi бывают теряются (подписка хоста ещё не раскварцована на кластере) — повторяем, пока не придёт лобби
-      setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},1500);
-      setTimeout(function(){if(!NET.started&&!LOBBY.length&&NET.hostConn)NET.hostConn.send({t:'hi',cls:NET.cls});},3500);
-      // инпут гостя — по таймеру, а не в rAF: сетевой такт не зависит от видимости вкладки
-      guestInIv=setInterval(function(){
-        if(!NET.hostConn||NET.mode!=='guest')return;
-        NET.hostConn.send({t:'in',x:Math.round(INPUT.ix*100)/100,y:Math.round(INPUT.iy*100)/100,
-          a:Math.round(INPUT.aim*100)/100,f1:(INPUT.f1||INPUT.f1Tap)?1:0,f2:INPUT.f2?1:0,sk:INPUT.sk?1:0,s2:INPUT.sk2?1:0,fk:INPUT.fk?1:0,cf:INPUT.cf?1:0,u:(INPUT.ultTap?1:0)});
-        INPUT.f1Tap=false;INPUT.ultTap=false;
-      },100);
-      // в лобби (не в игре) гость подаёт голос каждые 2с, чтобы хост его не вымел
-      guestHbIv=setInterval(function(){if(NET.hostConn)NET.hostConn.send({t:'hb'});},2000);
-      // хост жив, пока идут его пульс/снапшоты/лобби: тишина 8с = потеря
-      guestWatchIv=setInterval(function(){
-        if(performance.now()-NET.lastRecv>8000)netLost('Хост не отвечает — проверьте код комнаты');
-      },2000);
-      done=true;
-      cb(null,'connected');
-    },
-    onMsg:function(topic,str){
-      var o=null;try{o=JSON.parse(str);}catch(e){return;}
-      if(!o)return;
-      if(o.to&&o.to!==guestPid)return; // адресовано не нам
-      NET.lastRecv=performance.now();
-      if(o.d)guestOnMsg(o.d);
-    },
-    onDown:function(reason){
-      if(done)netLost(reason==='nobroker'?'Брокеры недоступны':'Связь с комнатой потеряна');
-      else cb(reason==='nobroker'?'nobroker':'broker-down');
-    }
-  });
+  cleanup=function(){clearTimeout(timer);clearInterval(guestWatchIv);guestWatchIv=null;};
+  tryBroker();
 }
 function guestOnMsg(d){
   if(!d)return;

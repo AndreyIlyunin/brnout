@@ -20,16 +20,7 @@ function loop(ts){
     var fsB=document.getElementById('btnFS');
     if(fsB)fsB.classList.toggle('hidden',G.state==='playing'); // случайный тап в бою исключён
   }catch(e){console.error('render:',e);}
-  // вход по инвайт-ссылке: ?join=code — сразу открываем форму с подставленным кодом
-try{
-  var _jc=new URL(location.href).searchParams.get('join');
-  if(_jc&&/^[a-z0-9]{5}$/i.test(_jc)){
-    showOv('bjoin');
-    document.getElementById('joinCode').value=_jc.toLowerCase();
-    document.getElementById('joinErr').textContent='код из ссылки подставлен — выберите класс (меню ← Назад) и жмите «Подключиться»';
-  }
-}catch(e){}
-requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 }
 
 // ============================== menu wiring ==============================
@@ -42,9 +33,12 @@ function refreshMenuUI(){
     var el=document.getElementById(cards[i]);
     if(el)el.classList.toggle('sel',cards[i]==='b'+selCls);
   }
-  $('mSolo').classList.toggle('on',menuMode==='solo');
-  $('mCoop').classList.toggle('on',menuMode==='coop');
-  $('mStart').textContent=menuMode==='solo'?'НАЧАТЬ СМЕНУ':'В КОМНАТУ →';
+  var joining=!!PENDING_JOIN;
+  $('mSolo').classList.toggle('on',!joining&&menuMode==='solo');
+  $('mCoop').classList.toggle('on',!joining&&menuMode==='coop');
+  $('mSolo').classList.toggle('hidden',joining);
+  $('mCoop').classList.toggle('hidden',joining);
+  $('mStart').textContent=joining?('ВОЙТИ В КОМНАТУ '+PENDING_JOIN.toUpperCase()+' →'):(menuMode==='solo'?'НАЧАТЬ СМЕНУ':'В КОМНАТУ →');
 }
 function selectClass(cls){
   selCls=cls;
@@ -57,8 +51,26 @@ for(var _ci=0;_ci<_cards.length;_ci++)(function(cid,cls){
 })(_cards[_ci][0],_cards[_ci][1]);
 $('mSolo').addEventListener('click',function(){menuMode='solo';refreshMenuUI();});
 $('mCoop').addEventListener('click',function(){menuMode='coop';refreshMenuUI();});
+function connectGuest(code){
+  audioInit();
+  showOv('bwait');
+  $('netStatus').textContent='Подключение…';
+  guestJoin(code,function(err){
+    if(err){
+      $('netStatus').textContent='';
+      showOv('bjoin'); // код известен — пусть правит в форме, там есть строка ошибки
+      document.getElementById('joinCode').value=code;
+      $('joinErr').textContent=err==='nobroker'?'Брокеры недоступны — проверьте интернет':'Комната не отвечает. Хост ещё в игре?';
+      destroyNet();
+    }else{
+      audioInit();startAmbient();
+      $('netStatus').textContent='Подключено. Ждём хоста…';
+    }
+  });
+}
 $('mStart').addEventListener('click',function(){
   audioInit();
+  if(PENDING_JOIN){connectGuest(PENDING_JOIN);return;}
   if(menuMode==='solo')startLocal();
   else showOv('bcoop');
 });
@@ -92,19 +104,7 @@ $('cJoin').addEventListener('click',function(){showOv('bjoin');$('joinErr').text
 $('bjoinGo').addEventListener('click',function(){
   var code=$('joinCode').value.trim().toLowerCase();
   if(code.length!==5||!/^[a-z0-9]{5}$/.test(code)){$('joinErr').textContent='Код из 5 символов (латиница)';return;}
-  showOv('bwait');
-  $('netStatus').textContent='Подключение…';
-  guestJoin(code,function(err){
-    if(err){
-      $('netStatus').textContent='';
-      showOv('bjoin');
-      $('joinErr').textContent=err==='nobroker'?'Брокеры недоступны — проверьте интернет':'Нет такой комнаты. Хост ещё собирает её?';
-      destroyNet();
-    }else{
-      audioInit();startAmbient();
-      $('netStatus').textContent='Подключено. Ждём лобби…';
-    }
-  });
+  connectGuest(code);
 });
 $('bLeaveWait').addEventListener('click',function(){
   try{if(NET.hostConn)NET.hostConn.send({t:'leave'});}catch(e){}
@@ -207,13 +207,15 @@ window.__bo={G:G,NET:NET,VIEW:VIEW,INPUT:INPUT,startLocal:startLocal,hostStartGa
       update(1/60);
     }
   }};
-// вход по инвайт-ссылке: ?join=code — сразу открываем форму с подставленным кодом
+requestAnimationFrame(loop);
+// вход по инвайт-ссылке: ?join=code — друг выбирает класс в меню и жмёт «ВОЙТИ В КОМНАТУ»
+var PENDING_JOIN=null;
 try{
   var _jc=new URL(location.href).searchParams.get('join');
   if(_jc&&/^[a-z0-9]{5}$/i.test(_jc)){
-    showOv('bjoin');
-    document.getElementById('joinCode').value=_jc.toLowerCase();
-    document.getElementById('joinErr').textContent='код из ссылки подставлен — выберите класс (меню ← Назад) и жмите «Подключиться»';
+    PENDING_JOIN=_jc.toLowerCase();
+    var _tag=document.querySelector('#bmenu .bgtag');
+    if(_tag)_tag.textContent='вас позвали в комнату '+PENDING_JOIN.toUpperCase()+' — выберите класс';
+    refreshMenuUI();
   }
 }catch(e){}
-requestAnimationFrame(loop);

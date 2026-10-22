@@ -258,6 +258,20 @@ test('дуга тач-кнопок: у всех 5 кнопок заданы по
     ok(css.slice(i, css.indexOf('}', i)).includes('bottom:calc('), sel + ' имеет bottom:calc');
   }
 });
+test('гость сканирует брокеры, пока не услышит комнату', () => {
+  const nj = require('fs').readFileSync('src/net.js', 'utf8');
+  ok(nj.indexOf('urls:[br]') > 0, 'guestJoin пробует брокеров по одному');
+  ok(nj.indexOf('tryBroker') > 0, 'есть переход к следующему брокеру при тишине');
+  const mj = require('fs').readFileSync('src/mqtt.js', 'utf8');
+  ok(mj.indexOf('mqttBrokerList') > 0, 'единый порядок брокеров вынесен в mqttBrokerList');
+});
+test('инвайт-флоу живёт вне render-цикла (регресс-страж)', () => {
+  const mjs = require('fs').readFileSync('src/main.js', 'utf8');
+  const loopBody = mjs.slice(mjs.indexOf('function loop('), mjs.indexOf('// ============================== menu wiring'));
+  ok(loopBody.indexOf('join') < 0, 'в loop() нет кода инвайта — иначе каждый кадр сносит оверлеи');
+  ok(mjs.indexOf("PENDING_JOIN=_jc.toLowerCase()") > 0, 'инвайт-ссылка открывает меню с выбором класса');
+  ok(mjs.indexOf('ВОЙТИ В КОМНАТУ') > 0, 'кнопка входа в комнату в join-режиме');
+});
 test('счётчик врагов доступен тач-HUD до раннего return', () => {
   const body = rjs.slice(rjs.indexOf('function drawHUD'), rjs.indexOf('function localNearCoffee'));
   ok(body.indexOf('__hudInfo=') > 0, '__hudInfo считается в drawHUD');

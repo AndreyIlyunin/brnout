@@ -4,8 +4,8 @@
 // а MQTT-брокеры живут — они и есть наш «сигнальный сервер + релей».
 // Реализовано ровно столько протокола, сколько нужно: CONNECT/SUBSCRIBE/PUBLISH(QoS0)/PINGREQ.
 var MQTT_BROKERS=[
+  {url:'wss://test.mosquitto.org:8081/',name:'mosquitto'}, // стабильнее всех и не шейпит
   {url:'wss://broker.emqx.io:8084/mqtt',name:'emqx'},
-  {url:'wss://test.mosquitto.org:8081/',name:'mosquitto'},
   {url:'wss://mqtt.hsl.fi:8883/',name:'hsl'}
 ];
 function mqttBytes(str){
@@ -28,11 +28,15 @@ function mqttPacket(typeFlags,body){
   return u;
 }
 // mqttClient({clientId,sub,onReady,onMsg(topic,str),onDown(reason)}) — авто-фейловер по списку брокеров
-function mqttClient(opts){
+// единый порядок брокеров для хоста и гостя: гость сканирует список, пока не услышит комнату
+function mqttBrokerList(){
   var override=null;
   try{var _q=new URL(location.href).searchParams.get('broker');if(_q)override=_q;}catch(e){}
   try{if(!override&&window.localStorage&&localStorage.getItem('brnt_broker'))override=localStorage.getItem('brnt_broker');}catch(e){}
-  var list=override?[{url:override,name:'custom'}].concat(MQTT_BROKERS):MQTT_BROKERS;
+  return override?[{url:override,name:'custom'}].concat(MQTT_BROKERS):MQTT_BROKERS;
+}
+function mqttClient(opts){
+  var list=opts.urls||mqttBrokerList();
   var idx=0,ws=null,alive=false,stopped=false,pingIv=null;
   function cleanup(){
     clearInterval(pingIv);pingIv=null;
