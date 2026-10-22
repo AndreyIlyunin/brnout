@@ -758,8 +758,9 @@ function drawMinimap(){
   var mw=200,mh=mmCv.height*(mw/mmCv.width);
   if(mh>190){mw=mw*190/mh;mh=190;}
   if(isTouch)mw=Math.min(mw,150),mh=mh*(mw/200);
-  // touch mode: minimap moves top-right so the joystick never covers it
-  var mx=W-mw-14,my=isTouch?76:H-mh-14;
+  // touch: карта в правом верхнем; на низких ландшафтах — в левый верх, подальше от дуги кнопок
+  var low=isTouch&&H<520;
+  var mx=low?14:W-mw-14,my=isTouch?76:H-mh-14;
   hctx.globalAlpha=0.92;
   hctx.fillStyle='rgba(14,18,26,0.88)';rr(hctx,mx-6,my-6,mw+12,mh+12,4);hctx.fill();
   hctx.strokeStyle='#7d8a99';hctx.lineWidth=2;rr(hctx,mx-6,my-6,mw+12,mh+12,4);hctx.stroke();

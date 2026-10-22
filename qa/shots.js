@@ -11,6 +11,7 @@ const VIEWPORTS = [
   { name: 'desktop', width: 1280, height: 720, mobile: false },
   { name: 'phone-portrait', width: 390, height: 700, mobile: true },
   { name: 'phone-landscape', width: 740, height: 420, mobile: true },
+  { name: 'phone-landscape-max', width: 844, height: 390, mobile: true },
 ];
 const SCENES = ['menu', 'game', 'wave', 'interstitial', 'pause'];
 
@@ -45,8 +46,10 @@ const AUDIT_SRC = () => {
   if (window.__mmRect) push('__mmRect', 'rect', { left: __mmRect.x, top: __mmRect.y, right: __mmRect.x + __mmRect.w, bottom: __mmRect.y + __mmRect.h });
   if (window.__nextBtnRect) push('__nextBtnRect', 'rect', { left: __nextBtnRect.x, top: __nextBtnRect.y, right: __nextBtnRect.x + __nextBtnRect.w, bottom: __nextBtnRect.y + __nextBtnRect.h });
   const out = { outside: [], overlap: [], count: els.length, mm: !!window.__mmRect, W, H };
+  const rootR = document.getElementById('burnout').getBoundingClientRect();
+  if (rootR.bottom > H + 1 || rootR.top < -1) out.outside.push('игровой контейнер обрезан: ' + Math.round(rootR.top) + '..' + Math.round(rootR.bottom) + ' / ' + H + 'px — кнопки внизу недоступны');
   for (const e of els)
-    if (e.l < -1 || e.t < -1 || e.r > W + 1 || e.b > H + 1) out.overlap && out.outside.push(e.id + ' за экраном (' + Math.round(e.l) + ',' + Math.round(e.t) + ',' + Math.round(e.r) + ',' + Math.round(e.b) + ' / ' + W + 'x' + H + ')');
+    if (e.l < -1 || e.t < -1 || e.r > W + 1 || e.b > H + 1) out.outside.push(e.id + ' за экраном (' + Math.round(e.l) + ',' + Math.round(e.t) + ',' + Math.round(e.r) + ',' + Math.round(e.b) + ' / ' + W + 'x' + H + ')');
   const contains = (p, q) => p.l <= q.l && p.t <= q.t && p.r >= q.r && p.b >= q.b;
   for (let i = 0; i < els.length; i++)
     for (let j = i + 1; j < els.length; j++) {

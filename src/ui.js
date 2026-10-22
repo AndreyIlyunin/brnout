@@ -7,6 +7,7 @@ function showOv(id){
   if(id)document.getElementById(id).classList.remove('bghidden');
   OV_OPEN=id||null;
   tuiSync();
+  try{window.scrollTo(0,0);}catch(e){} // iOS: страница могла уехать скроллом внутри панели
 }
 // единый владелец видимости бой-слоя: тач + нет оверлея = кнопки; всё остальное гасит
 function tuiSync(){
