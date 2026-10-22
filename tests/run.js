@@ -258,6 +258,15 @@ test('дуга тач-кнопок: у всех 5 кнопок заданы по
     ok(css.slice(i, css.indexOf('}', i)).includes('bottom:calc('), sel + ' имеет bottom:calc');
   }
 });
+test('контейнер вписывается в высоту экрана (ландшафт телефона)', () => {
+  const css = fsL.readFileSync('style.css', 'utf8');
+  ok(css.indexOf('width:min(100%,calc(100dvh*16/9))') > 0, 'леттербокс по ширине вместо обрезки низа');
+  ok(css.indexOf('overscroll-behavior:contain') > 0, 'скролл панелей не тянет страницу');
+  const ujs = fsL.readFileSync('src/ui.js', 'utf8');
+  ok(ujs.indexOf('window.scrollTo(0,0)') > 0, 'страница сбрасывается при смене оверлея (iOS)');
+  const qa = fsL.readFileSync('qa/shots.js', 'utf8');
+  ok(qa.indexOf('844, height: 390') > 0, 'QA проверяет реальный ландшафт телефона');
+});
 test('гость сканирует брокеры, пока не услышит комнату', () => {
   const nj = require('fs').readFileSync('src/net.js', 'utf8');
   ok(nj.indexOf('urls:[br]') > 0, 'guestJoin пробует брокеров по одному');

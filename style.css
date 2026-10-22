@@ -1,13 +1,14 @@
-#burnout{position:relative;width:100%;aspect-ratio:16/9;min-height:420px;height:auto;background:#05070a;overflow:hidden;border-radius:6px;font-family:'Segoe UI',Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
+/* вписываем в высоту экрана: леттербокс по бокам лучше, чем обрезанные кнопки снизу */
+#burnout{position:relative;width:min(100%,calc(100vh*16/9));width:min(100%,calc(100dvh*16/9));aspect-ratio:16/9;height:auto;background:#05070a;overflow:hidden;border-radius:6px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
 @media(max-width:720px), (orientation:portrait){
   html,body{overflow:hidden;height:100%;margin:0;}
   #burnout{aspect-ratio:auto;height:100dvh;min-height:0;border-radius:0;}
 }
 #burnout #bcv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;}
 #burnout #bhud{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;}
-#burnout .bgov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,5,9,.8);z-index:5;overflow-y:auto;}
+#burnout .bgov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,5,9,.8);z-index:5;overflow-y:auto;overscroll-behavior:contain;}
 #burnout .bghidden,#burnout .hidden{display:none;}
-#burnout .bgpanel{background:rgba(13,17,23,.97);border:1px solid #2a3038;border-radius:10px;padding:22px 30px;max-width:620px;width:88%;color:#c9d1d9;box-shadow:0 0 60px rgba(0,0,0,.8);max-height:92%;overflow-y:auto;}
+#burnout .bgpanel{background:rgba(13,17,23,.97);border:1px solid #2a3038;border-radius:10px;padding:22px 30px;max-width:620px;width:88%;color:#c9d1d9;box-shadow:0 0 60px rgba(0,0,0,.8);max-height:92%;overflow-y:auto;overscroll-behavior:contain;}
 #burnout .bgcenter{text-align:center;}
 #burnout .bgtitle{font-size:clamp(20px,4cqw,36px);font-weight:700;color:#e6edf3;letter-spacing:1px;animation:boflick 4s infinite;}
 #burnout .bgtitle span{color:#e5534b;}
@@ -123,5 +124,5 @@
 #burnout .bgov .bgbtn{min-height:44px;}
 /* сбор лута: боевые кнопки гаснут, мир и джойстик живут */
 #burnout.noatk .tb,#burnout.noatk .tbig{display:none;}
-/* нет скроллу страницы вообще (ландшафт тоже) */
-html,body{overflow:hidden;}
+/* нет скроллу страницы вообще (ландшафт тоже) + никаких дефолтных отступов */
+html,body{overflow:hidden;margin:0;padding:0;}
