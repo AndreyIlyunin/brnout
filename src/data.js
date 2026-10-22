@@ -14,7 +14,7 @@ var CLS={
     s1:{n:'стилус',cd:0.28,cost:0},s2:{n:'критика',cd:1.0,cost:8},
     ult:{n:'мудборд',cd:10,cost:35},sk:{n:'пиксель-перфект',cd:6,cost:15}}
 };
-var NET={mode:'solo',peer:null,conns:[],hostConn:null,code:'',myId:'me',snapT:0,events:[],cls:'mgr',lastSent:0,started:false};
+var NET={mode:'solo',peer:null,conns:[],hostConn:null,code:'',myId:'me',snapT:0,events:[],cls:'mgr',lastSent:0,started:false,broker:'',lastRecv:0,reconnecting:false,reconnectTries:0};
 var PCOLORS=['#e6edf3','#d29922','#7aa2c8','#3fb950'];
 var G={state:'menu',t:0,players:[],mobs:[],projs:[],fx:[],texts:[],pickups:[],zones:[],
   boss:null,wave:0,waveState:'calm',waveT:1.5,rushT:0,spawnQ:[],spawnT:0,okr:0,grade:1,

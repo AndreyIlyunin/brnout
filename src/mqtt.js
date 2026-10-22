@@ -52,8 +52,13 @@ function mqttClient(opts){
     var connack=false;
     var to=setTimeout(function(){if(!connack){cleanup();tryNext();}},9000);
     ws.onopen=function(){
-      // CONNECT: имя протокола, уровень 4, clean session, keepalive 60с
-      var body=[].concat(mqttStr('MQTT'),[4,0x02,0,60],mqttStr(opts.clientId));
+      // CONNECT: clean session + опциональный Last Will (мгновенное «меня не стало» при обрыве)
+      var flags=0x02;
+      var body=[].concat(mqttStr('MQTT'),[4,flags,0,60],mqttStr(opts.clientId));
+      if(opts.will){
+        flags|=0x04; // will flag = бит2; clean = бит1 (0x02) — по спецификации 3.1.1 §3.1.2.3
+        body=[].concat(mqttStr('MQTT'),[4,flags,0,60],mqttStr(opts.clientId),mqttStr(opts.will.topic),mqttStr(opts.will.str));
+      }
       try{ws.send(mqttPacket(0x10,body));}catch(e){cleanup();tryNext();}
     };
     ws.onmessage=function(ev){

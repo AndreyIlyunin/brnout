@@ -532,6 +532,18 @@ function drawHUD(){
   hctx.fillText(narrow?('☕'+Math.round(p.coffee)):('КОФЕ '+Math.round(p.coffee)),bx+bw+(narrow?64:80),by+38);
   }
   drawMinimap(); // до тач-return: миникарта обязательна на любой платформе
+  if(NET.mode==='guest'&&G.state==='playing'){ // живой индикатор связи: свежесть снапшотов
+    var age=performance.now()-NET.lastRecv;
+    var cCol=age<1500?'#3fb950':(age<4500?'#d29922':'#e5534b');
+    var tY=H<520?34:64;
+    var dotX=isTouch?302:216,dotY=isTouch?tY+6:26;
+    hctx.fillStyle=cCol;hctx.beginPath();hctx.arc(dotX,dotY,4.5,0,TAU);hctx.fill();
+    hctx.font=pixFont(9,true);hctx.fillStyle='#8b949e';hctx.fillText('связь',dotX+9,dotY+3);
+    if(NET.reconnecting){
+      hctx.font=pixFont(15,true);hctx.fillStyle='#d29922';hctx.textAlign='center';
+      hctx.fillText('ПЕРЕПОДКЛЮЧЕНИЕ… '+NET.reconnectTries+'/3',W/2,H*0.2);hctx.textAlign='left';
+    }
+  }
   // спринт-счётчик нужен всем платформам (и тестам): считаем до раскладки панелей
   var remG=(NET.mode==='guest')?VIEW.mobs.length:(G.spawnQ.length+G.mobs.length);
   var cleared=G.waveState==='cleared';
