@@ -94,6 +94,8 @@
 #burnout input[type=range]{flex:1;accent-color:#15707f;height:4px;cursor:pointer;}
 #burnout .sndval{width:40px;font-family:'Pixelify Sans',Arial;font-size:12px;color:#42e0ff;text-align:right;}
 #burnout .bgcredit{margin-top:12px;font-size:10px;color:#4d5560;text-align:center;letter-spacing:1px;}
+#burnout .bgcredit a{color:#7d8590;text-decoration:none;border-bottom:1px dotted #4d5560;transition:color .15s,border-color .15s;}
+#burnout .bgcredit a:hover{color:#42e0ff;border-color:#42e0ff;}
 
 /* ===== главное меню: класс-фокус, углы ===== */
 #burnout .bgmain{display:flex;flex-direction:column;gap:8px;}

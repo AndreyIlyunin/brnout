@@ -258,11 +258,29 @@ test('дуга тач-кнопок: у всех 5 кнопок заданы по
     ok(css.slice(i, css.indexOf('}', i)).includes('bottom:calc('), sel + ' имеет bottom:calc');
   }
 });
+test('счётчик врагов доступен тач-HUD до раннего return', () => {
+  const body = rjs.slice(rjs.indexOf('function drawHUD'), rjs.indexOf('function localNearCoffee'));
+  ok(body.indexOf('__hudInfo=') > 0, '__hudInfo считается в drawHUD');
+  ok(body.indexOf('__hudInfo=') < body.indexOf('if(isTouch){drawHudTouch'), 'экспорт до тач-гейта — иначе на телефоне счётчика нет');
+});
+test('тач-HUD: строка ВРАГОВ и итоговая карточка спринта', () => {
+  const body = rjs.slice(rjs.indexOf('function drawHudTouch'), rjs.indexOf('var boss='));
+  ok(body.indexOf('ВРАГОВ') > 0, 'в drawHudTouch есть счётчик врагов');
+  ok(body.indexOf('ЗАКРЫТ') > 0, 'в drawHudTouch есть заголовок итогов');
+  ok(body.indexOf('__interRect') > 0, 'итоговая карточка экспортирует __interRect');
+});
+test('босс-бар и смерть рисуются до тач-гейта', () => {
+  const body = rjs.slice(rjs.indexOf('function drawHUD'), rjs.indexOf('function localNearCoffee'));
+  ok(body.indexOf('АУДИТ') < body.indexOf('if(isTouch){drawHudTouch'), 'полоса аудита доступна на таче');
+  ok(body.indexOf('ВЫ СГОРЕЛИ') < body.indexOf('if(isTouch){drawHudTouch'), 'оверлей смерти доступен на таче');
+});
 test('аудит раскладки встроен в QA по всем сценам', () => {
   const q = fsL.readFileSync('qa/shots.js', 'utf8');
   for (const sc of ['menu', 'game', 'wave', 'interstitial', 'pause'])
     ok(q.includes("auditLayout(page, '" + sc), 'сцена ' + sc + ' под аудитом');
   ok(q.includes('__mmRect'), 'QA знает про миникарту');
+  ok(q.includes('__hudInfo'), 'QA следит за счётчиком врагов');
+  ok(q.includes('__interRect'), 'QA следит за итоговой статистикой');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
